@@ -1,0 +1,20 @@
+spring:
+ thymeleaf:
+    cache: false
+    check-template: true
+    check-template-location: true
+    servlet:
+      content-type: text/html
+    enabled: true
+    encoding: UTF-8
+    mode: HTML
+    prefix: classpath:/templates/
+    suffix: .html
+ task:
+  execution:
+   pool:
+    core-size: 8
+    max-size: 8
+ devtools:  livereload:   enabled: true
+
+

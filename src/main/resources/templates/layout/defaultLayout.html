@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+
+	<head th:fragment="headFragment">
+		<meta charset="utf-8"/>
+	    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+	    <title layout:fragment="title">AWS Analyzer</title>
+	    <meta name="description" content=""/>
+	    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"/>
+
+		<!-- CSS -->
+		<link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:400,700|Material+Icons">
+		<link rel="stylesheet" type="text/css" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+		<link rel="stylesheet" type="text/css" href="/css/material-dashboard.min.css" th:href="'/css/material-dashboard.min.css?v=' + ${#dates.createNow().getTime()}"/>
+		<link rel="stylesheet" type="text/css" href="/js/font-awesome-4.0.3/css/font-awesome.css" th:href="'/js/font-awesome-4.0.3/css/font-awesome.css?v=' + ${#dates.createNow().getTime()}"/>
+		<th:block layout:fragment="customCssLink"></th:block>
+		<link rel="stylesheet" type="text/css" href="/css/style.css" th:href="'/css/style.css?v=' + ${#dates.createNow().getTime()}">
+		<th:block layout:fragment="customCss"></th:block>
+				
+	</head>
+      
+	<body>
+		<div id="overlay" class="justify-content-center align-items-center" style="flex-flow: column; color: #fff;">
+			<div id="progressTitle"></div>
+			<div class="progress" style="width: 80%; height: 35px;">
+				<div id="progressText"></div>
+			  <div id="progressBar" class="progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+			</div>
+			<div id="progressFooter"></div>
+		</div>
+		<div class="wrapper">
+			<div class="main-panel ps-container ps-theme-default" data-ps-id="88875e3a-154c-f5f6-a447-fe6e3d51c774">
+				
+				<header class="main-header">
+					<th:block th:replace="fragments/header :: headerFragment"></th:block>
+				</header>
+				
+	      		<div class="content" layout:fragment="content">
+	      		</div>
+	      		
+	      		<footer class="main-footer">
+					<th:block th:replace="fragments/footer :: footerFragment"></th:block>
+				</footer>
+			</div>
+		</div>	
+	</body>
+		
+<!-- JavaScript -->		
+<!-- jQuery first, then Popper.js, then Bootstrap JS -->
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+
+<th:block layout:fragment="customScript"></th:block>
+
+<script>
+function on(progressTitle, progressFooter) {
+	document.getElementById("overlay").style.display = "flex";
+	document.getElementById("progressTitle").innerHTML = progressTitle;
+	document.getElementById("progressFooter").innerHTML = progressFooter;
+}
+
+function loadMessage(percent, message) {
+	var pb = document.getElementById("progressBar");
+	var pbText = document.getElementById("progressText");
+	
+	pb.style.width = percent + "%";
+	pbText.innerText = message + " [ " + percent + "% ]";
+}
+
+function off() {
+	document.getElementById("overlay").style.display = "none";
+	document.getElementById("progressTitle").innerHTML = "";
+	document.getElementById("progressFooter").innerHTML = "";
+	loadMessage(0, "");
+}
+
+function collectServiceData(serviceName) {
+	
+	on("<h3>We are collecting metadata for this account for quick response.</h3>"
+	 , "<p><h2><strong>Please wait.</strong></h2></p>");
+	
+	var evt = new EventSource("/api/collect" + (serviceName ? "/" + serviceName : ""));
+	evt.onmessage = function(e) {
+		var data = JSON.parse(e.data);
+		loadMessage(data.percent, data.message);
+	};
+	evt.onerror = function(e) {
+		evt.close();
+		setTimeout(function() { off(); }, 1000);
+	};
+}
+</script>
+</html>

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+	
+	<th:block th:fragment="headerFragment">
+	
+		<nav class="navbar navbar-expand-lg navbar-transparent navbar-absolute fixed-top ">
+			<div class="container-fluid">
+				<div class="navbar-wrapper">
+					<a class="navbar-brand" href="/dashboard">AWS Analyzer</a>
+				</div>
+				<button class="navbar-toggler" type="button" data-toggle="collapse" aria-controls="navigation-index" aria-expanded="false" aria-label="Toggle navigation">
+					<span class="sr-only">Toggle navigation</span>
+					<span class="navbar-toggler-icon icon-bar"></span>
+					<span class="navbar-toggler-icon icon-bar"></span>
+					<span class="navbar-toggler-icon icon-bar"></span>
+				</button>
+				<div class="collapse navbar-collapse justify-content-end">
+					<ul class="navbar-nav">
+					<th:block th:if="${not session.isEmpty()}">
+						<li class="nav-item">
+							<a class="nav-link" href="/diagram">
+								<i class="material-icons">account_tree</i> Network analysis
+							</a>
+						</li>
+						<li class="nav-item">
+							<select class="form-control nav-link">
+								<option>Select Profile</option>
+								<option th:each="profileName : ${T(com.anthunt.aws.network.controller.UIController).PROFILES}" 
+										th:text="${profileName}"
+										th:selected="${session.profile.getProfileName() == profileName} ? 'true' : 'false'">Default select</option>
+							</select>
+						</li>
+						<li class="nav-item">
+							<select class="form-control nav-link">
+								<option>Select Region</option>
+								<option th:each="region : ${T(com.anthunt.aws.network.controller.UIController).REGIONS}"
+										th:text="${region.id()}"
+										th:selected="${session.profile.getRegionId() == region.id()} ? 'true' : 'false'">Default select</option>
+							</select>
+						</li>
+						<li class="nav-item dropdown">
+							<a class="nav-link" href="#" id="navbarDropdownSyncLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+								<i class="material-icons">sync</i>
+								<p class="d-lg-none d-md-block">Services sync</p>
+							</a>
+							<div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownSyncLink">
+								<a class="dropdown-item" href="#" onclick="javascript: collectServiceData('EC2');">EC2 sync</a>
+								<a class="dropdown-item" href="#" onclick="javascript: collectServiceData('ELB');">ELB sync</a>
+								<div class="dropdown-divider"></div>
+								<a class="dropdown-item" href="#" onclick="javascript: collectServiceData();">All services sync</a>
+							</div>
+						</li>
+						<li class="nav-item dropdown">
+							<a class="nav-link" href="http://example.com" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+								<i class="material-icons">notifications</i>
+								<span class="notification">5</span>
+								<p class="d-lg-none d-md-block">Some Actions</p>
+							</a>
+							<div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownMenuLink">
+								<a class="dropdown-item" href="#">Mike John responded to your email</a>
+								<a class="dropdown-item" href="#">You have 5 new tasks</a>
+								<a class="dropdown-item" href="#">You're now friend with Andrew</a>
+								<a class="dropdown-item" href="#">Another Notification</a>
+								<a class="dropdown-item" href="#">Another One</a>
+							</div>
+						</li>
+						<li class="nav-item dropdown">
+							<a class="nav-link" href="#pablo" id="navbarDropdownProfile" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+								<i class="material-icons">person</i>
+								<p class="d-lg-none d-md-block">Account</p>
+							</a>
+							<div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownProfile">
+								<a class="dropdown-item" href="#">Profile</a>
+								<a class="dropdown-item" href="#">Settings</a>
+								<div class="dropdown-divider"></div>
+								<a class="dropdown-item" href="#">Log out</a>
+							</div>
+						</li>
+					</th:block>
+					</ul>
+				</div>
+			</div>
+		</nav>
+		
+	</th:block>
+	
+</html>

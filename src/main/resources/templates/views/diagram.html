@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+  	  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="layout/defaultLayout">
+      
+	<head>
+	    <meta charset="utf-8">
+	    <title>Network Analysis ::: AWS Analyzer</title>    
+	</head>
+	
+	<th:block layout:fragment="customCssLink">
+		<link rel="stylesheet" type="text/css" href="/js/cytoscape/cytoscape-panzoom.css" th:href="'/js/cytoscape/cytoscape-panzoom.css?v=' + ${#dates.createNow().getTime()}">
+		<link rel="stylesheet" type="text/css" href="/js/cytoscape/cytoscape-navigator.css" th:href="'/js/cytoscape/cytoscape-navigator.css?v=' + ${#dates.createNow().getTime()}">
+		<link rel="stylesheet" type="text/css" href="https://unpkg.com/tippy.js@4.0.1/index.css" />
+		<link rel="stylesheet" type="text/css" href="/css/style.css" th:href="'/css/style.css?v=' + ${#dates.createNow().getTime()}">
+	</th:block>
+	
+	<th:block layout:fragment="customCss">
+		<style>
+			.main-panel {
+				height: 100%;
+				display: flex;
+				flex-direction: column;
+			}
+			
+			.content {
+				flex: auto;
+			}
+			
+			.col-2 {
+				display: flex;
+				flex-direction: column;
+			}
+		</style>
+	</th:block>
+	
+	<th:block layout:fragment="customScript">
+		<script src="https://js.cytoscape.org/js/cytoscape.min.js"></script>
+		<script src="https://unpkg.com/klayjs@0.4.1/klay.js"></script>
+		<script src="https://cytoscape.org/cytoscape.js-klay/cytoscape-klay.js"></script>
+		<script src="/js/cytoscape/cytoscape-panzoom.js" th:src="'/js/cytoscape/cytoscape-panzoom.js?v=' + ${#dates.createNow().getTime()}"></script>
+		<script src="/js/cytoscape/cytoscape-navigator.js" th:src="'/js/cytoscape/cytoscape-navigator.js?v=' + ${#dates.createNow().getTime()}"></script>
+		<script src="https://unpkg.com/popper.js@1.14.7/dist/umd/popper.js"></script>
+		<script src="/js/cytoscape/cytoscape-popper.js" th:src="'/js/cytoscape/cytoscape-popper.js?v=' + ${#dates.createNow().getTime()}"></script>
+		<script src="https://unpkg.com/tippy.js@4.0.1/umd/index.all.min.js"></script>
+		<script src="/js/network.js" th:src="'/js/network.js?v=' + ${#dates.createNow().getTime()}"></script>
+		<script th:inline="javascript">
+			
+			var loadDiagram = function(type, resourceId) {
+				
+				let targetCidrString = targetCidr.value;
+				
+				if(targetCidrString.trim() == "") {
+					targetCidr.focus();
+				}
+				
+				NetworkLoad.initialize('/api/network/' + type + '/' + window.btoa(encodeURIComponent(resourceId)) + '/' + targetCidrString);
+			};
+			
+			/*
+			var resizeInstanceList = function() {
+				instanceList.style.setProperty("height", (window.innerHeight - targetCidrDiv.offsetHeight) + "px");
+			};
+			
+			resizeInstanceList();
+
+			*/
+			document.getElementById("btnTrafficPlay").onclick = function(e) {
+				if(isTrafficEnable) {
+					isTrafficEnable = false;
+				} else {
+					isTrafficEnable = true;
+					startTraffic(1000);
+				}
+			};
+			
+			window.addEventListener("resize", function() {
+				//resizeInstanceList();
+				NetworkLoad.diagram().fit();
+			});
+		</script>
+	</th:block>
+	
+	<body>
+		
+		<div layout:fragment="content">
+			<div id="overlayLoading" class="justify-content-center align-items-center">
+				<div class="spinner"></div>
+			</div>
+			<div class="container-fluid full">
+				<div class="row full">
+					<div class="col-2 full">
+						<div id="targetCidrDiv" class="row">
+							<div class="col">
+								<form>
+								  <div class="form-group white">
+								    <label for="targetCidr">Target Cidr</label>
+								    <input type="text" class="form-control" id="targetCidr" aria-describedby="targetCidrHelp" placeholder="Enter Target Cidr">
+								    <small id="targetCidrHelp" class="form-text text-muted">Enter Target Cidr</small>
+								  </div>
+								</form>
+							</div>
+						</div>
+						<div id="instanceList" class="row">
+							<div class="col width-200">
+								<div class="list-group">
+									<div class="d-flex w-100 justify-content-between white">
+										<p class="mb-1"><strong>EC2 Instances</strong></p>
+									</div>
+								  <a href="#" class="list-group-item list-group-item-action" th:each="instance : ${instances}" th:instanceid="${instance.instanceId()}" onclick="loadDiagram('ec2', this.getAttribute('instanceid'))">
+								    <div class="d-flex w-100 justify-content-between">
+								      <small class="mb-1" th:text="${instance.instanceId()}">List group item heading</small>
+								      <small th:text="${instance.state().nameAsString()}">3 days ago</small>
+								    </div>
+								    <p class="mb-1"><strong><abbr th:title="${T(com.anthunt.aws.network.utils.Utils).getNameFromTags(instance.tags())}" th:text="${#strings.abbreviate(T(com.anthunt.aws.network.utils.Utils).getNameFromTags(instance.tags()), 30)}">210.0.0.0</abbr></strong></p>
+								    <p class="mb-1"><strong>public ip :</strong><span th:text="${instance.publicIpAddress()}">210.0.0.0</span></p>
+								    <p class="mb-1"><strong>private ip :</strong><span th:text="${instance.privateIpAddress()}">10.0.0.0</span></p>
+								  </a>
+									<div class="d-flex w-100 justify-content-between white">
+										<p class="mb-1"><strong>LoadBalancers</strong></p>
+									</div>
+								  <a href="#" class="list-group-item list-group-item-action" th:each="loadbalancer : ${loadbalancers}" th:loadBalancerArn="${loadbalancer.loadBalancerArn()}" onclick="loadDiagram('loadBalancer', this.getAttribute('loadBalancerArn'))">
+								    <div class="d-flex w-100 justify-content-between">
+								      <small class="mb-1" th:text="${loadbalancer.typeAsString()}">List group item heading</small>
+								      <small th:text="${loadbalancer.state().codeAsString()}">3 days ago</small>
+								    </div>
+								    <p class="mb-1"><strong><abbr th:title="${loadbalancer.loadBalancerName()}" th:text="${#strings.abbreviate(loadbalancer.loadBalancerName(), 30)}">210.0.0.0</abbr></strong></p>
+								    <p class="mb-1"><span th:text="${loadbalancer.dnsName()}">210.0.0.0</span></p>
+								  </a>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="col">
+						<div id="cy"></div>
+						<div id="controlPanel">
+						    <button type="button" id="btnTrafficPlay" class="btn btn-success"><i class="fa fa-play"></i></button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	
+	</body>
+</html>
