@@ -10,6 +10,7 @@ import software.amazon.awssdk.services.ec2.model.PrefixList;
 import software.amazon.awssdk.services.ec2.model.RouteTable;
 import software.amazon.awssdk.services.ec2.model.SecurityGroup;
 import software.amazon.awssdk.services.ec2.model.Subnet;
+import software.amazon.awssdk.services.ec2.model.Vpc;
 import software.amazon.awssdk.services.ec2.model.VpnConnection;
 import software.amazon.awssdk.services.ec2.model.VpnGateway;
 import software.amazon.awssdk.services.elasticloadbalancing.model.LoadBalancerDescription;
@@ -21,6 +22,19 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetHealth
 
 public interface ServiceRepository {
 
+	/**
+	 * Get Vpc Map
+	 * @return Map<vpcId, Vpc>
+	 */
+	public Map<String, Vpc> getVpcMap();
+	
+	/**
+	 * Set Vpc Map
+	 * 
+	 * @param vpcMap - Map<vpcId, Vpc>
+	 */
+	public void setVpcMap(Map<String, Vpc> vpcMap);
+	
 	/**
 	 * Get EC2 Instance Map
 	 * 

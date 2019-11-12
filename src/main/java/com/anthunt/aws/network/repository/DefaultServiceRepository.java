@@ -10,6 +10,7 @@ import software.amazon.awssdk.services.ec2.model.PrefixList;
 import software.amazon.awssdk.services.ec2.model.RouteTable;
 import software.amazon.awssdk.services.ec2.model.SecurityGroup;
 import software.amazon.awssdk.services.ec2.model.Subnet;
+import software.amazon.awssdk.services.ec2.model.Vpc;
 import software.amazon.awssdk.services.ec2.model.VpnConnection;
 import software.amazon.awssdk.services.ec2.model.VpnGateway;
 import software.amazon.awssdk.services.elasticloadbalancing.model.LoadBalancerDescription;
@@ -21,6 +22,11 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetHealth
 
 public class DefaultServiceRepository implements com.anthunt.aws.network.service.checker.ServiceRepository {
 
+	/**
+	 * String vpcId
+	 */
+	private Map<String, Vpc> vpcMap;
+	
 	/**
 	 * String instanceId
 	 */
@@ -98,6 +104,14 @@ public class DefaultServiceRepository implements com.anthunt.aws.network.service
 	
 	public DefaultServiceRepository() {
 	
+	}
+
+	public Map<String, Vpc> getVpcMap() {
+		return vpcMap;
+	}
+
+	public void setVpcMap(Map<String, Vpc> vpcMap) {
+		this.vpcMap = vpcMap;
 	}
 
 	public Map<String, Instance> getEc2InstanceMap() {

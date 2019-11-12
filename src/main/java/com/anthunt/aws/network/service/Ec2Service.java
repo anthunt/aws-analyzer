@@ -29,6 +29,7 @@ import software.amazon.awssdk.services.ec2.model.DescribeRouteTablesRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeRouteTablesResponse;
 import software.amazon.awssdk.services.ec2.model.DescribeSecurityGroupsResponse;
 import software.amazon.awssdk.services.ec2.model.DescribeSubnetsResponse;
+import software.amazon.awssdk.services.ec2.model.DescribeVpcsResponse;
 import software.amazon.awssdk.services.ec2.model.Filter;
 import software.amazon.awssdk.services.ec2.model.Instance;
 import software.amazon.awssdk.services.ec2.model.NetworkAcl;
@@ -37,6 +38,7 @@ import software.amazon.awssdk.services.ec2.model.Reservation;
 import software.amazon.awssdk.services.ec2.model.RouteTable;
 import software.amazon.awssdk.services.ec2.model.SecurityGroup;
 import software.amazon.awssdk.services.ec2.model.Subnet;
+import software.amazon.awssdk.services.ec2.model.Vpc;
 import software.amazon.awssdk.services.ec2.model.VpnConnection;
 import software.amazon.awssdk.services.ec2.model.VpnGateway;
 
@@ -52,6 +54,16 @@ public class Ec2Service extends AbstractNetworkService {
 				   .credentialsProvider(ProfileCredentialsProvider.create(profileName))
 				   .region(Region.of(regionId))
 				   .build();
+	}
+	
+	public Map<String, Vpc> getVpcs(SessionProfile sessionProfile) {
+		Map<String, Vpc> vpcMap = new HashMap<>();
+		Ec2Client ec2Client = this.getEc2Client(sessionProfile);
+		DescribeVpcsResponse describeVpcsResponse = ec2Client.describeVpcs();
+		for(Vpc vpc : describeVpcsResponse.vpcs()) {
+			vpcMap.put(vpc.vpcId(), vpc);
+		}
+		return vpcMap;
 	}
 	
 	public Map<String, Instance> getInstances(SessionProfile sessionProfile) {

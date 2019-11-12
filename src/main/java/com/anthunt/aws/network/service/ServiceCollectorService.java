@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import com.anthunt.aws.network.controller.AbstractController;
-import com.anthunt.aws.network.repository.DefaultServiceRepository;
 import com.anthunt.aws.network.service.checker.ServiceRepository;
 import com.anthunt.aws.network.service.model.ServiceType;
 import com.anthunt.aws.network.session.SessionProfile;
@@ -70,14 +69,17 @@ public class ServiceCollectorService {
 	@Async
 	public void collectServices(HttpSession session, SseEmitter sseEmitter, SessionProfile sessionProfile, Optional<String> serviceName) throws IOException {
 
-		ServiceRepository serviceRepository = new DefaultServiceRepository();
+		ServiceRepository serviceRepository = AbstractController.getSessionServiceRepository(session);
 		
-		int num = 1;
+		int num = 0;
 		int total = !serviceName.isPresent() ? 14 
 					: ServiceType.EC2.getName().equals(serviceName.get()) ? 7 
 					: ServiceType.ELB.getName().equals(serviceName.get()) ? 6 : 1;
 		
 		if(!serviceName.isPresent() || ServiceType.EC2.getName().equals(serviceName.get())) {
+			serviceRepository.setVpcMap(ec2Service.getVpcs(sessionProfile));
+			this.send(sseEmitter, num, total, "Vpc data is loaded");
+			num++;
 			serviceRepository.setEc2InstanceMap(ec2Service.getInstances(sessionProfile));
 			this.send(sseEmitter, num, total, "Ec2 instances data is loaded");
 			num++;
