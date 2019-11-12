@@ -152,16 +152,18 @@ public class LoadBalancerService extends AbstractNetworkService {
 		return serviceRepository.getLoadBalancerMap().values();
 	}
 
-	public DiagramResult getLoadBalancerNetwork(ServiceRepository serviceRepository, String loadBalancerArn, String targetIp) {
+	public DiagramResult getNetwork(ServiceRepository serviceRepository, String loadBalancerArn, String targetIp) {
 		
-		DiagramResult diagramResult = new DiagramResult();
+		DiagramResult diagramResult = new DiagramResult(targetIp == null);
 		
 		LoadBalancerNetwork loadBalancerNetwork = new LoadBalancerNetwork(loadBalancerArn, serviceRepository);
 		CheckResults<LoadBalancer> checkResults = loadBalancerNetwork.checkCommunication(targetIp);
 		LoadBalancer loadBalancer = checkResults.getResource();
 		
 		String serverId = checkResults.getCidr();
-		diagramResult.addNode(new DiagramData<DiagramNode>(new DiagramNode(serverId, serverId)).addClass(NodeType.SERVER));
+		if(serverId != null) {
+			diagramResult.addNode(new DiagramData<DiagramNode>(new DiagramNode(serverId, serverId)).addClass(NodeType.SERVER));
+		}
 		
 		String routeTableId = this.setRouteTable(serverId, checkResults.get(CheckType.ROUTE_TABLE), diagramResult);
 		String networkAclId = this.setNetworkAcl(routeTableId, checkResults.get(CheckType.NETWORK_ACL), diagramResult);

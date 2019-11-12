@@ -3,6 +3,7 @@ package com.anthunt.aws.network.service;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.anthunt.aws.network.service.checker.ServiceRepository;
 import com.anthunt.aws.network.service.model.CheckResult;
 import com.anthunt.aws.network.service.model.CheckRule;
 import com.anthunt.aws.network.service.model.DirectionType;
@@ -23,9 +24,15 @@ import software.amazon.awssdk.services.ec2.model.VpnConnection;
 
 public abstract class AbstractNetworkService {
 
+	public DiagramResult getNetworkDiagram(ServiceRepository serviceRepository, String instanceId, String targetIp) {
+		return this.getNetwork(serviceRepository, instanceId, targetIp);
+	}
+	
+	protected abstract DiagramResult getNetwork(ServiceRepository serviceRepository, String instanceId, String targetIp);
+	
 	protected String setRouteTable(String serverId, CheckResult routeCheckResult, DiagramResult diagramResult) {
 
-		String routeTableId = "";		
+		String routeTableId = "";
 		for(CheckRule checkRule : routeCheckResult.getAllRules()) {
 			if(checkRule instanceof RouteCheckRule) {
 				RouteCheckRule routeCheckRule = (RouteCheckRule) checkRule;
@@ -42,10 +49,12 @@ public abstract class AbstractNetworkService {
 					
 					gatewayIds.add(vpnConnection.vpnConnectionId());
 					
-					DiagramEdge diagramCustomerGatewayEdge = new DiagramEdge(serverId, vpnConnection.customerGatewayId());
-					diagramCustomerGatewayEdge.setLabel(vpnConnection.category());
-					diagramCustomerGatewayEdge.setBoth(true);
-					diagramResult.addEdge(new DiagramData<DiagramEdge>(diagramCustomerGatewayEdge));
+					if(serverId != null) {
+						DiagramEdge diagramCustomerGatewayEdge = new DiagramEdge(serverId, vpnConnection.customerGatewayId());
+						diagramCustomerGatewayEdge.setLabel(vpnConnection.category());
+						diagramCustomerGatewayEdge.setBoth(true);
+						diagramResult.addEdge(new DiagramData<DiagramEdge>(diagramCustomerGatewayEdge));
+					}
 					
 					DiagramEdge diagramVpnConnectionEdge = new DiagramEdge(vpnConnection.customerGatewayId(), vpnConnection.vpnConnectionId());
 					diagramVpnConnectionEdge.setLabel(vpnConnection.typeAsString());
@@ -65,10 +74,12 @@ public abstract class AbstractNetworkService {
 					
 					gatewayIds.add(virtualInterface.connectionId());
 					
-					DiagramEdge diagramLocationEdge = new DiagramEdge(serverId, virtualInterface.location());
-					diagramLocationEdge.setLabel(virtualInterface.customerAddress() + " (Vlan : " + virtualInterface.vlan() + ", Asn :" + virtualInterface.asn() + ")");
-					diagramLocationEdge.setBoth(true);
-					diagramResult.addEdge(new DiagramData<DiagramEdge>(diagramLocationEdge));
+					if(serverId != null) {
+						DiagramEdge diagramLocationEdge = new DiagramEdge(serverId, virtualInterface.location());
+						diagramLocationEdge.setLabel(virtualInterface.customerAddress() + " (Vlan : " + virtualInterface.vlan() + ", Asn :" + virtualInterface.asn() + ")");
+						diagramLocationEdge.setBoth(true);
+						diagramResult.addEdge(new DiagramData<DiagramEdge>(diagramLocationEdge));
+					}
 					
 					DiagramEdge diagramDirectConnectEdge = new DiagramEdge(virtualInterface.location(), virtualInterface.connectionId());
 					diagramDirectConnectEdge.setLabel(virtualInterface.amazonAddress() + " (" + virtualInterface.awsDeviceV2() + ")");
@@ -96,15 +107,17 @@ public abstract class AbstractNetworkService {
 
 				for(String cidr : routeCheckRule.getCidrs()) {
 					
-					if(gatewayIds.size() < 1) {
-						DiagramEdge diagramGatewayEdge = new DiagramEdge(serverId, routeCheckRule.getGatewayId());
-						diagramGatewayEdge.setLabel(cidr);
-						if(routeCheckRule.getGatewayType() == NodeType.EGRESS_INTERNET_GATEWAY || routeCheckRule.getGatewayType() == NodeType.NAT_GATEWAY) {
-							diagramGatewayEdge.setOut(routeCheckRule.getRouteState() == RouteState.ACTIVE);
-						} else {
-							diagramGatewayEdge.setBoth(routeCheckRule.getRouteState() == RouteState.ACTIVE);
+					if(serverId != null) {
+						if(gatewayIds.size() < 1) {
+							DiagramEdge diagramGatewayEdge = new DiagramEdge(serverId, routeCheckRule.getGatewayId());
+							diagramGatewayEdge.setLabel(cidr);
+							if(routeCheckRule.getGatewayType() == NodeType.EGRESS_INTERNET_GATEWAY || routeCheckRule.getGatewayType() == NodeType.NAT_GATEWAY) {
+								diagramGatewayEdge.setOut(routeCheckRule.getRouteState() == RouteState.ACTIVE);
+							} else {
+								diagramGatewayEdge.setBoth(routeCheckRule.getRouteState() == RouteState.ACTIVE);
+							}
+							diagramResult.addEdge(new DiagramData<DiagramEdge>(diagramGatewayEdge));
 						}
-						diagramResult.addEdge(new DiagramData<DiagramEdge>(diagramGatewayEdge));
 					}
 					
 					DiagramEdge diagramEdge = new DiagramEdge(routeCheckRule.getGatewayId(), routeCheckRule.getId());
@@ -126,10 +139,12 @@ public abstract class AbstractNetworkService {
 			String noRouteName = "Unknown Route";
 			routeTableId = noRouteId;
 			diagramResult.addNode(new DiagramData<DiagramNode>(new DiagramNode(noRouteId, noRouteName)).addClass(NodeType.ROUTE_TABLE));
-			DiagramEdge diagramEdge = new DiagramEdge(serverId, noRouteId);
-			diagramEdge.setLabel("Have no route");
-			diagramEdge.setBoth(false);
-			diagramResult.addEdge(new DiagramData<DiagramEdge>(diagramEdge));
+			if(serverId != null) {
+				DiagramEdge diagramEdge = new DiagramEdge(serverId, noRouteId);
+				diagramEdge.setLabel("Have no route");
+				diagramEdge.setBoth(false);
+				diagramResult.addEdge(new DiagramData<DiagramEdge>(diagramEdge));
+			}
 		}
 
 		return routeTableId;

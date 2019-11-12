@@ -8,12 +8,21 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 public class DiagramResult {
 
 	@JsonIgnore
+	private boolean isAllMode;
+	
+	@JsonIgnore
 	private List<String> nodeIds;
+	
+	@JsonIgnore
+	private List<DiagramEdge> diagramEdges;
+	
 	private List<DiagramData<DiagramNode>> nodes;
 	private List<DiagramData<DiagramEdge>> edges;
 	
-	public DiagramResult() {
+	public DiagramResult(boolean isAllMode) {
+		this.isAllMode = isAllMode;
 		this.nodeIds = new ArrayList<>();
+		this.diagramEdges = new ArrayList<>();
 		this.nodes = new ArrayList<>();
 		this.edges = new ArrayList<>();
 	}
@@ -35,7 +44,12 @@ public class DiagramResult {
 	}
 	
 	public void addEdge(DiagramData<DiagramEdge> edge) {
-		this.edges.add(edge);
+		edge.getData().setAllMode(this.isAllMode);
+		if(this.isAllMode) edge.getData().setLabel(""); 
+		if(!this.diagramEdges.contains(edge.getData())) {
+			this.diagramEdges.add(edge.getData());
+			this.edges.add(edge);
+		}
 	}
 	
 }

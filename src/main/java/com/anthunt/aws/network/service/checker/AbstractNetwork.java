@@ -285,12 +285,41 @@ public abstract class AbstractNetwork<T> {
 	public CheckResults<T> checkCommunication(String cidr) {
 		
 		CheckResults<T> checkResults = new CheckResults<T>(this.resource);
-		checkResults.setCidr(cidr);
-		checkResults.put(CheckType.ROUTE_TABLE, this.checkRoute(cidr));
-		checkResults.put(CheckType.SECURITY_GROUP, this.checkSecurityGroup(cidr));
-		checkResults.put(CheckType.NETWORK_ACL, this.checkNetworkAcl(cidr));
+		if(cidr != null) {
+			checkResults.setCidr(cidr);
+			checkResults.put(CheckType.ROUTE_TABLE, this.checkRoute(cidr));
+			checkResults.put(CheckType.SECURITY_GROUP, this.checkSecurityGroup(cidr));
+			checkResults.put(CheckType.NETWORK_ACL, this.checkNetworkAcl(cidr));
+		} else {
+			checkResults.put(CheckType.ROUTE_TABLE, this.getAllRoute());
+			checkResults.put(CheckType.SECURITY_GROUP, this.getAllSecurityGroup());
+			checkResults.put(CheckType.NETWORK_ACL, this.getAllNetworkAcl());
+		}
 		
 		return checkResults;		
+	}
+	
+	private CheckResult getAllRoute() {
+		CheckResult checkResult = new CheckResult();
+		
+		List<CheckRule> allowRules = new ArrayList<>();
+		List<CheckRule> denyRules = new ArrayList<>();
+		
+		for(RouteCheckRule checkRule : this.routeCheckRules) {
+				
+			if(checkRule.getRouteState() == RouteState.ACTIVE) {
+				allowRules.add(checkRule);
+			} else {
+				denyRules.add(checkRule);
+			}
+		}
+		
+		boolean isSuccess = allowRules.size() > 0;
+		checkResult.setInSuccess(isSuccess);
+		checkResult.setOutSuccess(isSuccess);
+		checkResult.setAllowRules(allowRules);
+		checkResult.setDenyRules(denyRules);
+		return checkResult;
 	}
 	
 	private CheckResult checkRoute(String cidr) {
@@ -328,6 +357,30 @@ public abstract class AbstractNetwork<T> {
 		return checkResult;
 	}
 	
+	private CheckResult getAllSecurityGroup() {
+		
+		CheckResult checkResult = new CheckResult();		
+		List<CheckRule> allowRules = new ArrayList<>();		
+		
+		Set<String> keys = this.sgRulesMap.keySet();
+		Iterator<String> iKeys = keys.iterator();
+		while(iKeys.hasNext()) {
+			String securityGroupName = iKeys.next();
+			List<SecurityGroupCheckRule> checkRules = this.sgRulesMap.get(securityGroupName);
+			for (SecurityGroupCheckRule checkRule : checkRules) {
+				if(checkRule.getDirectionType() == DirectionType.INGRESS) {
+					checkResult.setInSuccess(true);
+				} else {
+					checkResult.setOutSuccess(true);
+				}
+				allowRules.add(checkRule);
+			}
+		}
+
+		checkResult.setAllowRules(allowRules);
+		return checkResult;
+	}
+
 	private CheckResult checkSecurityGroup(String cidr) {
 		
 		CheckResult checkResult = new CheckResult();
@@ -357,6 +410,37 @@ public abstract class AbstractNetwork<T> {
 		}
 
 		checkResult.setAllowRules(allowRules);
+		return checkResult;
+	}
+	
+	private CheckResult getAllNetworkAcl() {
+		
+		CheckResult checkResult = new CheckResult();
+				
+		List<CheckRule> allowRules = new ArrayList<>();
+		List<CheckRule> denyRules = new ArrayList<>();
+		
+		for(NetworkAclCheckRule checkRule : this.networkAclCheckRules) {	
+			if(checkRule.getDirectionType() == DirectionType.INGRESS) {
+				if(checkRule.getRuleAction() == RuleAction.ALLOW) {
+					checkResult.setInSuccess(true);
+					allowRules.add(checkRule);
+				} else {
+					denyRules.add(checkRule);
+				}
+			} else if(checkRule.getDirectionType() == DirectionType.EGRESS) {
+				if(checkRule.getRuleAction() == RuleAction.ALLOW) {
+					checkResult.setOutSuccess(true);
+					allowRules.add(checkRule);
+				} else {
+					denyRules.add(checkRule);
+				}
+			}
+		}
+		
+		checkResult.setAllowRules(allowRules);
+		checkResult.setDenyRules(denyRules);
+		
 		return checkResult;
 	}
 	

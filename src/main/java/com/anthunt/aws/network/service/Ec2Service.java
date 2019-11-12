@@ -209,16 +209,18 @@ public class Ec2Service extends AbstractNetworkService {
 		return serviceStatistic;
 	}
 	
-	public DiagramResult getEc2Network(ServiceRepository serviceRepository, String instanceId, String targetIp) {
+	public DiagramResult getNetwork(ServiceRepository serviceRepository, String instanceId, String targetIp) {
 		Ec2InstanceNetwork ec2InstanceNetwork = new Ec2InstanceNetwork(instanceId, serviceRepository);
 		
 		CheckResults<Instance> checkResults = ec2InstanceNetwork.checkCommunication(targetIp);
 		
-		DiagramResult diagramResult = new DiagramResult();
+		DiagramResult diagramResult = new DiagramResult(targetIp == null);
 		
 		String targetId = checkResults.getCidr();
 		
-		diagramResult.addNode(new DiagramData<DiagramNode>(new DiagramNode(targetId, targetId)).addClass(NodeType.SERVER));
+		if(targetId != null) {
+			diagramResult.addNode(new DiagramData<DiagramNode>(new DiagramNode(targetId, targetId)).addClass(NodeType.SERVER));
+		}
 		
 		String routeTableId = this.setRouteTable(targetId, checkResults.get(CheckType.ROUTE_TABLE), diagramResult);
 		

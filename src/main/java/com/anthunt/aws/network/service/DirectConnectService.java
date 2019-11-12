@@ -15,7 +15,7 @@ import software.amazon.awssdk.services.directconnect.DirectConnectClient;
 import software.amazon.awssdk.services.directconnect.model.VirtualInterface;
 
 @Service
-public class DirectConnectService extends AbstractNetworkService {
+public class DirectConnectService {
 	
 	public DirectConnectClient getDirectConnectClient(SessionProfile sessionProfile) {
 		return this.getDirectConnectClient(sessionProfile.getProfileName(), sessionProfile.getRegionId());

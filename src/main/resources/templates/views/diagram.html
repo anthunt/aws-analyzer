@@ -48,23 +48,15 @@
 			
 			var loadDiagram = function(type, resourceId) {
 				
-				let targetCidrString = targetCidr.value;
-				
-				if(targetCidrString.trim() == "") {
-					targetCidr.focus();
+				let url = '/api/network/' + type + '/' + window.btoa(encodeURIComponent(resourceId));
+				let targetCidrString = targetCidr.value; 
+				if(targetCidrString.trim() != "") {
+					url += '/' + window.btoa(encodeURIComponent(targetCidrString));
 				}
 				
-				NetworkLoad.initialize('/api/network/' + type + '/' + window.btoa(encodeURIComponent(resourceId)) + '/' + targetCidrString);
+				NetworkLoad.initialize(url);
 			};
-			
-			/*
-			var resizeInstanceList = function() {
-				instanceList.style.setProperty("height", (window.innerHeight - targetCidrDiv.offsetHeight) + "px");
-			};
-			
-			resizeInstanceList();
 
-			*/
 			document.getElementById("btnTrafficPlay").onclick = function(e) {
 				if(isTrafficEnable) {
 					isTrafficEnable = false;
@@ -75,7 +67,6 @@
 			};
 			
 			window.addEventListener("resize", function() {
-				//resizeInstanceList();
 				NetworkLoad.diagram().fit();
 			});
 		</script>

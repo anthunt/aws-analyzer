@@ -2,8 +2,6 @@ package com.anthunt.aws.network.controller;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.util.Base64;
 import java.util.Optional;
 
 import javax.servlet.http.HttpSession;
@@ -18,6 +16,7 @@ import com.anthunt.aws.network.service.Ec2Service;
 import com.anthunt.aws.network.service.LoadBalancerService;
 import com.anthunt.aws.network.service.ServiceCollectorService;
 import com.anthunt.aws.network.service.model.diagram.DiagramResult;
+import com.anthunt.aws.network.utils.Utils;
 
 @RestController
 @RequestMapping("api")
@@ -32,35 +31,35 @@ public class APIController extends AbstractController {
 	@Autowired
 	private LoadBalancerService loadBalancerService;
 	
-	@RequestMapping(value= {"/network/ec2/{instanceId}/{targetIp}", "/network/ec2/{instanceId}/{targetIp}/{bits}"})
+	@RequestMapping(value= {"/network/ec2/{instanceId}", "/network/ec2/{instanceId}/{targetIp}"})
 	public DiagramResult ec2Network( HttpSession session
 			                       , @PathVariable("instanceId") String instanceId
-			                       , @PathVariable("targetIp") String targetIp
-			                       , @PathVariable("bits") Optional<String>  bits
+			                       , @PathVariable("targetIp") Optional<String> targetIp
 			                       ) throws UnsupportedEncodingException {
-		if(bits.isPresent()) {
-			targetIp += "/" + bits.get();
+		String target = null;
+		if(targetIp.isPresent()) {
+			target = Utils.decodeB64URL(targetIp.get());
 		}
-		return this.ec2Service.getEc2Network(this.getSessionServiceRepository(session), URLDecoder.decode(new String(Base64.getDecoder().decode(instanceId), "utf8"), "utf8"), targetIp);
+		return this.ec2Service.getNetwork(this.getSessionServiceRepository(session), Utils.decodeB64URL(instanceId), target);
 	}
 
-	@RequestMapping(value= {"/network/loadBalancer/{loadBalancerArn}/{targetIp}", "/network/loadBalancer/{loadBalancerArn}/{targetIp}/{bits}"})
+	@RequestMapping(value= {"/network/loadBalancer/{loadBalancerArn}", "/network/loadBalancer/{loadBalancerArn}/{targetIp}"})
 	public DiagramResult loadBalancerNetwork( HttpSession session
 								            , @PathVariable("loadBalancerArn") String loadBalancerArn
-								            , @PathVariable("targetIp") String targetIp
-								            , @PathVariable("bits") Optional<String>  bits
+								            , @PathVariable("targetIp") Optional<String> targetIp
 								            ) throws UnsupportedEncodingException {
-		if(bits.isPresent()) {
-			targetIp += "/" + bits.get();
+		String target = null;
+		if(targetIp.isPresent()) {
+			target = Utils.decodeB64URL(targetIp.get());
 		}
-		return this.loadBalancerService.getLoadBalancerNetwork(this.getSessionServiceRepository(session), URLDecoder.decode(new String(Base64.getDecoder().decode(loadBalancerArn), "utf8"), "utf8"), targetIp);
+		return this.loadBalancerService.getNetwork(this.getSessionServiceRepository(session), Utils.decodeB64URL(loadBalancerArn), target);
 	}
 	
 	@RequestMapping(value= {"/collect", "/collect/{serviceName}"})
 	public SseEmitter collectServices( HttpSession session
 			                         , @PathVariable("serviceName") Optional<String> serviceName) throws IOException {
 		
-		SseEmitter sseEmitter = new SseEmitter(18000L);
+		SseEmitter sseEmitter = new SseEmitter(180000L);
 		serviceCollectorService.collectServices(session, sseEmitter, this.getSessionProfile(session), serviceName);
 		return sseEmitter;
 	}

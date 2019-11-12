@@ -2,6 +2,7 @@ package com.anthunt.aws.network.service.model.diagram;
 
 public class DiagramEdge {
 
+	private boolean isAllMode;
 	private String source;
 	private String target;
 	private String label;
@@ -17,6 +18,14 @@ public class DiagramEdge {
 		this.setTarget(target);
 	}
 	
+	public boolean isAllMode() {
+		return isAllMode;
+	}
+
+	public void setAllMode(boolean isAllMode) {
+		this.isAllMode = isAllMode;
+	}
+
 	public String getSource() {
 		return source;
 	}
@@ -132,6 +141,18 @@ public class DiagramEdge {
 	
 	private void setOutBound(boolean out) {
 		this.out = out;
+	}
+	
+	@Override
+	public boolean equals(Object o) {
+		if (o == this)
+            return true;
+        if (!(o instanceof DiagramEdge))
+            return false;
+        DiagramEdge de = (DiagramEdge)o;
+        return de.target.equals(target)
+            && de.source.equals(source)
+            && (isAllMode || de.label.equals(label));
 	}
 	
 }
