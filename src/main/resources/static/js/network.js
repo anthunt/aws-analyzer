@@ -1,6 +1,7 @@
 var NetworkLoad = function() {
 	
 	var diagram;
+	var navigator;
 	
 	this.diagram = function() {
 		return diagram;
@@ -13,7 +14,14 @@ var NetworkLoad = function() {
 	function off() {
 	  document.getElementById("overlayLoading").style.display = "none";
 	}
-		
+	
+	function destroy() {
+		if(diagram != null) {
+			diagram.destroy();
+			navigator.destroy();
+		}
+	}
+	
 	this.initialize = function(jsonURL) {
 		on();
 		fetch(jsonURL, {mode: 'no-cors'})
@@ -24,6 +32,7 @@ var NetworkLoad = function() {
 			return res.json(); 
 		})
 		.then(function(data) {
+			destroy();
 			diagram = cytoscape({
 			  container: document.getElementById('cy'),
 			
@@ -252,7 +261,7 @@ var NetworkLoad = function() {
 				  resetIcon: 'fa fa-expand'
 			});
 
-			var nav = diagram.navigator({
+			navigator = diagram.navigator({
 			    container: document.getElementById('cy') // can be a HTML or jQuery element or jQuery selector
 				  , viewLiveFramerate: 0 // set false to update graph pan only on drag end; set 0 to do it instantly; set a number (frames per second) to update not more than N times per second
 				  , thumbnailEventFramerate: 30 // max thumbnail's updates per second triggered by graph updates
@@ -261,6 +270,7 @@ var NetworkLoad = function() {
 				  , removeCustomContainer: true // destroy the container specified by user on plugin destroy
 				  , rerenderDelay: 100 // ms to throttle rerender updates to the panzoom for performance
 			}); // get navigator instance, nav
+			
 			
 			diagram.elements().forEach(function(element, index) {
 			    var popup = tippy(element.popperRef(), {
