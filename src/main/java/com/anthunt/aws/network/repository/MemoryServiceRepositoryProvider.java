@@ -1,4 +1,4 @@
-package com.anthunt.aws.network.service;
+package com.anthunt.aws.network.repository;
 
 import java.util.List;
 
