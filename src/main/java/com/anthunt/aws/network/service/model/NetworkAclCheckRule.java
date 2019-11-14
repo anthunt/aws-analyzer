@@ -78,8 +78,25 @@ public class NetworkAclCheckRule implements CheckRule {
 	public RuleAction getRuleAction() {
 		return this.ruleAction;
 	}
+	
 	public void setRuleAction(RuleAction ruleAction) {
 		this.ruleAction = ruleAction;
 	}
 
+	@Override
+	public String toString() {
+		return new StringBuffer()
+				.append("{")
+				.append("id:").append(this.getId())
+				.append(", name:").append(this.getName())
+				.append(", rule number:").append(this.getRuleNumber())
+				.append(", protocol:").append(this.getPrototol())
+				.append(", cidr:").append(this.getCidr())
+				.append(", direction:").append(this.getDirectionType())
+				.append(", port range:").append(this.getPortRange())
+				.append(", rule action:").append(this.getRuleAction())
+				.append("}")
+				.toString()
+				;
+	}
 }

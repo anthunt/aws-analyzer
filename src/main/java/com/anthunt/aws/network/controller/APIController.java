@@ -40,7 +40,7 @@ public class APIController extends AbstractController {
 		if(targetIp.isPresent()) {
 			target = Utils.decodeB64URL(targetIp.get());
 		}
-		return this.ec2Service.getNetwork(this.getSessionServiceRepository(session), Utils.decodeB64URL(instanceId), target);
+		return this.ec2Service.getNetwork(getSessionServiceRepository(session), Utils.decodeB64URL(instanceId), target);
 	}
 
 	@RequestMapping(value= {"/network/loadBalancer/{loadBalancerArn}", "/network/loadBalancer/{loadBalancerArn}/{targetIp}"})
@@ -52,7 +52,7 @@ public class APIController extends AbstractController {
 		if(targetIp.isPresent()) {
 			target = Utils.decodeB64URL(targetIp.get());
 		}
-		return this.loadBalancerService.getNetwork(this.getSessionServiceRepository(session), Utils.decodeB64URL(loadBalancerArn), target);
+		return this.loadBalancerService.getNetwork(getSessionServiceRepository(session), Utils.decodeB64URL(loadBalancerArn), target);
 	}
 	
 	@RequestMapping(value= {"/collect", "/collect/{serviceName}"})

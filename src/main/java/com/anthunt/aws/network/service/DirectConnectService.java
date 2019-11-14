@@ -1,18 +1,18 @@
 package com.anthunt.aws.network.service;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
+import com.anthunt.aws.network.service.checker.ServiceMap;
 import com.anthunt.aws.network.session.SessionProfile;
 
 import software.amazon.awssdk.auth.credentials.ProfileCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.directconnect.DirectConnectClient;
 import software.amazon.awssdk.services.directconnect.model.VirtualInterface;
+import software.amazon.awssdk.services.directconnect.model.VirtualInterfaceState;
 
 @Service
 public class DirectConnectService {
@@ -28,18 +28,21 @@ public class DirectConnectService {
 				   .build();
 	}
 
-	public Map<String, List<VirtualInterface>> getVirtualInterfaces(SessionProfile sessionProfile) {
-		Map<String, List<VirtualInterface>> virtualInterfaceMap = new HashMap<>();
+	public ServiceMap<List<VirtualInterface>> getVirtualInterfaces(SessionProfile sessionProfile) {
+		ServiceMap<List<VirtualInterface>> virtualInterfaceMap = new ServiceMap<>();
 		DirectConnectClient directConnectClient = this.getDirectConnectClient(sessionProfile);
+		int active = 0;
 		for(VirtualInterface virtualInterface : directConnectClient.describeVirtualInterfaces().virtualInterfaces()) {
 			if(virtualInterfaceMap.containsKey(virtualInterface.virtualGatewayId())) {
 				virtualInterfaceMap.get(virtualInterface.virtualGatewayId()).add(virtualInterface);
 			} else {
+				if(virtualInterface.virtualInterfaceState() == VirtualInterfaceState.AVAILABLE) active++;
 				List<VirtualInterface> virtualInterfaces = new ArrayList<>();
 				virtualInterfaces.add(virtualInterface);
 				virtualInterfaceMap.put(virtualInterface.virtualGatewayId(), virtualInterfaces);
 			}
 		}
+		virtualInterfaceMap.setActive(active);
 		return virtualInterfaceMap;
 	}
 	

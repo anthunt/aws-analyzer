@@ -1,3 +1,7 @@
+server:
+  error:
+    whitelabel:
+      enabled: false
 spring:
  thymeleaf:
     cache: false
@@ -17,4 +21,9 @@ spring:
     max-size: 8
  devtools:  livereload:   enabled: true
 
-
+logging:
+  exception-conversion-word: "%wEx"
+  register-shutdown-hook: true
+  level:
+    com.amazonaws: error
+    com.anthunt.aws.network: info

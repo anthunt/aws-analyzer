@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import com.anthunt.aws.network.service.Ec2Service;
 import com.anthunt.aws.network.service.LoadBalancerService;
 import com.anthunt.aws.network.service.checker.ServiceRepository;
-import com.anthunt.aws.network.service.model.ServiceStatistic;
+import com.anthunt.aws.network.service.checker.ServiceStatistic;
 import com.anthunt.aws.network.session.SessionProfile;
 
 import software.amazon.awssdk.profiles.Profile;
@@ -52,6 +52,11 @@ public class UIController extends AbstractController {
 	@RequestMapping("")
 	public String main() {
 		return "redirect:/profiles";
+	}
+	
+	@RequestMapping("login")
+	public String login() {
+		return "login";
 	}
 	
 	@RequestMapping("profiles")

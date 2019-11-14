@@ -1,7 +1,13 @@
 package com.anthunt.aws.network.service.checker;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+
+import com.anthunt.aws.network.service.DirectConnectService;
+import com.anthunt.aws.network.service.Ec2Service;
+import com.anthunt.aws.network.service.LoadBalancerService;
+import com.anthunt.aws.network.session.SessionProfile;
 
 import software.amazon.awssdk.services.directconnect.model.VirtualInterface;
 import software.amazon.awssdk.services.ec2.model.Instance;
@@ -20,89 +26,109 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroup;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetHealthDescription;
 
-public interface ServiceRepository {
-
-	/**
-	 * Get Vpc Map
-	 * @return Map<vpcId, Vpc>
-	 */
-	public Map<String, Vpc> getVpcMap();
+public class ServiceRepository {
 	
-	/**
-	 * Set Vpc Map
-	 * 
-	 * @param vpcMap - Map<vpcId, Vpc>
-	 */
-	public void setVpcMap(Map<String, Vpc> vpcMap);
+	private List<ServiceStatistic> serviceStatistics;
 	
-	/**
-	 * Get EC2 Instance Map
-	 * 
-	 * @return Map<instanceId, Instance>
-	 */
-	public Map<String, Instance> getEc2InstanceMap();
-
-	/**
-	 * Set EC2 Instance Map
-	 * 
-	 * @param ec2InstanceMap - Map<instanceId, Instance>
-	 */
-	public void setEc2InstanceMap(Map<String, Instance> ec2InstanceMap);
-
-	public Map<String, Subnet> getSubnetMap();
-
-	public void setSubnetMap(Map<String, Subnet> subnetMap);
-
-	public Map<String, LoadBalancer> getLoadBalancerMap();
-
-	public void setLoadBalancerMap(Map<String, LoadBalancer> loadBalancerMap);
-
-	public Map<String, List<Listener>> getLoadBalancerListenersMap();
-
-	public void setLoadBalancerListenersMap(Map<String, List<Listener>> loadBalancerListenersMap);
-
-	public Map<String, List<Rule>> getLoadBalancerRulesMap();
-
-	public void setLoadBalancerRulesMap(Map<String, List<Rule>> loadBalancerRulesMap);
-
-	public Map<String, TargetGroup> getTargetGroupMap();
-
-	public void setTargetGroupMap(Map<String, TargetGroup> targetGroupMap);
-
-	public Map<String, List<TargetHealthDescription>> getTargetHealthDescriptionsMap();
-
-	public void setTargetHealthDescriptionsMap(Map<String, List<TargetHealthDescription>> targetHealthDescriptionsMap);
-
-	public Map<String, LoadBalancerDescription> getClassicLoadBalancerMap();
-
-	public void setClassicLoadBalancerMap(Map<String, LoadBalancerDescription> classicLoadBalancerMap);
-
-	public Map<String, SecurityGroup> getSecurityGroupMap();
-
-	public void setSecurityGroupMap(Map<String, SecurityGroup> securityGroupMap);
-
-	public Map<String, List<RouteTable>> getRouteTablesMap();
-
-	public void setRouteTablesMap(Map<String, List<RouteTable>> routeTablesMap);
-
-	public Map<String, PrefixList> getPrefixListMap();
-
-	public void setPrefixListMap(Map<String, PrefixList> prefixListMap);
-
-	public Map<String, VpnGateway> getVpnGatewayMap();
-
-	public void setVpnGatewayMap(Map<String, VpnGateway> vpnGatewayMap);
-
-	public Map<String, List<VpnConnection>> getVpnConnectionsMap();
-
-	public void setVpnConnectionsMap(Map<String, List<VpnConnection>> vpnConnectionsMap);
-
-	public Map<String, List<VirtualInterface>> getVirtualInterfacesMap();
-
-	public void setVirtualInterfacesMap(Map<String, List<VirtualInterface>> virtualInterfacesMap);
-
-	public Map<String, List<NetworkAcl>> getNetworkAclsMap();
-
-	public void setNetworkAclsMap(Map<String, List<NetworkAcl>> networkAclsMap);
+	private ServiceRepositoryProvider serviceRepositoryProvider;
 	
+	private ServiceRepository(ServiceRepositoryProvider serviceRepositoryProvider) {
+		this.serviceStatistics = new ArrayList<>();
+		this.serviceRepositoryProvider = serviceRepositoryProvider;
+	}
+	
+	public static ServiceRepository build(ServiceRepositoryProvider serviceRepositoryProvider) {		
+		return new ServiceRepository(serviceRepositoryProvider);
+	}
+	
+	public ServiceMap<Vpc> getVpcMap() {
+		return this.serviceRepositoryProvider.getVpcMap();
+	}
+
+	public ServiceMap<Instance> getEc2InstanceMap() {
+		return this.serviceRepositoryProvider.getEc2InstanceMap();
+	}
+
+	public ServiceMap<Subnet> getSubnetMap() {
+		return this.serviceRepositoryProvider.getSubnetMap();
+	}
+
+	public ServiceMap<LoadBalancer> getLoadBalancerMap() {
+		return this.serviceRepositoryProvider.getLoadBalancerMap();
+	}
+
+	public ServiceMap<List<Listener>> getLoadBalancerListenersMap() {
+		return this.serviceRepositoryProvider.getLoadBalancerListenersMap();
+	}
+
+	public ServiceMap<List<Rule>> getLoadBalancerRulesMap() {
+		return this.serviceRepositoryProvider.getLoadBalancerRulesMap();
+	}
+
+	public ServiceMap<TargetGroup> getTargetGroupMap() {
+		return this.serviceRepositoryProvider.getTargetGroupMap();
+	}
+
+	public ServiceMap<List<TargetHealthDescription>> getTargetHealthDescriptionsMap() {
+		return this.serviceRepositoryProvider.getTargetHealthDescriptionsMap();
+	}
+
+	public ServiceMap<LoadBalancerDescription> getClassicLoadBalancerMap() {
+		return this.serviceRepositoryProvider.getClassicLoadBalancerMap();
+	}
+
+	public ServiceMap<SecurityGroup> getSecurityGroupMap() {
+		return this.serviceRepositoryProvider.getSecurityGroupMap();
+	}
+
+	public ServiceMap<List<RouteTable>> getRouteTablesMap() {
+		return this.serviceRepositoryProvider.getRouteTablesMap();
+	}
+
+	public ServiceMap<PrefixList> getPrefixListMap() {
+		return this.serviceRepositoryProvider.getPrefixListMap();
+	}
+
+	public ServiceMap<VpnGateway> getVpnGatewayMap() {
+		return this.serviceRepositoryProvider.getVpnGatewayMap();
+	}
+
+	public ServiceMap<List<VpnConnection>> getVpnConnectionsMap() {
+		return this.serviceRepositoryProvider.getVpnConnectionsMap();
+	}
+
+	public ServiceMap<List<VirtualInterface>> getVirtualInterfacesMap() {
+		return this.serviceRepositoryProvider.getVirtualInterfacesMap();
+	}
+
+	public ServiceMap<List<NetworkAcl>> getNetworkAclsMap() {
+		return this.serviceRepositoryProvider.getNetworkAclsMap();
+	}
+
+	public List<ServiceStatistic> getServiceStatistic() {
+		return this.serviceStatistics;
+	}
+	
+	public int ec2Sync(int num, int total, SessionProfile sessionProfile, Ec2Service ec2Service) throws IOException {
+		return this.serviceRepositoryProvider.ec2Sync(num, total, sessionProfile, ec2Service);
+	}
+	
+	public int elbSync(int num, int total, SessionProfile sessionProfile, LoadBalancerService loadBalancerService) throws IOException {
+		return this.serviceRepositoryProvider.elbSync(num, total, sessionProfile, loadBalancerService);
+	}
+	
+	public int dxSync(int num, int total, SessionProfile sessionProfile, DirectConnectService directConnectService) throws IOException {
+		return this.serviceRepositoryProvider.dxSync(num, total, sessionProfile, directConnectService);
+	}
+	
+	public void collect() {
+		if(this.serviceStatistics.size() > 0) this.serviceStatistics.clear();
+		this.serviceStatistics.addAll(this.serviceRepositoryProvider.collect());
+	}
+
+	public void setServiceRepositoryCollectListener(ServiceRepositoryCollectListener serviceRepositoryCollectListener) {
+		this.serviceRepositoryProvider.setServiceRepositoryCollectListener(serviceRepositoryCollectListener);
+	}
+
 }
+

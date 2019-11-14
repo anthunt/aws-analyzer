@@ -470,7 +470,7 @@ public abstract class AbstractNetwork<T> {
 				} else if(!out && checkRule.getDirectionType() == DirectionType.EGRESS) {
 					out = true;
 					if(checkRule.getRuleAction() == RuleAction.ALLOW) {
-						checkResult.setInSuccess(true);
+						checkResult.setOutSuccess(true);
 						allowRules.add(checkRule);
 					} else {
 						denyRules.add(checkRule);

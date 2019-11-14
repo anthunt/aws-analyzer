@@ -2,6 +2,9 @@ package com.anthunt.aws.network.service.model;
 
 public enum ServiceType {
 
+	VPC("VPC", "Virtual Private Cloud", "/img/Virtual-private-cloud-VPC_dark-bg@4x.png"),
+	PUSB("PUSB", "Public Subnet", "/img/VPC-subnet-public_dark-bg@4x.png"),
+	PRSB("PRSB", "Private Subnet", "/img/VPC-subnet-private_dark-bg@4x.png"),
 	EC2("EC2", "EC2 Instance", "/img/Amazon-EC2_Instance_dark-bg@4x.png"),
 	ELB("ELB", "Elastic Load Balancer", "/img/Elastic-Load-Balancing@4x.png"),
 	CLB("CLB", "Classic Load Balancer", "/img/Elastic-Load-Balancing_Classic-load-balancer_dark-bg@4x.png"),

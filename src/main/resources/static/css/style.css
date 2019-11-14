@@ -31,6 +31,10 @@ body {
 	overflow-y: auto;
 }
 
+.form-group > label {
+	font-weight: bold;
+}
+
 #progressText {
 	position: absolute;
 	color: #000;

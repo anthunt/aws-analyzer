@@ -1,13 +1,12 @@
 package com.anthunt.aws.network.service;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
 import com.anthunt.aws.network.service.checker.LoadBalancerNetwork;
+import com.anthunt.aws.network.service.checker.ServiceMap;
 import com.anthunt.aws.network.service.checker.ServiceRepository;
 import com.anthunt.aws.network.service.model.CheckResult;
 import com.anthunt.aws.network.service.model.CheckResults;
@@ -72,8 +71,8 @@ public class LoadBalancerService extends AbstractNetworkService {
 				   .build();
 	}
 	
-	public Map<String, LoadBalancerDescription> getClassicLoadBalancers(SessionProfile sessionProfile) {
-		Map<String, LoadBalancerDescription> classicLoadBalancerMap = new HashMap<>();
+	public ServiceMap<LoadBalancerDescription> getClassicLoadBalancers(SessionProfile sessionProfile) {
+		ServiceMap<LoadBalancerDescription> classicLoadBalancerMap = new ServiceMap<>();
 		ElasticLoadBalancingClient elasticLoadBalancingClient = this.getElasticLoadBalancingClient(sessionProfile);
 		for(LoadBalancerDescription loadBalancerDescription : elasticLoadBalancingClient.describeLoadBalancers().loadBalancerDescriptions()) {
 			classicLoadBalancerMap.put(loadBalancerDescription.loadBalancerName(), loadBalancerDescription);
@@ -81,8 +80,8 @@ public class LoadBalancerService extends AbstractNetworkService {
 		return classicLoadBalancerMap;
 	}
 	
-	public Map<String, LoadBalancer> getLoadBalancers(SessionProfile sessionProfile) {
-		Map<String, LoadBalancer> loadBalancerMap = new HashMap<>();
+	public ServiceMap<LoadBalancer> getLoadBalancers(SessionProfile sessionProfile) {
+		ServiceMap<LoadBalancer> loadBalancerMap = new ServiceMap<>();
 		ElasticLoadBalancingV2Client elasticLoadBalancingV2Client = this.getElasticLoadBalancingV2Client(sessionProfile);
 		for(LoadBalancer loadBalancer : elasticLoadBalancingV2Client.describeLoadBalancers().loadBalancers()) {
 			loadBalancerMap.put(loadBalancer.loadBalancerArn(), loadBalancer);
@@ -90,8 +89,8 @@ public class LoadBalancerService extends AbstractNetworkService {
 		return loadBalancerMap;
 	}
 	
-	public Map<String, List<Listener>> getLoadBalancerListeners(SessionProfile sessionProfile, Collection<LoadBalancer> loadBalancers) {
-		Map<String, List<Listener>> loadBalancerListenerMap = new HashMap<>();
+	public ServiceMap<List<Listener>> getLoadBalancerListeners(SessionProfile sessionProfile, Collection<LoadBalancer> loadBalancers) {
+		ServiceMap<List<Listener>> loadBalancerListenerMap = new ServiceMap<>();
 		ElasticLoadBalancingV2Client elasticLoadBalancingV2Client = this.getElasticLoadBalancingV2Client(sessionProfile);
 		for(LoadBalancer loadBalancer : loadBalancers) {
 			DescribeListenersResponse describeListenersResponse = elasticLoadBalancingV2Client.describeListeners(
@@ -105,8 +104,8 @@ public class LoadBalancerService extends AbstractNetworkService {
 		return loadBalancerListenerMap;
 	}
 	
-	public Map<String, List<Rule>> getLoadBalancerRules(SessionProfile sessionProfile, Collection<List<Listener>> listenerss) {
-		Map<String, List<Rule>> loadBalancerRuleMap = new HashMap<>();
+	public ServiceMap<List<Rule>> getLoadBalancerRules(SessionProfile sessionProfile, Collection<List<Listener>> listenerss) {
+		ServiceMap<List<Rule>> loadBalancerRuleMap = new ServiceMap<>();
 		ElasticLoadBalancingV2Client elasticLoadBalancingV2Client = this.getElasticLoadBalancingV2Client(sessionProfile);		
 		for(List<Listener> listeners : listenerss) {
 			for(Listener listener : listeners) {
@@ -121,8 +120,8 @@ public class LoadBalancerService extends AbstractNetworkService {
 		return loadBalancerRuleMap;
 	}
 	
-	public Map<String, TargetGroup> getTargetGroups(SessionProfile sessionProfile) {
-		Map<String, TargetGroup> targetGroupMap = new HashMap<>();
+	public ServiceMap<TargetGroup> getTargetGroups(SessionProfile sessionProfile) {
+		ServiceMap<TargetGroup> targetGroupMap = new ServiceMap<>();
 		ElasticLoadBalancingV2Client elasticLoadBalancingV2Client = this.getElasticLoadBalancingV2Client(sessionProfile);
 		for(TargetGroup targetGroup : elasticLoadBalancingV2Client.describeTargetGroups().targetGroups()) {
 			targetGroupMap.put(targetGroup.targetGroupArn(), targetGroup);
@@ -130,8 +129,8 @@ public class LoadBalancerService extends AbstractNetworkService {
 		return targetGroupMap;
 	}
 	
-	public Map<String, List<TargetHealthDescription>> getTargetHealthDescriptions(SessionProfile sessionProfile, Collection<TargetGroup> targetGroups) {
-		Map<String, List<TargetHealthDescription>> targetHealthDescriptionsMap = new HashMap<>();
+	public ServiceMap<List<TargetHealthDescription>> getTargetHealthDescriptions(SessionProfile sessionProfile, Collection<TargetGroup> targetGroups) {
+		ServiceMap<List<TargetHealthDescription>> targetHealthDescriptionsMap = new ServiceMap<>();
 		ElasticLoadBalancingV2Client elasticLoadBalancingV2Client = this.getElasticLoadBalancingV2Client(sessionProfile);		
 		for(TargetGroup targetGroup : targetGroups) {
 			DescribeTargetHealthResponse describeTargetHealthResponse = elasticLoadBalancingV2Client.describeTargetHealth(

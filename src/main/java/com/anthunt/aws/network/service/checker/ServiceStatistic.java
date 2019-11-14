@@ -1,4 +1,6 @@
-package com.anthunt.aws.network.service.model;
+package com.anthunt.aws.network.service.checker;
+
+import com.anthunt.aws.network.service.model.ServiceType;
 
 public class ServiceStatistic {
 

@@ -26,4 +26,13 @@ public class DiagramNode {
 		this.label = label;
 	}
 	
+	@Override
+	public String toString() {
+		return new StringBuffer()
+				.append("{")
+				.append("id: ").append(this.getId())
+				.append(", label: ").append(this.getLabel())
+				.append("}")
+				.toString();
+	}
 }

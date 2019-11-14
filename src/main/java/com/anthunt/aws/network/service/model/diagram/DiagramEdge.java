@@ -155,4 +155,18 @@ public class DiagramEdge {
             && (isAllMode || de.label.equals(label));
 	}
 	
+	@Override
+	public String toString() {
+		return new StringBuffer()
+				.append("{")
+				.append("source: ").append(this.getSource())
+				.append(", target: ").append(this.getTarget())
+				.append(", label: ").append(this.getLabel())
+				.append(", lineColor: ").append(this.getLineColor())
+				.append(", sourceArrowShape: ").append(this.getSourceArrowShape())
+				.append(", targetArrowShape: ").append(this.getTargetArrowShape())
+				.append("}")
+				.toString();
+	}
+	
 }

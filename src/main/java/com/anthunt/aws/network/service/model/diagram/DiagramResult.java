@@ -31,25 +31,32 @@ public class DiagramResult {
 		return nodes;
 	}
 	
-	public void addNode(DiagramData<DiagramNode> node) {
+	public DiagramNode addNode(DiagramData<DiagramNode> node) {
 		String nodeId = node.getData().getId();
 		if(!this.nodeIds.contains(nodeId)) {
 			this.nodeIds.add(nodeId);
 			this.nodes.add(node);
 		}
+		return node.getData();
 	}
 	
 	public List<DiagramData<DiagramEdge>> getEdges() {
 		return edges;
 	}
 	
-	public void addEdge(DiagramData<DiagramEdge> edge) {
+	public DiagramEdge addEdge(DiagramData<DiagramEdge> edge) {
 		edge.getData().setAllMode(this.isAllMode);
-		if(this.isAllMode) edge.getData().setLabel(""); 
-		if(!this.diagramEdges.contains(edge.getData())) {
+		if(this.isAllMode) {
+			edge.getData().setLabel("");
+			if(!this.diagramEdges.contains(edge.getData())) {
+				this.diagramEdges.add(edge.getData());
+				this.edges.add(edge);
+			}
+		} else {
 			this.diagramEdges.add(edge.getData());
 			this.edges.add(edge);
 		}
+		return edge.getData();
 	}
 	
 }

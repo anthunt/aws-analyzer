@@ -2,7 +2,6 @@ package com.anthunt.aws.network.controller;
 
 import javax.servlet.http.HttpSession;
 
-import com.anthunt.aws.network.repository.DefaultServiceRepository;
 import com.anthunt.aws.network.service.checker.ServiceRepository;
 import com.anthunt.aws.network.session.SessionProfile;
 
@@ -24,11 +23,7 @@ public abstract class AbstractController {
 	}
 	
 	public static ServiceRepository getSessionServiceRepository(HttpSession session) {
-		ServiceRepository serviceRepository = (ServiceRepository) session.getAttribute(APIController.SESSION_SERVICE_REPOSITORY);
-		if(serviceRepository == null) {
-			serviceRepository = new DefaultServiceRepository();
-		}
-		return serviceRepository;
+		return (ServiceRepository) session.getAttribute(APIController.SESSION_SERVICE_REPOSITORY);
 	}
 	
 	public static void setServiceRepository(HttpSession session, ServiceRepository serviceRepository) {

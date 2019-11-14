@@ -54,7 +54,7 @@
 					url += '/' + window.btoa(encodeURIComponent(targetCidrString));
 				}
 				
-				NetworkLoad.initialize(url);
+				NetworkLoad.load(url);
 			};
 
 			document.getElementById("btnTrafficPlay").onclick = function(e) {
@@ -65,6 +65,18 @@
 					startTraffic(1000);
 				}
 			};
+			
+			$('#ec2InstanceList a').on('click', function (e) {
+				e.preventDefault();
+				$(this).tab('show');
+			});
+			
+			$('#elbList a').on('click', function (e) {
+				e.preventDefault();
+				$(this).tab('show');
+			});
+
+			NetworkLoad.initialize();
 			
 			window.addEventListener("resize", function() {
 				NetworkLoad.diagram().fit();
@@ -92,38 +104,45 @@
 								</form>
 							</div>
 						</div>
+						<div class="list-group list-group-horizontal" id="resourceTab" role="tablist" style="flex-direction: row;">
+							<a class="list-group-item list-group-item-action active" data-toggle="list" href="#ec2InstanceList" role="tab">Ec2</a>
+							<a class="list-group-item list-group-item-action" data-toggle="list" href="#elbList" role="tab">ELB</a>
+						</div>
 						<div id="instanceList" class="row">
 							<div class="col width-200">
-								<div class="list-group">
-									<div class="d-flex w-100 justify-content-between white">
-										<p class="mb-1"><strong>EC2 Instances</strong></p>
+								<div class="tab-content">
+									<div class="tab-pane active" id="ec2InstanceList" role="tabpanel">
+										<div class="list-group">
+											<a href="#" class="list-group-item list-group-item-action" th:each="instance : ${instances}" th:instanceid="${instance.instanceId()}" onclick="loadDiagram('ec2', this.getAttribute('instanceid'))">
+											    <div class="d-flex w-100 justify-content-between">
+											    	<small class="mb-1" th:text="${instance.instanceId()}">List group item heading</small>
+											    	<small th:text="${instance.state().nameAsString()}">3 days ago</small>
+											    </div>
+											    <p class="mb-1"><strong><abbr th:title="${T(com.anthunt.aws.network.utils.Utils).getNameFromTags(instance.tags())}" th:text="${#strings.abbreviate(T(com.anthunt.aws.network.utils.Utils).getNameFromTags(instance.tags()), 30)}">210.0.0.0</abbr></strong></p>
+											    <p class="mb-1"><strong>public ip :</strong><span th:text="${instance.publicIpAddress()}">210.0.0.0</span></p>
+											    <p class="mb-1"><strong>private ip :</strong><span th:text="${instance.privateIpAddress()}">10.0.0.0</span></p>
+											</a>
+										</div>
 									</div>
-								  <a href="#" class="list-group-item list-group-item-action" th:each="instance : ${instances}" th:instanceid="${instance.instanceId()}" onclick="loadDiagram('ec2', this.getAttribute('instanceid'))">
-								    <div class="d-flex w-100 justify-content-between">
-								      <small class="mb-1" th:text="${instance.instanceId()}">List group item heading</small>
-								      <small th:text="${instance.state().nameAsString()}">3 days ago</small>
-								    </div>
-								    <p class="mb-1"><strong><abbr th:title="${T(com.anthunt.aws.network.utils.Utils).getNameFromTags(instance.tags())}" th:text="${#strings.abbreviate(T(com.anthunt.aws.network.utils.Utils).getNameFromTags(instance.tags()), 30)}">210.0.0.0</abbr></strong></p>
-								    <p class="mb-1"><strong>public ip :</strong><span th:text="${instance.publicIpAddress()}">210.0.0.0</span></p>
-								    <p class="mb-1"><strong>private ip :</strong><span th:text="${instance.privateIpAddress()}">10.0.0.0</span></p>
-								  </a>
-									<div class="d-flex w-100 justify-content-between white">
-										<p class="mb-1"><strong>LoadBalancers</strong></p>
+									<div class="tab-pane active" id="elbList" role="tabpanel">
+										<div class="list-group">
+											<a href="#" class="list-group-item list-group-item-action" th:each="loadbalancer : ${loadbalancers}" th:loadBalancerArn="${loadbalancer.loadBalancerArn()}" onclick="loadDiagram('loadBalancer', this.getAttribute('loadBalancerArn'))">
+											    <div class="d-flex w-100 justify-content-between">
+												    <small class="mb-1" th:text="${loadbalancer.typeAsString()}">List group item heading</small>
+												    <small th:text="${loadbalancer.state().codeAsString()}">3 days ago</small>
+											    </div>
+											    <p class="mb-1"><strong><abbr th:title="${loadbalancer.loadBalancerName()}" th:text="${#strings.abbreviate(loadbalancer.loadBalancerName(), 30)}">210.0.0.0</abbr></strong></p>
+											    <p class="mb-1"><span th:text="${loadbalancer.dnsName()}">210.0.0.0</span></p>
+											</a>
+										</div>
 									</div>
-								  <a href="#" class="list-group-item list-group-item-action" th:each="loadbalancer : ${loadbalancers}" th:loadBalancerArn="${loadbalancer.loadBalancerArn()}" onclick="loadDiagram('loadBalancer', this.getAttribute('loadBalancerArn'))">
-								    <div class="d-flex w-100 justify-content-between">
-								      <small class="mb-1" th:text="${loadbalancer.typeAsString()}">List group item heading</small>
-								      <small th:text="${loadbalancer.state().codeAsString()}">3 days ago</small>
-								    </div>
-								    <p class="mb-1"><strong><abbr th:title="${loadbalancer.loadBalancerName()}" th:text="${#strings.abbreviate(loadbalancer.loadBalancerName(), 30)}">210.0.0.0</abbr></strong></p>
-								    <p class="mb-1"><span th:text="${loadbalancer.dnsName()}">210.0.0.0</span></p>
-								  </a>
 								</div>
 							</div>
 						</div>
 					</div>
 					<div class="col">
 						<div id="cy"></div>
+						<div id="cytoscape-navigator" class="cytoscape-navigator"></div>
 						<div id="controlPanel">
 						    <button type="button" id="btnTrafficPlay" class="btn btn-success"><i class="fa fa-play"></i></button>
 						</div>

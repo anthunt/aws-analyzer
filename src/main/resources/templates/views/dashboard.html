@@ -9,9 +9,15 @@
 	</head>
 	
 	<th:block layout:fragment="customScript">
-		<script>
+		<script th:inline="javascript">		
 			window.onload = function() {
-				collectServiceData();
+				if([[${session.profile != null}]]) {
+					if([[${session.serviceRepository == null}]]) {		
+							collectServiceData();
+					}
+				} else {
+					location.href = "/profiles";
+				}	
 			};
 		</script>
 	</th:block>
