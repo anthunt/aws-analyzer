@@ -1,7 +1,8 @@
-package com.anthunt.aws.network.service.checker;
+package com.anthunt.aws.network.repository;
 
 import java.util.List;
 
+import com.anthunt.aws.network.repository.model.ServiceStatistic;
 import com.anthunt.aws.network.service.model.ServiceType;
 
 public class ServiceCollector {

@@ -1,11 +1,11 @@
-package com.anthunt.aws.network.service.checker;
+package com.anthunt.aws.network.repository;
 
 import java.io.IOException;
 import java.util.UUID;
 
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
-import com.anthunt.aws.network.service.model.ServiceResult;
+import com.anthunt.aws.network.repository.model.ServiceResult;
 
 public class ServiceRepositoryCollectListener {
 

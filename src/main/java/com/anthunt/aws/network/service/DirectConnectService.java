@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.anthunt.aws.network.service.checker.ServiceMap;
+import com.anthunt.aws.network.repository.model.ServiceMap;
 import com.anthunt.aws.network.session.SessionProfile;
 
 import software.amazon.awssdk.auth.credentials.ProfileCredentialsProvider;

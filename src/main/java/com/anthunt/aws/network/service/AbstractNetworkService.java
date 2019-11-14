@@ -6,7 +6,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.anthunt.aws.network.service.checker.ServiceRepository;
+import com.anthunt.aws.network.repository.ServiceRepository;
 import com.anthunt.aws.network.service.model.CheckResult;
 import com.anthunt.aws.network.service.model.CheckRule;
 import com.anthunt.aws.network.service.model.DirectionType;

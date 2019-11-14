@@ -6,10 +6,10 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.anthunt.aws.network.repository.ServiceRepository;
+import com.anthunt.aws.network.repository.model.ServiceMap;
+import com.anthunt.aws.network.repository.model.ServiceStatistic;
 import com.anthunt.aws.network.service.checker.Ec2InstanceNetwork;
-import com.anthunt.aws.network.service.checker.ServiceMap;
-import com.anthunt.aws.network.service.checker.ServiceRepository;
-import com.anthunt.aws.network.service.checker.ServiceStatistic;
 import com.anthunt.aws.network.service.model.CheckResults;
 import com.anthunt.aws.network.service.model.CheckType;
 import com.anthunt.aws.network.service.model.ServiceType;

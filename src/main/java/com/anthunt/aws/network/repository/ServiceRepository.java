@@ -1,9 +1,11 @@
-package com.anthunt.aws.network.service.checker;
+package com.anthunt.aws.network.repository;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.anthunt.aws.network.repository.model.ServiceMap;
+import com.anthunt.aws.network.repository.model.ServiceStatistic;
 import com.anthunt.aws.network.service.DirectConnectService;
 import com.anthunt.aws.network.service.Ec2Service;
 import com.anthunt.aws.network.service.LoadBalancerService;

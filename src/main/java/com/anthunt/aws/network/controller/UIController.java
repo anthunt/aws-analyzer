@@ -14,10 +14,10 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import com.anthunt.aws.network.repository.ServiceRepository;
+import com.anthunt.aws.network.repository.model.ServiceStatistic;
 import com.anthunt.aws.network.service.Ec2Service;
 import com.anthunt.aws.network.service.LoadBalancerService;
-import com.anthunt.aws.network.service.checker.ServiceRepository;
-import com.anthunt.aws.network.service.checker.ServiceStatistic;
 import com.anthunt.aws.network.session.SessionProfile;
 
 import software.amazon.awssdk.profiles.Profile;

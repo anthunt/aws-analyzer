@@ -2,8 +2,7 @@ package com.anthunt.aws.network.repository;
 
 import java.util.List;
 
-import com.anthunt.aws.network.service.checker.ServiceMap;
-import com.anthunt.aws.network.service.checker.ServiceRepositoryProvider;
+import com.anthunt.aws.network.repository.model.ServiceMap;
 
 import software.amazon.awssdk.services.directconnect.model.VirtualInterface;
 import software.amazon.awssdk.services.ec2.model.Instance;

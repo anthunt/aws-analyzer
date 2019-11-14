@@ -1,4 +1,4 @@
-package com.anthunt.aws.network.service.checker;
+package com.anthunt.aws.network.repository.model;
 
 import java.util.HashMap;
 

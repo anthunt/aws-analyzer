@@ -1,4 +1,4 @@
-package com.anthunt.aws.network.service.model;
+package com.anthunt.aws.network.repository.model;
 
 public class ServiceResult {
 	private int percent;

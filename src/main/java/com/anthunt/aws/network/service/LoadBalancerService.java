@@ -5,9 +5,9 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.anthunt.aws.network.repository.ServiceRepository;
+import com.anthunt.aws.network.repository.model.ServiceMap;
 import com.anthunt.aws.network.service.checker.LoadBalancerNetwork;
-import com.anthunt.aws.network.service.checker.ServiceMap;
-import com.anthunt.aws.network.service.checker.ServiceRepository;
 import com.anthunt.aws.network.service.model.CheckResult;
 import com.anthunt.aws.network.service.model.CheckResults;
 import com.anthunt.aws.network.service.model.CheckRule;

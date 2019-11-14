@@ -2,7 +2,7 @@ package com.anthunt.aws.network.controller;
 
 import javax.servlet.http.HttpSession;
 
-import com.anthunt.aws.network.service.checker.ServiceRepository;
+import com.anthunt.aws.network.repository.ServiceRepository;
 import com.anthunt.aws.network.session.SessionProfile;
 
 public abstract class AbstractController {
