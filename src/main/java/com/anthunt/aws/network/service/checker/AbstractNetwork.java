@@ -82,7 +82,7 @@ public abstract class AbstractNetwork<T> {
 				
 				List<IpRange> ipRanges = inBoundIpPermission.ipRanges();
 				for(IpRange ipRange : ipRanges) {
-					SecurityGroupCheckRule checkRule = new SecurityGroupCheckRule(securityGroup.groupId(), securityGroupName);
+					SecurityGroupCheckRule checkRule = new SecurityGroupCheckRule(securityGroup.groupId(), securityGroupName, securityGroup);
 					checkRule.setDirectionType(DirectionType.INGRESS);
 					checkRule.setPrototol(inBoundIpPermission.ipProtocol());
 					checkRule.setFromPort(inBoundIpPermission.fromPort());
@@ -93,7 +93,7 @@ public abstract class AbstractNetwork<T> {
 				}
 				List<Ipv6Range> ipv6Ranges = inBoundIpPermission.ipv6Ranges();
 				for(Ipv6Range ipv6Range : ipv6Ranges) {
-					SecurityGroupCheckRule checkRule = new SecurityGroupCheckRule(securityGroup.groupId(), securityGroupName);
+					SecurityGroupCheckRule checkRule = new SecurityGroupCheckRule(securityGroup.groupId(), securityGroupName, securityGroup);
 					checkRule.setDirectionType(DirectionType.INGRESS);
 					checkRule.setPrototol(inBoundIpPermission.ipProtocol());
 					checkRule.setFromPort(inBoundIpPermission.fromPort());
@@ -104,7 +104,7 @@ public abstract class AbstractNetwork<T> {
 				}
 				List<PrefixListId> prefixListIds = inBoundIpPermission.prefixListIds();
 				for(PrefixListId prefixListId : prefixListIds) {
-					SecurityGroupCheckRule checkRule = new SecurityGroupCheckRule(securityGroup.groupId(), securityGroupName);
+					SecurityGroupCheckRule checkRule = new SecurityGroupCheckRule(securityGroup.groupId(), securityGroupName, securityGroup);
 					checkRule.setDirectionType(DirectionType.INGRESS);
 					checkRule.setPrototol(inBoundIpPermission.ipProtocol());
 					checkRule.setFromPort(inBoundIpPermission.fromPort());
@@ -115,7 +115,7 @@ public abstract class AbstractNetwork<T> {
 				}
 				List<UserIdGroupPair> userIdGroupPairs = inBoundIpPermission.userIdGroupPairs();
 				for(UserIdGroupPair userIdGroupPair : userIdGroupPairs) {
-					SecurityGroupCheckRule checkRule = new SecurityGroupCheckRule(securityGroup.groupId(), securityGroupName);
+					SecurityGroupCheckRule checkRule = new SecurityGroupCheckRule(securityGroup.groupId(), securityGroupName, securityGroup);
 					checkRule.setDirectionType(DirectionType.INGRESS);
 					checkRule.setPrototol(inBoundIpPermission.ipProtocol());
 					checkRule.setFromPort(inBoundIpPermission.fromPort());
@@ -131,7 +131,7 @@ public abstract class AbstractNetwork<T> {
 			for (IpPermission outBoundIpPermission : outBoundIpPermissions) {
 				List<IpRange> ipRanges = outBoundIpPermission.ipRanges();
 				for(IpRange ipRange : ipRanges) {
-					SecurityGroupCheckRule checkRule = new SecurityGroupCheckRule(securityGroup.groupId(), securityGroupName);
+					SecurityGroupCheckRule checkRule = new SecurityGroupCheckRule(securityGroup.groupId(), securityGroupName, securityGroup);
 					checkRule.setDirectionType(DirectionType.EGRESS);
 					checkRule.setPrototol(outBoundIpPermission.ipProtocol());
 					checkRule.setFromPort(outBoundIpPermission.fromPort());
@@ -142,7 +142,7 @@ public abstract class AbstractNetwork<T> {
 				}
 				List<Ipv6Range> ipv6Ranges = outBoundIpPermission.ipv6Ranges();
 				for(Ipv6Range ipv6Range : ipv6Ranges) {
-					SecurityGroupCheckRule checkRule = new SecurityGroupCheckRule(securityGroup.groupId(), securityGroupName);
+					SecurityGroupCheckRule checkRule = new SecurityGroupCheckRule(securityGroup.groupId(), securityGroupName, securityGroup);
 					checkRule.setDirectionType(DirectionType.EGRESS);
 					checkRule.setPrototol(outBoundIpPermission.ipProtocol());
 					checkRule.setFromPort(outBoundIpPermission.fromPort());
@@ -153,7 +153,7 @@ public abstract class AbstractNetwork<T> {
 				}
 				List<PrefixListId> prefixListIds = outBoundIpPermission.prefixListIds();
 				for(PrefixListId prefixListId : prefixListIds) {
-					SecurityGroupCheckRule checkRule = new SecurityGroupCheckRule(securityGroup.groupId(), securityGroupName);
+					SecurityGroupCheckRule checkRule = new SecurityGroupCheckRule(securityGroup.groupId(), securityGroupName, securityGroup);
 					checkRule.setDirectionType(DirectionType.EGRESS);
 					checkRule.setPrototol(outBoundIpPermission.ipProtocol());
 					checkRule.setFromPort(outBoundIpPermission.fromPort());
@@ -164,7 +164,7 @@ public abstract class AbstractNetwork<T> {
 				}
 				List<UserIdGroupPair> userIdGroupPairs = outBoundIpPermission.userIdGroupPairs();
 				for(UserIdGroupPair userIdGroupPair : userIdGroupPairs) {
-					SecurityGroupCheckRule checkRule = new SecurityGroupCheckRule(securityGroup.groupId(), securityGroupName);
+					SecurityGroupCheckRule checkRule = new SecurityGroupCheckRule(securityGroup.groupId(), securityGroupName, securityGroup);
 					checkRule.setDirectionType(DirectionType.EGRESS);
 					checkRule.setPrototol(outBoundIpPermission.ipProtocol());
 					checkRule.setFromPort(outBoundIpPermission.fromPort());
@@ -194,7 +194,7 @@ public abstract class AbstractNetwork<T> {
 				List<Route> routes = routeTable.routes();
 				for (Route route : routes) {
 					
-					RouteCheckRule routeCheckRule = new RouteCheckRule(routeTable.routeTableId(), routeTableName);
+					RouteCheckRule routeCheckRule = new RouteCheckRule(routeTable.routeTableId(), routeTableName, routeTable);
 					
 					if(route.destinationCidrBlock() != null) {
 						routeCheckRule.setCidr(true);
@@ -270,7 +270,7 @@ public abstract class AbstractNetwork<T> {
 				}
 				List<NetworkAclEntry> networkAclEntries = networkAcl.entries();
 				for (NetworkAclEntry networkAclEntry : networkAclEntries) {	
-					NetworkAclCheckRule networkAclCheckRule = new NetworkAclCheckRule(networkAcl.networkAclId(), networkAclName);
+					NetworkAclCheckRule networkAclCheckRule = new NetworkAclCheckRule(networkAcl.networkAclId(), networkAclName, networkAcl);
 					networkAclCheckRule.setDirectionType(networkAclEntry.egress() ? DirectionType.EGRESS : DirectionType.INGRESS);
 					networkAclCheckRule.setRuleNumber(networkAclEntry.ruleNumber() == 32767 ? "*" : networkAclEntry.ruleNumber().toString());
 					networkAclCheckRule.setCidr(networkAclEntry.cidrBlock());

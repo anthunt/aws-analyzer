@@ -174,7 +174,7 @@ public abstract class ServiceRepositoryProvider {
 		serviceStatistics.add(this.getSecurityGroupMap().getServiceStatistic(ServiceType.SG));
 		serviceStatistics.add(this.getVpnGatewayMap().getServiceStatistic(ServiceType.VGW));
 		serviceStatistics.add(this.getVpnConnectionsMap().getServiceStatistic(ServiceType.VPNC));
-		serviceStatistics.add(this.getVirtualInterfacesMap().getServiceStatistic(ServiceType.DX));
+		serviceStatistics.add(this.getVirtualInterfacesMap().getServiceStatistic(ServiceType.VIF));
 		serviceStatistics.add(this.getEc2InstanceMap().getServiceStatistic(ServiceType.EC2));
 		serviceStatistics.add(this.getLoadBalancerMap().getServiceStatistic(ServiceType.ELB));
 		return serviceStatistics;

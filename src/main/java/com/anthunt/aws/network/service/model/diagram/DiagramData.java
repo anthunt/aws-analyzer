@@ -3,21 +3,21 @@ package com.anthunt.aws.network.service.model.diagram;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DiagramData<E> {
+public class DiagramData<T> {
 
-	private E data;
+	private T data;
 	private List<String> classes;
 	
-	public DiagramData(E data) {
+	public DiagramData(T data) {
 		this.data = data;
 		this.classes = new ArrayList<>();
 	}
 	
-	public E getData() {
+	public T getData() {
 		return data;
 	}
 
-	public void setData(E data) {
+	public void setData(T data) {
 		this.data = data;
 	}
 	
@@ -25,7 +25,7 @@ public class DiagramData<E> {
 		return classes;
 	}
 	
-	public DiagramData<E> addClass(NodeType nodeType) {
+	public DiagramData<T> addClass(NodeType nodeType) {
 		this.classes.add(nodeType.getName());
 		return this;
 	}

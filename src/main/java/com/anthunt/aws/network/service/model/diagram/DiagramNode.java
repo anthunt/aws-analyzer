@@ -4,10 +4,16 @@ public class DiagramNode {
 
 	private String id;
 	private String label;
+	private Object resource;
 	
 	public DiagramNode(String id, String label) {
+		this(id, label, null);
+	}
+	
+	public DiagramNode(String id, String label, Object resource ) {
 		this.setId(id);
 		this.setLabel(label);
+		this.setResource(resource);
 	}
 	
 	public String getId() {
@@ -24,6 +30,14 @@ public class DiagramNode {
 	
 	public void setLabel(String label) {
 		this.label = label;
+	}
+	
+	public Object getResource() {
+		return resource;
+	}
+	
+	public void setResource(Object resource) {
+		this.resource = resource;
 	}
 	
 	@Override

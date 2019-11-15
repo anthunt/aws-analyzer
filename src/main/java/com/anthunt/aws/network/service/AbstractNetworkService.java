@@ -60,7 +60,7 @@ public abstract class AbstractNetworkService {
 					
 					DiagramNode vpnConnectionNode = diagramResult.addNode(
 							new DiagramData<DiagramNode>(
-									new DiagramNode(vpnConnection.vpnConnectionId(), vpnConnection.vpnConnectionId())
+									new DiagramNode(vpnConnection.vpnConnectionId(), vpnConnection.vpnConnectionId(), vpnConnection)
 							).addClass(NodeType.VPN_CONNECTION)
 					);
 					log.debug("added node - {routeTableId: {}, {}}", routeTableId, vpnConnectionNode.toString());
@@ -98,7 +98,7 @@ public abstract class AbstractNetworkService {
 					log.debug("added node - {routeTableId: {}, {}}", routeTableId, dxLoacationNode.toString());
 					DiagramNode vifConnectionNode = diagramResult.addNode(
 							new DiagramData<DiagramNode>(
-									new DiagramNode(virtualInterface.connectionId(), virtualInterface.connectionId())
+									new DiagramNode(virtualInterface.connectionId(), virtualInterface.connectionId(), virtualInterface)
 							).addClass(NodeType.DIRECT_CONNECT)
 					);
 					log.debug("added node - {routeTableId: {}, {}}", routeTableId, vifConnectionNode.toString());
@@ -145,7 +145,7 @@ public abstract class AbstractNetworkService {
 				log.debug("added node - {routeTableId: {}, {}}", routeTableId, gatewayNode.toString());
 				DiagramNode routeNode = diagramResult.addNode(
 						new DiagramData<DiagramNode>(
-								new DiagramNode(routeCheckRule.getId(), routeCheckRule.getName())
+								new DiagramNode(routeCheckRule.getId(), routeCheckRule.getName(), routeCheckRule.getRouteTable())
 						).addClass(NodeType.ROUTE_TABLE)
 				);
 				log.debug("added node - {routeTableId: {}, {}}", routeTableId, routeNode.toString());
@@ -215,7 +215,7 @@ public abstract class AbstractNetworkService {
 				
 				DiagramNode diagramNode = diagramResult.addNode(
 						new DiagramData<DiagramNode>(
-								new DiagramNode(networkAclCheckRule.getId(), networkAclCheckRule.getName())
+								new DiagramNode(networkAclCheckRule.getId(), networkAclCheckRule.getName(), networkAclCheckRule.getNetworkAcl())
 						).addClass(NodeType.NETWORK_ACL)
 				);
 				log.debug("add node - {networkAclId:{}, {}}", networkAclId, diagramNode.toString());
@@ -251,7 +251,7 @@ public abstract class AbstractNetworkService {
 			if(checkRule instanceof SecurityGroupCheckRule) {
 				SecurityGroupCheckRule securityGroupCheckRule = (SecurityGroupCheckRule) checkRule;
 				
-				diagramResult.addNode(new DiagramData<DiagramNode>(new DiagramNode(securityGroupCheckRule.getId(), securityGroupCheckRule.getName())).addClass(NodeType.SECURITY_GROUP));
+				diagramResult.addNode(new DiagramData<DiagramNode>(new DiagramNode(securityGroupCheckRule.getId(), securityGroupCheckRule.getName(), securityGroupCheckRule.getSecurityGroup())).addClass(NodeType.SECURITY_GROUP));
 				
 				String port = "";
 				if("-1".equals(securityGroupCheckRule.getPrototol())) {

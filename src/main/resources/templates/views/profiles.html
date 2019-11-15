@@ -13,10 +13,10 @@
 		<div layout:fragment="content">
 			<div class="container-fluid">
 				<div class="row">
-		            <div class="col-lg-3 col-md-6 col-sm-6" th:each="profileName : ${profileNames}">
+		            <div class="col-lg-2 col-md-4 col-sm-6" th:each="profileName : ${profileNames}">
 						<div class="card card-stats">
-							<div class="card-header card-header-warning card-header-icon">
-								<div class="card-icon">
+							<div class="card-header card-header-icon">
+								<div class="card-icon" th:with="color=${T(com.anthunt.aws.network.utils.Utils).getColor()}" th:style="'box-shadow: 0 4px 20px 0 rgba(0,0,0,.14), 0 7px 10px -5px rgba(' + ${color.getR()} + ',' + ${color.getG()} + ',' + ${color.getB()} + ',' + ${color.getAlpha()} + '); background-color:' + ${color.getHex()}">
 									<i class="material-icons">account_box</i>
 								</div>
 								<p class="card-category">Profile</p>

@@ -7,6 +7,7 @@ import com.anthunt.aws.network.service.model.diagram.NodeType;
 
 import software.amazon.awssdk.services.directconnect.model.VirtualInterface;
 import software.amazon.awssdk.services.ec2.model.RouteState;
+import software.amazon.awssdk.services.ec2.model.RouteTable;
 import software.amazon.awssdk.services.ec2.model.VpnConnection;
 
 public class RouteCheckRule implements CheckRule {
@@ -23,13 +24,15 @@ public class RouteCheckRule implements CheckRule {
 	private List<VpnConnection> vpnConnections;
 	private List<VirtualInterface> virtualInterfaces;
 	private RouteState routeState;
+	private RouteTable routeTable;
 	
-	public RouteCheckRule(String id, String name) {
+	public RouteCheckRule(String id, String name, RouteTable routeTable) {
 		this.setId(id);
 		this.setName(name);
 		this.cidrs = new ArrayList<String>();
 		this.vpnConnections = new ArrayList<VpnConnection>();
 		this.virtualInterfaces = new ArrayList<VirtualInterface>();
+		this.setRouteTable(routeTable);
 	}
 
 	public String getId() {
@@ -44,7 +47,7 @@ public class RouteCheckRule implements CheckRule {
 		return name;
 	}
 
-	public void setName(String name) {
+	private void setName(String name) {
 		this.name = name;
 	}
 
@@ -123,6 +126,14 @@ public class RouteCheckRule implements CheckRule {
 
 	public void setRouteState(RouteState routeState) {
 		this.routeState = routeState;
+	}
+
+	public RouteTable getRouteTable() {
+		return routeTable;
+	}
+
+	private void setRouteTable(RouteTable routeTable) {
+		this.routeTable = routeTable;
 	}
 
 }

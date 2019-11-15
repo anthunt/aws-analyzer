@@ -1,5 +1,7 @@
 package com.anthunt.aws.network.service.model;
 
+import software.amazon.awssdk.services.ec2.model.SecurityGroup;
+
 public class SecurityGroupCheckRule implements CheckRule {
 
 	private boolean isCidr;
@@ -10,10 +12,12 @@ public class SecurityGroupCheckRule implements CheckRule {
 	private Integer fromPort;
 	private Integer toPort;
 	private DirectionType directionType;
+	private SecurityGroup securityGroup;
 
-	public SecurityGroupCheckRule(String id, String name) {
+	public SecurityGroupCheckRule(String id, String name, SecurityGroup securityGroup) {
 		this.setName(name);
 		this.setId(id);
+		this.setSecurityGroup(securityGroup);
 	}
 	
 	public boolean isCidr() {
@@ -78,6 +82,14 @@ public class SecurityGroupCheckRule implements CheckRule {
 	
 	public void setDirectionType(DirectionType directionType) {
 		this.directionType = directionType;
+	}
+
+	public SecurityGroup getSecurityGroup() {
+		return securityGroup;
+	}
+
+	public void setSecurityGroup(SecurityGroup securityGroup) {
+		this.securityGroup = securityGroup;
 	}
 	
 }

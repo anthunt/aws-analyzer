@@ -169,7 +169,7 @@ public class LoadBalancerService extends AbstractNetworkService {
 		
 		this.setSecurityGroup(networkAclId, loadBalancer, checkResults.get(CheckType.SECURITY_GROUP), diagramResult);
 		
-		diagramResult.addNode(new DiagramData<DiagramNode>(new DiagramNode(loadBalancer.loadBalancerArn(), loadBalancer.loadBalancerName())).addClass(NodeType.getLoadBalancerType(loadBalancer.type())));
+		diagramResult.addNode(new DiagramData<DiagramNode>(new DiagramNode(loadBalancer.loadBalancerArn(), loadBalancer.loadBalancerName(), loadBalancer)).addClass(NodeType.getLoadBalancerType(loadBalancer.type())));
 		
 		this.setLoadBalancer(serviceRepository, loadBalancer, diagramResult);
 		
@@ -189,7 +189,7 @@ public class LoadBalancerService extends AbstractNetworkService {
 				if(checkRule instanceof SecurityGroupCheckRule) {
 					SecurityGroupCheckRule securityGroupCheckRule = (SecurityGroupCheckRule) checkRule;
 					
-					diagramResult.addNode(new DiagramData<DiagramNode>(new DiagramNode(securityGroupCheckRule.getId(), securityGroupCheckRule.getName())).addClass(NodeType.SECURITY_GROUP));
+					diagramResult.addNode(new DiagramData<DiagramNode>(new DiagramNode(securityGroupCheckRule.getId(), securityGroupCheckRule.getName(), securityGroupCheckRule.getSecurityGroup())).addClass(NodeType.SECURITY_GROUP));
 					
 					String port = "";
 					if("-1".equals(securityGroupCheckRule.getPrototol())) {
@@ -268,7 +268,7 @@ public class LoadBalancerService extends AbstractNetworkService {
 					case FORWARD :
 						TargetGroup targetGroup = serviceRepository.getTargetGroupMap().get(action.targetGroupArn());
 						
-						diagramResult.addNode(new DiagramData<DiagramNode>(new DiagramNode(targetGroup.targetGroupArn(), targetGroup.targetGroupName())).addClass(NodeType.TARGET_GROUP));
+						diagramResult.addNode(new DiagramData<DiagramNode>(new DiagramNode(targetGroup.targetGroupArn(), targetGroup.targetGroupName(), targetGroup)).addClass(NodeType.TARGET_GROUP));
 						DiagramEdge diagramTargetEdge = new DiagramEdge(loadBalancer.loadBalancerArn(), targetGroup.targetGroupArn());
 						diagramTargetEdge.setLabel(
 								(ruleConditions.size() == 0 ? "Default " : "")
@@ -286,7 +286,7 @@ public class LoadBalancerService extends AbstractNetworkService {
 
 							switch(targetGroup.targetType()) {
 							case INSTANCE :
-								diagramResult.addNode(new DiagramData<DiagramNode>(new DiagramNode(targetDescription.id(), targetDescription.id())).addClass(NodeType.EC2_INSTANCE));
+								diagramResult.addNode(new DiagramData<DiagramNode>(new DiagramNode(targetDescription.id(), targetDescription.id(), serviceRepository.getEc2InstanceMap().get(targetDescription.id()))).addClass(NodeType.EC2_INSTANCE));
 								break;
 							case IP :
 								diagramResult.addNode(new DiagramData<DiagramNode>(new DiagramNode(targetDescription.id(), targetDescription.id())).addClass(NodeType.SERVER));

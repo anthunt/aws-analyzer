@@ -75,7 +75,7 @@ function off() {
 	loadMessage(0, "");
 }
 
-function collectServiceData(serviceName) {
+function collectServiceData(serviceName, callback) {
 	
 	on("<h3>We are collecting metadata for this account for quick response.</h3>"
 	 , "<p><h2><strong>Please wait.</strong></h2></p>");
@@ -87,6 +87,7 @@ function collectServiceData(serviceName) {
 	};
 	evt.onerror = function(e) {
 		evt.close();
+		if(typeof callback === "function") callback();
 		setTimeout(function() { off(); }, 1000);
 	};
 }

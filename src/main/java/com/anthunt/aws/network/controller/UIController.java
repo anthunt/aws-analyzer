@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.anthunt.aws.network.repository.ServiceRepository;
-import com.anthunt.aws.network.repository.model.ServiceStatistic;
 import com.anthunt.aws.network.service.Ec2Service;
 import com.anthunt.aws.network.service.LoadBalancerService;
 import com.anthunt.aws.network.session.SessionProfile;
@@ -71,11 +70,6 @@ public class UIController extends AbstractController {
 	@RequestMapping("dashboard")
 	public String getDashboard( Model model
 					          , HttpSession session) {		
-		List<ServiceStatistic> serviceStatistics = new ArrayList<>();
-		//serviceStatistics.add(ec2Service.getInstanceStatistic(profileName, regionId));
-		
-		model.addAttribute("serviceStatistics", serviceStatistics);
-		
 		return "views/dashboard";
 	}
 	

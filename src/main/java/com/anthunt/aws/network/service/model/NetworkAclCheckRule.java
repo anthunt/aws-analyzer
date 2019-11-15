@@ -1,5 +1,6 @@
 package com.anthunt.aws.network.service.model;
 
+import software.amazon.awssdk.services.ec2.model.NetworkAcl;
 import software.amazon.awssdk.services.ec2.model.PortRange;
 import software.amazon.awssdk.services.ec2.model.RuleAction;
 
@@ -13,10 +14,12 @@ public class NetworkAclCheckRule implements CheckRule {
 	private PortRange portRange;
 	private String protocol;
 	private RuleAction ruleAction;
+	private NetworkAcl networkAcl;
 	
-	public NetworkAclCheckRule(String id, String name) {
+	public NetworkAclCheckRule(String id, String name, NetworkAcl networkAcl) {
 		this.setId(id);
 		this.setName(name);
+		this.setNetworkAcl(networkAcl);
 	}
 	
 	public String getId() {
@@ -81,6 +84,14 @@ public class NetworkAclCheckRule implements CheckRule {
 	
 	public void setRuleAction(RuleAction ruleAction) {
 		this.ruleAction = ruleAction;
+	}
+
+	public NetworkAcl getNetworkAcl() {
+		return networkAcl;
+	}
+
+	public void setNetworkAcl(NetworkAcl networkAcl) {
+		this.networkAcl = networkAcl;
 	}
 
 	@Override

@@ -244,7 +244,7 @@ public class Ec2Service extends AbstractNetworkService {
 		
 		this.setSecurityGroup(networkAclId, checkResults.getResource().instanceId(), checkResults.get(CheckType.SECURITY_GROUP), diagramResult);
 		
-		diagramResult.addNode(new DiagramData<DiagramNode>(new DiagramNode(checkResults.getResource().instanceId(), checkResults.getResource().privateIpAddress())).addClass(NodeType.EC2_INSTANCE));
+		diagramResult.addNode(new DiagramData<DiagramNode>(new DiagramNode(checkResults.getResource().instanceId(), checkResults.getResource().privateIpAddress(), checkResults.getResource())).addClass(NodeType.EC2_INSTANCE));
 		
 		return diagramResult;
 	}

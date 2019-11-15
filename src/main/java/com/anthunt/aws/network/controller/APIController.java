@@ -2,6 +2,7 @@ package com.anthunt.aws.network.controller;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.List;
 import java.util.Optional;
 
 import javax.servlet.http.HttpSession;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+import com.anthunt.aws.network.repository.model.ServiceStatistic;
 import com.anthunt.aws.network.service.Ec2Service;
 import com.anthunt.aws.network.service.LoadBalancerService;
 import com.anthunt.aws.network.service.ServiceCollectorService;
@@ -62,6 +64,11 @@ public class APIController extends AbstractController {
 		SseEmitter sseEmitter = new SseEmitter(180000L);
 		serviceCollectorService.collectServices(session, sseEmitter, this.getSessionProfile(session), serviceName);
 		return sseEmitter;
+	}
+	
+	@RequestMapping("/statistics")
+	public List<ServiceStatistic> getServiceStatistics(HttpSession session) {
+		return getSessionServiceRepository(session).getServiceStatistic();		
 	}
 	
 }

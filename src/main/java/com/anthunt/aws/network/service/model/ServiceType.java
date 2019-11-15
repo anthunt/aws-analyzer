@@ -15,6 +15,7 @@ public enum ServiceType {
 	VGW("VGW", "Virtual Gateway", "/img/Amazon-VPC_Virtual-Gateway_dark-bg@4x.png"),
 	VPNC("VPNC", "Vpn Connection", "/img/Amazon-VPC_VPN-Connection_dark-bg@4x.png"),
 	DX("DX", "Direct Connect", "/img/AWS-Direct-Connect@4x.png"),
+	VIF("VIF", "Virtual Interface", "/img/AWS-Direct-Connect@4x.png"),
 	NACL("NACL", "Network ACL", "/img/Amazon-VPC_Network-Access-Control-List_dark-bg@4x.png")
 	;
 	

@@ -5,12 +5,14 @@ import com.anthunt.aws.network.service.model.ServiceType;
 public class ServiceStatistic {
 
 	private String serviceName;
+	private String serviceDisplayName;
 	private int serviceActive;
 	private int serviceTotal;
 	private String icon;
 
 	public ServiceStatistic(ServiceType serviceType) {
 		this.setServiceName(serviceType.getName());
+		this.setServiceDisplayName(serviceType.getAlias());
 		this.setIcon(serviceType.getIcon());
 	}
 	
@@ -22,6 +24,14 @@ public class ServiceStatistic {
 		this.serviceName = serviceName;
 	}
 	
+	public String getServiceDisplayName() {
+		return serviceDisplayName;
+	}
+
+	private void setServiceDisplayName(String serviceDisplayName) {
+		this.serviceDisplayName = serviceDisplayName;
+	}
+
 	public int getServiceActive() {
 		return serviceActive;
 	}

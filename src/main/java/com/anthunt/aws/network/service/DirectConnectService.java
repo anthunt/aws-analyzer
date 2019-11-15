@@ -36,11 +36,11 @@ public class DirectConnectService {
 			if(virtualInterfaceMap.containsKey(virtualInterface.virtualGatewayId())) {
 				virtualInterfaceMap.get(virtualInterface.virtualGatewayId()).add(virtualInterface);
 			} else {
-				if(virtualInterface.virtualInterfaceState() == VirtualInterfaceState.AVAILABLE) active++;
 				List<VirtualInterface> virtualInterfaces = new ArrayList<>();
 				virtualInterfaces.add(virtualInterface);
 				virtualInterfaceMap.put(virtualInterface.virtualGatewayId(), virtualInterfaces);
 			}
+			if(virtualInterface.virtualInterfaceState() == VirtualInterfaceState.AVAILABLE) active++;
 		}
 		virtualInterfaceMap.setActive(active);
 		return virtualInterfaceMap;

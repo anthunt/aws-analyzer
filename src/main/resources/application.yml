@@ -3,6 +3,9 @@ server:
     whitelabel:
       enabled: false
 spring:
+ devtools:
+  livereload:
+   enabled: true
  thymeleaf:
     cache: false
     check-template: true
@@ -19,8 +22,9 @@ spring:
    pool:
     core-size: 8
     max-size: 8
- devtools:  livereload:   enabled: true
-
+ jackson:    serialization:
+     FAIL_ON_EMPTY_BEANS: false    visibility:
+     field: any            
 logging:
   exception-conversion-word: "%wEx"
   register-shutdown-hook: true
