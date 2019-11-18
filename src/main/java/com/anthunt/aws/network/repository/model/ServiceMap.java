@@ -1,6 +1,5 @@
 package com.anthunt.aws.network.repository.model;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -26,6 +25,7 @@ public class ServiceMap<T> extends HashMap<String, T> {
 		this.active = active;
 	}
 	
+	@SuppressWarnings("rawtypes")
 	public ServiceStatistic getServiceStatistic(ServiceType serviceType) {
 		ServiceStatistic serviceStatistic = new ServiceStatistic(serviceType);
 		

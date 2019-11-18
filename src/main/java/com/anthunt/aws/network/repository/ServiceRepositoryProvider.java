@@ -13,6 +13,7 @@ import com.anthunt.aws.network.service.model.ServiceType;
 import com.anthunt.aws.network.session.SessionProfile;
 
 import software.amazon.awssdk.services.directconnect.model.VirtualInterface;
+import software.amazon.awssdk.services.ec2.model.CustomerGateway;
 import software.amazon.awssdk.services.ec2.model.Instance;
 import software.amazon.awssdk.services.ec2.model.NetworkAcl;
 import software.amazon.awssdk.services.ec2.model.PrefixList;
@@ -20,6 +21,7 @@ import software.amazon.awssdk.services.ec2.model.RouteTable;
 import software.amazon.awssdk.services.ec2.model.SecurityGroup;
 import software.amazon.awssdk.services.ec2.model.Subnet;
 import software.amazon.awssdk.services.ec2.model.Vpc;
+import software.amazon.awssdk.services.ec2.model.VpcPeeringConnection;
 import software.amazon.awssdk.services.ec2.model.VpnConnection;
 import software.amazon.awssdk.services.ec2.model.VpnGateway;
 import software.amazon.awssdk.services.elasticloadbalancing.model.LoadBalancerDescription;
@@ -43,6 +45,8 @@ public abstract class ServiceRepositoryProvider {
 
 	protected abstract ServiceMap<Subnet> getSubnetMap();
 
+	protected abstract ServiceMap<VpcPeeringConnection> getVpcPeeringMap();
+	
 	protected abstract ServiceMap<LoadBalancer> getLoadBalancerMap();
 
 	protected abstract ServiceMap<List<Listener>> getLoadBalancerListenersMap();
@@ -61,6 +65,8 @@ public abstract class ServiceRepositoryProvider {
 
 	protected abstract ServiceMap<PrefixList> getPrefixListMap();
 
+	protected abstract ServiceMap<CustomerGateway> getCustomerGatewayMap();
+	
 	protected abstract ServiceMap<VpnGateway> getVpnGatewayMap();
 
 	protected abstract ServiceMap<List<VpnConnection>> getVpnConnectionsMap();
@@ -93,6 +99,10 @@ public abstract class ServiceRepositoryProvider {
 
 	protected abstract void setRouteTablesMap(ServiceMap<List<RouteTable>> serviceMap);
 
+	protected abstract void setVpcPeeringMap(ServiceMap<VpcPeeringConnection> serviceMap);
+	
+	protected abstract void setCustomerGatewayMap(ServiceMap<CustomerGateway> serviceMap);
+	
 	protected abstract ServiceMap<Subnet> setSubnetMap(ServiceMap<Subnet> serviceMap);
 
 	protected abstract void setSecurityGroupMap(ServiceMap<SecurityGroup> serviceMap);
@@ -121,11 +131,17 @@ public abstract class ServiceRepositoryProvider {
 		this.setRouteTablesMap(ec2Service.getRouteTables(sessionProfile, subnetMap.values()));
 		this.serviceRepositoryCollectListener.serviceLoaded(num, total, "Routes data is loaded");
 		num++;
+		this.setVpcPeeringMap(ec2Service.getVpcPeerings(sessionProfile));
+		this.serviceRepositoryCollectListener.serviceLoaded(num, total, "Vpc Peering data is loaded");
+		num++;
 		this.setPrefixListMap(ec2Service.getPrefixLists(sessionProfile));
 		this.serviceRepositoryCollectListener.serviceLoaded(num, total, "PrefixLists data is loaded");
 		num++;
 		this.setNetworkAclsMap(ec2Service.getNetworkAcls(sessionProfile, subnetMap.values()));
 		this.serviceRepositoryCollectListener.serviceLoaded(num, total, "PrefixLists data is loaded");
+		num++;
+		this.setCustomerGatewayMap(ec2Service.getCustomerGateways(sessionProfile));
+		this.serviceRepositoryCollectListener.serviceLoaded(num, total, "CustomerGateways data is loaded");
 		num++;
 		this.setVpnGatewayMap(ec2Service.getVpnGateways(sessionProfile));
 		this.serviceRepositoryCollectListener.serviceLoaded(num, total, "VpnGateways data is loaded");
@@ -172,7 +188,9 @@ public abstract class ServiceRepositoryProvider {
 		serviceStatistics.add(this.getNetworkAclsMap().getServiceStatistic(ServiceType.NACL));
 		serviceStatistics.add(this.getRouteTablesMap().getServiceStatistic(ServiceType.RT));
 		serviceStatistics.add(this.getSecurityGroupMap().getServiceStatistic(ServiceType.SG));
+		serviceStatistics.add(this.getVpcPeeringMap().getServiceStatistic(ServiceType.PEERING));
 		serviceStatistics.add(this.getVpnGatewayMap().getServiceStatistic(ServiceType.VGW));
+		serviceStatistics.add(this.getCustomerGatewayMap().getServiceStatistic(ServiceType.CGW));
 		serviceStatistics.add(this.getVpnConnectionsMap().getServiceStatistic(ServiceType.VPNC));
 		serviceStatistics.add(this.getVirtualInterfacesMap().getServiceStatistic(ServiceType.VIF));
 		serviceStatistics.add(this.getEc2InstanceMap().getServiceStatistic(ServiceType.EC2));

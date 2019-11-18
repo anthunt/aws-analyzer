@@ -22,6 +22,7 @@ import com.anthunt.aws.network.session.SessionProfile;
 import software.amazon.awssdk.auth.credentials.ProfileCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.ec2.Ec2Client;
+import software.amazon.awssdk.services.ec2.model.CustomerGateway;
 import software.amazon.awssdk.services.ec2.model.DescribeInstancesResponse;
 import software.amazon.awssdk.services.ec2.model.DescribeNetworkAclsRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeRouteTablesRequest;
@@ -38,6 +39,8 @@ import software.amazon.awssdk.services.ec2.model.RouteTable;
 import software.amazon.awssdk.services.ec2.model.SecurityGroup;
 import software.amazon.awssdk.services.ec2.model.Subnet;
 import software.amazon.awssdk.services.ec2.model.Vpc;
+import software.amazon.awssdk.services.ec2.model.VpcPeeringConnection;
+import software.amazon.awssdk.services.ec2.model.VpcPeeringConnectionStateReasonCode;
 import software.amazon.awssdk.services.ec2.model.VpnConnection;
 import software.amazon.awssdk.services.ec2.model.VpnGateway;
 import software.amazon.awssdk.services.ec2.model.VpnState;
@@ -148,6 +151,20 @@ public class Ec2Service extends AbstractNetworkService {
 		return routeTablesMap;
 	}
 	
+	public ServiceMap<VpcPeeringConnection> getVpcPeerings(SessionProfile sessionProfile) {
+		ServiceMap<VpcPeeringConnection> vpcPeeringConnectionsMap = new ServiceMap<>();
+		Ec2Client ec2Client = this.getEc2Client(sessionProfile);
+		int active = 0;
+		for(VpcPeeringConnection vpcPeeringConnection : ec2Client.describeVpcPeeringConnections().vpcPeeringConnections()) {
+			if(vpcPeeringConnection.status().code() == VpcPeeringConnectionStateReasonCode.ACTIVE) {
+				active++;
+			}
+			vpcPeeringConnectionsMap.put(vpcPeeringConnection.vpcPeeringConnectionId(), vpcPeeringConnection);
+		}
+		vpcPeeringConnectionsMap.setActive(active);
+		return vpcPeeringConnectionsMap;
+	}
+	
 	public ServiceMap<PrefixList> getPrefixLists(SessionProfile sessionProfile) {
 		ServiceMap<PrefixList> prefixListMap = new ServiceMap<>();
 		Ec2Client ec2Client = this.getEc2Client(sessionProfile);
@@ -173,6 +190,20 @@ public class Ec2Service extends AbstractNetworkService {
 			).networkAcls()); 
 		}
 		return networkAclMap;
+	}
+	
+	public ServiceMap<CustomerGateway> getCustomerGateways(SessionProfile sessionProfile) {
+		ServiceMap<CustomerGateway> customerGatewayMap = new ServiceMap<>();
+		Ec2Client ec2Client = this.getEc2Client(sessionProfile);
+		int active = 0;
+		for(CustomerGateway customerGateway : ec2Client.describeCustomerGateways().customerGateways()) {
+			if("available".equals(customerGateway.state())) {
+				active++;
+			}
+			customerGatewayMap.put(customerGateway.customerGatewayId(), customerGateway);
+		}
+		customerGatewayMap.setActive(active);
+		return customerGatewayMap;
 	}
 	
 	public ServiceMap<VpnGateway> getVpnGateways(SessionProfile sessionProfile) {

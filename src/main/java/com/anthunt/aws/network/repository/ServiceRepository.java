@@ -19,6 +19,7 @@ import software.amazon.awssdk.services.ec2.model.RouteTable;
 import software.amazon.awssdk.services.ec2.model.SecurityGroup;
 import software.amazon.awssdk.services.ec2.model.Subnet;
 import software.amazon.awssdk.services.ec2.model.Vpc;
+import software.amazon.awssdk.services.ec2.model.VpcPeeringConnection;
 import software.amazon.awssdk.services.ec2.model.VpnConnection;
 import software.amazon.awssdk.services.ec2.model.VpnGateway;
 import software.amazon.awssdk.services.elasticloadbalancing.model.LoadBalancerDescription;
@@ -55,6 +56,10 @@ public class ServiceRepository {
 		return this.serviceRepositoryProvider.getSubnetMap();
 	}
 
+	public ServiceMap<VpcPeeringConnection> getVpcPeeringMap() {
+		return this.serviceRepositoryProvider.getVpcPeeringMap();
+	}
+	
 	public ServiceMap<LoadBalancer> getLoadBalancerMap() {
 		return this.serviceRepositoryProvider.getLoadBalancerMap();
 	}

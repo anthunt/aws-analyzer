@@ -5,6 +5,7 @@ import java.util.List;
 import com.anthunt.aws.network.repository.model.ServiceMap;
 
 import software.amazon.awssdk.services.directconnect.model.VirtualInterface;
+import software.amazon.awssdk.services.ec2.model.CustomerGateway;
 import software.amazon.awssdk.services.ec2.model.Instance;
 import software.amazon.awssdk.services.ec2.model.NetworkAcl;
 import software.amazon.awssdk.services.ec2.model.PrefixList;
@@ -12,6 +13,7 @@ import software.amazon.awssdk.services.ec2.model.RouteTable;
 import software.amazon.awssdk.services.ec2.model.SecurityGroup;
 import software.amazon.awssdk.services.ec2.model.Subnet;
 import software.amazon.awssdk.services.ec2.model.Vpc;
+import software.amazon.awssdk.services.ec2.model.VpcPeeringConnection;
 import software.amazon.awssdk.services.ec2.model.VpnConnection;
 import software.amazon.awssdk.services.ec2.model.VpnGateway;
 import software.amazon.awssdk.services.elasticloadbalancing.model.LoadBalancerDescription;
@@ -37,6 +39,16 @@ public class MemoryServiceRepositoryProvider extends ServiceRepositoryProvider {
 	 * String subnetId
 	 */
 	private ServiceMap<Subnet> subnetMap;
+	
+	/**
+	 * String vpcPeeringConnectionId
+	 */
+	private ServiceMap<VpcPeeringConnection> vpcPeeringConnectionMap;
+	
+	/**
+	 * String customerGatewayId
+	 */
+	private ServiceMap<CustomerGateway> customerGatewayMap;
 	
 	/**
 	 * String loadBalancerArn
@@ -121,6 +133,11 @@ public class MemoryServiceRepositoryProvider extends ServiceRepositoryProvider {
 	protected ServiceMap<Subnet> getSubnetMap() {
 		return this.subnetMap;
 	}
+	
+	@Override
+	protected ServiceMap<VpcPeeringConnection> getVpcPeeringMap() {
+		return this.vpcPeeringConnectionMap;
+	}
 
 	@Override
 	protected ServiceMap<LoadBalancer> getLoadBalancerMap() {
@@ -166,6 +183,11 @@ public class MemoryServiceRepositoryProvider extends ServiceRepositoryProvider {
 	protected ServiceMap<PrefixList> getPrefixListMap() {
 		return this.prefixListMap;
 	}
+	
+	@Override
+	protected ServiceMap<CustomerGateway> getCustomerGatewayMap() {
+		return this.customerGatewayMap;
+	}
 
 	@Override
 	protected ServiceMap<VpnGateway> getVpnGatewayMap() {
@@ -187,6 +209,11 @@ public class MemoryServiceRepositoryProvider extends ServiceRepositoryProvider {
 		return this.networkAclsMap;
 	}
 
+	@Override
+	protected void setVpcPeeringMap(ServiceMap<VpcPeeringConnection> serviceMap) {
+		this.vpcPeeringConnectionMap = serviceMap;
+	}
+	
 	@Override
 	protected void setVirtualInterfacesMap(ServiceMap<List<VirtualInterface>> serviceMap) {
 		this.virtualInterfacesMap = serviceMap;
@@ -225,6 +252,11 @@ public class MemoryServiceRepositoryProvider extends ServiceRepositoryProvider {
 		this.classicLoadBalancerMap = serviceMap;
 	}
 
+	@Override
+	protected void setCustomerGatewayMap(ServiceMap<CustomerGateway> serviceMap) {
+		this.customerGatewayMap = serviceMap;
+	}
+	
 	@Override
 	protected void setVpnConnectionsMap(ServiceMap<List<VpnConnection>> serviceMap) {
 		this.vpnConnectionsMap = serviceMap;
