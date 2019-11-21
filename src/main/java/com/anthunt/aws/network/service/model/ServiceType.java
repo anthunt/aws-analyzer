@@ -11,6 +11,7 @@ public enum ServiceType {
 	ALB(ServiceCategory.NETWORK, "ALB", "Application Load Balancer", "/img/Elastic-Load-Balancing-ELB_Application-load-balancer_dark-bg@4x.png"),
 	NLB(ServiceCategory.NETWORK, "NLB", "Network Load Balancer", "/img/Elastic-Load-Balancing-ELB_Network-load-balancer_dark-bg@4x.png"),
 	SG(ServiceCategory.SECURITY, "SG", "Security Group", "/img/SecurityGroup_dark-bg@4x.png"),
+	EBS(ServiceCategory.STORAGE, "EBS", "EBS Volume", "/img/Amazon-Elastic-Block-Store-EBS@4x.png"),
 	RT(ServiceCategory.NETWORK, "RT", "Route Table", "/img/Amazon-Route-53_Route-Table_dark-bg@4x.png"),
 	PEERING(ServiceCategory.NETWORK, "PEERING", "Vpc Peering", "/img/Amazon-VPC_Peering_dark-bg@4x.png"),
 	VGW(ServiceCategory.NETWORK, "VGW", "Virtual Gateway", "/img/Amazon-VPC_Virtual-Gateway_dark-bg@4x.png"),
@@ -18,7 +19,12 @@ public enum ServiceType {
 	VPNC(ServiceCategory.NETWORK, "VPNC", "Vpn Connection", "/img/Amazon-VPC_VPN-Connection_dark-bg@4x.png"),
 	DX(ServiceCategory.NETWORK, "DX", "Direct Connect", "/img/AWS-Direct-Connect@4x.png"),
 	VIF(ServiceCategory.NETWORK, "VIF", "Virtual Interface", "/img/AWS-Direct-Connect@4x.png"),
-	NACL(ServiceCategory.SECURITY, "NACL", "Network ACL", "/img/Amazon-VPC_Network-Access-Control-List_dark-bg@4x.png")
+	VND(ServiceCategory.NETWORK, "VND", "VPC Endpoint", "/img/Amazon-VPC_Endpoints_dark-bg@4x.png"),
+	IGW(ServiceCategory.NETWORK, "IGW", "Internet Gateway", "/img/Amazon-VPC_Internet-Gateway_dark-bg@4x.png"),
+	EGW(ServiceCategory.NETWORK, "EGW", "Egress Only Internet Gateway", "/img/Amazon-VPC_Internet-Gateway_dark-bg@4x.png"),
+	TGW(ServiceCategory.NETWORK, "TGW", "Transit Gateway", "/img/AWS-Transit-Gateway@4x.png"),
+	NACL(ServiceCategory.SECURITY, "NACL", "Network ACL", "/img/Amazon-VPC_Network-Access-Control-List_dark-bg@4x.png"),
+	ENI(ServiceCategory.NETWORK, "ENI", "Elastic Network Interface", "/img/Amazon-VPC_Elastic-Network-Interface_dark-bg@4x.png")
 	;
 	
 	private ServiceCategory serviceCategory;

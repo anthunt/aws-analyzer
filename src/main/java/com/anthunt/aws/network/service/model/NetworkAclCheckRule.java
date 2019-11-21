@@ -14,6 +14,7 @@ public class NetworkAclCheckRule implements CheckRule {
 	private PortRange portRange;
 	private String protocol;
 	private RuleAction ruleAction;
+	private String routeTableId;
 	private NetworkAcl networkAcl;
 	
 	public NetworkAclCheckRule(String id, String name, NetworkAcl networkAcl) {
@@ -84,6 +85,14 @@ public class NetworkAclCheckRule implements CheckRule {
 	
 	public void setRuleAction(RuleAction ruleAction) {
 		this.ruleAction = ruleAction;
+	}
+
+	public String getRouteTableId() {
+		return routeTableId;
+	}
+
+	public void setRouteTableId(String routeTableId) {
+		this.routeTableId = routeTableId;
 	}
 
 	public NetworkAcl getNetworkAcl() {

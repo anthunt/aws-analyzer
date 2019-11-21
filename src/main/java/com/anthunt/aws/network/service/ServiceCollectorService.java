@@ -13,13 +13,13 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
-import com.anthunt.aws.network.controller.AbstractController;
 import com.anthunt.aws.network.repository.MemoryServiceRepositoryProvider;
 import com.anthunt.aws.network.repository.ServiceRepository;
 import com.anthunt.aws.network.repository.ServiceRepositoryCollectListener;
 import com.anthunt.aws.network.repository.model.ServiceResult;
 import com.anthunt.aws.network.service.model.ServiceType;
 import com.anthunt.aws.network.session.SessionProfile;
+import com.anthunt.aws.network.session.SessionProvider;
 
 @Service
 public class ServiceCollectorService {
@@ -38,7 +38,7 @@ public class ServiceCollectorService {
 	@Async
 	public void collectServices(HttpSession session, SseEmitter sseEmitter, SessionProfile sessionProfile, Optional<String> serviceName) throws IOException {
 
-		ServiceRepository serviceRepository = AbstractController.getSessionServiceRepository(session);
+		ServiceRepository serviceRepository = SessionProvider.getSessionServiceRepository(session);
 		if(serviceRepository == null) {
 			serviceRepository = ServiceRepository.build(new MemoryServiceRepositoryProvider());
 		}
@@ -46,8 +46,8 @@ public class ServiceCollectorService {
 		serviceRepository.setServiceRepositoryCollectListener(new ServiceRepositoryCollectListener(sseEmitter));
 		
 		int num = 0;
-		int total = !serviceName.isPresent() ? 14 
-					: ServiceType.EC2.getName().equals(serviceName.get()) ? 7 
+		int total = !serviceName.isPresent() ? 19 
+					: ServiceType.EC2.getName().equals(serviceName.get()) ? 12 
 					: ServiceType.ELB.getName().equals(serviceName.get()) ? 6 : 1;
 		
 		if(!serviceName.isPresent() || ServiceType.EC2.getName().equals(serviceName.get())) {
@@ -64,7 +64,7 @@ public class ServiceCollectorService {
 		
 		serviceRepository.collect();
 		
-		AbstractController.setServiceRepository(session, serviceRepository);
+		SessionProvider.setServiceRepository(session, serviceRepository);
 		
 		sseEmitter.send(SseEmitter.event()
 			      .id(UUID.randomUUID().toString())

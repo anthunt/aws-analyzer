@@ -6,13 +6,19 @@ import com.anthunt.aws.network.repository.model.ServiceMap;
 
 import software.amazon.awssdk.services.directconnect.model.VirtualInterface;
 import software.amazon.awssdk.services.ec2.model.CustomerGateway;
+import software.amazon.awssdk.services.ec2.model.EgressOnlyInternetGateway;
 import software.amazon.awssdk.services.ec2.model.Instance;
+import software.amazon.awssdk.services.ec2.model.InternetGateway;
 import software.amazon.awssdk.services.ec2.model.NetworkAcl;
+import software.amazon.awssdk.services.ec2.model.NetworkInterface;
 import software.amazon.awssdk.services.ec2.model.PrefixList;
 import software.amazon.awssdk.services.ec2.model.RouteTable;
 import software.amazon.awssdk.services.ec2.model.SecurityGroup;
 import software.amazon.awssdk.services.ec2.model.Subnet;
+import software.amazon.awssdk.services.ec2.model.TransitGateway;
+import software.amazon.awssdk.services.ec2.model.Volume;
 import software.amazon.awssdk.services.ec2.model.Vpc;
+import software.amazon.awssdk.services.ec2.model.VpcEndpoint;
 import software.amazon.awssdk.services.ec2.model.VpcPeeringConnection;
 import software.amazon.awssdk.services.ec2.model.VpnConnection;
 import software.amazon.awssdk.services.ec2.model.VpnGateway;
@@ -34,6 +40,16 @@ public class MemoryServiceRepositoryProvider extends ServiceRepositoryProvider {
 	 * String instanceId
 	 */
 	private ServiceMap<Instance> ec2InstanceMap;
+	
+	/**
+	 * String volumeId
+	 */
+	private ServiceMap<Volume> volumeMap;
+	
+	/**
+	 * String networkInterfaceId
+	 */
+	private ServiceMap<NetworkInterface> networkInterfaceMap;
 	
 	/**
 	 * String subnetId
@@ -114,6 +130,26 @@ public class MemoryServiceRepositoryProvider extends ServiceRepositoryProvider {
 	 * String subnetId
 	 */
 	private ServiceMap<List<NetworkAcl>> networkAclsMap;
+
+	/**
+	 * String vpcEndpointId
+	 */
+	private ServiceMap<VpcEndpoint> vpcEndpointMap;
+
+	/**
+	 * String EgressOnlyInternetGatewayId
+	 */
+	private ServiceMap<EgressOnlyInternetGateway> egressInternetGatewayMap;
+
+	/**
+	 * String InternetGatewayId
+	 */
+	private ServiceMap<InternetGateway> internetGatewayMap;
+
+	/**
+	 * String transitGatewayId
+	 */
+	private ServiceMap<TransitGateway> transitGatewayMap;
 	
 	public MemoryServiceRepositoryProvider() {
 		super();
@@ -129,6 +165,16 @@ public class MemoryServiceRepositoryProvider extends ServiceRepositoryProvider {
 		return this.ec2InstanceMap;
 	}
 
+	@Override
+	protected ServiceMap<Volume> getVolumeMap() {
+		return this.volumeMap;
+	}
+	
+	@Override
+	protected ServiceMap<NetworkInterface> getNetworkInterfaceMap() {
+		return this.networkInterfaceMap;
+	}
+	
 	@Override
 	protected ServiceMap<Subnet> getSubnetMap() {
 		return this.subnetMap;
@@ -297,10 +343,60 @@ public class MemoryServiceRepositoryProvider extends ServiceRepositoryProvider {
 	protected void setEc2InstanceMap(ServiceMap<Instance> serviceMap) {
 		this.ec2InstanceMap = serviceMap;
 	}
+	
+	@Override
+	protected void setVolumeMap(ServiceMap<Volume> serviceMap) {
+		this.volumeMap = serviceMap;
+	}
+	
+	@Override
+	protected void setNetworkInterfaceMap(ServiceMap<NetworkInterface> serviceMap) {
+		this.networkInterfaceMap = serviceMap;
+	}
 
 	@Override
 	protected void setVpcMap(ServiceMap<Vpc> serviceMap) {
 		this.vpcMap = serviceMap;
+	}
+
+	@Override
+	protected ServiceMap<VpcEndpoint> getVpcEndpointMap() {
+		return this.vpcEndpointMap;
+	}
+
+	@Override
+	protected ServiceMap<EgressOnlyInternetGateway> getEgressInternetGatewayMap() {
+		return this.egressInternetGatewayMap;
+	}
+
+	@Override
+	protected ServiceMap<InternetGateway> getInternetGatewayMap() {
+		return this.internetGatewayMap;
+	}
+
+	@Override
+	protected ServiceMap<TransitGateway> getTransitGatewayMap() {
+		return this.transitGatewayMap;
+	}
+
+	@Override
+	protected void setVpcEndpointMap(ServiceMap<VpcEndpoint> serviceMap) {
+		this.vpcEndpointMap = serviceMap;
+	}
+
+	@Override
+	protected void setEgressInternetGatewayMap(ServiceMap<EgressOnlyInternetGateway> serviceMap) {
+		this.egressInternetGatewayMap = serviceMap;
+	}
+
+	@Override
+	protected void setInternetGatewayMap(ServiceMap<InternetGateway> serviceMap) {
+		this.internetGatewayMap = serviceMap;
+	}
+
+	@Override
+	protected void setTransitGatewayMap(ServiceMap<TransitGateway> serviceMap) {
+		this.transitGatewayMap = serviceMap;
 	}
 	
 }

@@ -29,9 +29,9 @@ public class RouteCheckRule implements CheckRule {
 	public RouteCheckRule(String id, String name, RouteTable routeTable) {
 		this.setId(id);
 		this.setName(name);
-		this.cidrs = new ArrayList<String>();
-		this.vpnConnections = new ArrayList<VpnConnection>();
-		this.virtualInterfaces = new ArrayList<VirtualInterface>();
+		this.cidrs = new ArrayList<>();
+		this.vpnConnections = new ArrayList<>();
+		this.virtualInterfaces = new ArrayList<>();
 		this.setRouteTable(routeTable);
 	}
 
@@ -109,7 +109,7 @@ public class RouteCheckRule implements CheckRule {
 	}
 	
 	public void setVpnConnections(List<VpnConnection> vpnConnections) {
-		this.vpnConnections = vpnConnections;
+		this.vpnConnections = vpnConnections == null ? new ArrayList<>() : vpnConnections;
 	}
 	
 	public List<VirtualInterface> getVirtualInterfaces() {
@@ -117,7 +117,7 @@ public class RouteCheckRule implements CheckRule {
 	}
 	
 	public void setVirtualInterfaces(List<VirtualInterface> virtualInterfaces) {
-		this.virtualInterfaces = virtualInterfaces;
+		this.virtualInterfaces = virtualInterfaces == null ? new ArrayList<>() : virtualInterfaces;
 	}
 	
 	public RouteState getRouteState() {

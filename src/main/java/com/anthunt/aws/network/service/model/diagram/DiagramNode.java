@@ -25,7 +25,7 @@ public class DiagramNode {
 	}
 	
 	public String getLabel() {
-		return label;
+		return this.label;
 	}
 	
 	public void setLabel(String label) {

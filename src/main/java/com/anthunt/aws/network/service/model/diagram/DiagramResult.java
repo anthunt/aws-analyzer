@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class DiagramResult {
 
 	@JsonIgnore
@@ -18,6 +20,10 @@ public class DiagramResult {
 	
 	private List<DiagramData<DiagramNode>> nodes;
 	private List<DiagramData<DiagramEdge>> edges;
+	
+	public DiagramResult() {
+		this(false);
+	}
 	
 	public DiagramResult(boolean isAllMode) {
 		this.isAllMode = isAllMode;

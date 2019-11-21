@@ -14,6 +14,7 @@ import com.anthunt.aws.network.service.model.CheckResults;
 import com.anthunt.aws.network.service.model.CheckType;
 import com.anthunt.aws.network.service.model.ServiceType;
 import com.anthunt.aws.network.service.model.diagram.DiagramData;
+import com.anthunt.aws.network.service.model.diagram.DiagramEdge;
 import com.anthunt.aws.network.service.model.diagram.DiagramNode;
 import com.anthunt.aws.network.service.model.diagram.DiagramResult;
 import com.anthunt.aws.network.service.model.diagram.NodeType;
@@ -30,20 +31,32 @@ import software.amazon.awssdk.services.ec2.model.DescribeRouteTablesResponse;
 import software.amazon.awssdk.services.ec2.model.DescribeSecurityGroupsResponse;
 import software.amazon.awssdk.services.ec2.model.DescribeSubnetsResponse;
 import software.amazon.awssdk.services.ec2.model.DescribeVpcsResponse;
+import software.amazon.awssdk.services.ec2.model.EgressOnlyInternetGateway;
 import software.amazon.awssdk.services.ec2.model.Filter;
+import software.amazon.awssdk.services.ec2.model.GroupIdentifier;
+import software.amazon.awssdk.services.ec2.model.IamInstanceProfile;
 import software.amazon.awssdk.services.ec2.model.Instance;
+import software.amazon.awssdk.services.ec2.model.InstanceBlockDeviceMapping;
+import software.amazon.awssdk.services.ec2.model.InstanceNetworkInterface;
+import software.amazon.awssdk.services.ec2.model.InternetGateway;
 import software.amazon.awssdk.services.ec2.model.NetworkAcl;
+import software.amazon.awssdk.services.ec2.model.NetworkInterface;
+import software.amazon.awssdk.services.ec2.model.NetworkInterfaceStatus;
 import software.amazon.awssdk.services.ec2.model.PrefixList;
 import software.amazon.awssdk.services.ec2.model.Reservation;
 import software.amazon.awssdk.services.ec2.model.RouteTable;
 import software.amazon.awssdk.services.ec2.model.SecurityGroup;
 import software.amazon.awssdk.services.ec2.model.Subnet;
+import software.amazon.awssdk.services.ec2.model.TransitGateway;
+import software.amazon.awssdk.services.ec2.model.TransitGatewayState;
+import software.amazon.awssdk.services.ec2.model.Volume;
+import software.amazon.awssdk.services.ec2.model.VolumeState;
 import software.amazon.awssdk.services.ec2.model.Vpc;
+import software.amazon.awssdk.services.ec2.model.VpcEndpoint;
 import software.amazon.awssdk.services.ec2.model.VpcPeeringConnection;
 import software.amazon.awssdk.services.ec2.model.VpcPeeringConnectionStateReasonCode;
 import software.amazon.awssdk.services.ec2.model.VpnConnection;
 import software.amazon.awssdk.services.ec2.model.VpnGateway;
-import software.amazon.awssdk.services.ec2.model.VpnState;
 
 @Service
 public class Ec2Service extends AbstractNetworkService {
@@ -92,6 +105,34 @@ public class Ec2Service extends AbstractNetworkService {
 		return instanceMap;
 	}
 
+	public ServiceMap<Volume> getVolumes(SessionProfile sessionProfile) {
+		ServiceMap<Volume> volumeMap = new ServiceMap<>();
+		Ec2Client ec2Client = this.getEc2Client(sessionProfile);
+		int active = 0;
+		for(Volume volume : ec2Client.describeVolumes().volumes()) {
+			if(volume.state() == VolumeState.IN_USE) {
+				active++;
+			}
+			volumeMap.put(volume.volumeId(), volume);
+		}
+		volumeMap.setActive(active);
+		return volumeMap;
+	}
+	
+	public ServiceMap<NetworkInterface> getNetworkInterfaces(SessionProfile sessionProfile) {
+		ServiceMap<NetworkInterface> networkInterfaceMap = new ServiceMap<>();
+		Ec2Client ec2Client = this.getEc2Client(sessionProfile);
+		int active = 0;
+		for(NetworkInterface networkInterface : ec2Client.describeNetworkInterfaces().networkInterfaces()) {
+			if(networkInterface.status() == NetworkInterfaceStatus.IN_USE) {
+				active++;
+			}
+			networkInterfaceMap.put(networkInterface.networkInterfaceId(), networkInterface);
+		}
+		networkInterfaceMap.setActive(active);
+		return networkInterfaceMap;
+	}
+	
 	public ServiceMap<SecurityGroup> getSecurityGroups(SessionProfile sessionProfile) {
 		ServiceMap<SecurityGroup> securityGroupMap = new ServiceMap<>();
 		Ec2Client ec2Client = this.getEc2Client(sessionProfile);
@@ -220,10 +261,10 @@ public class Ec2Service extends AbstractNetworkService {
 		Ec2Client ec2Client = this.getEc2Client(sessionProfile);
 		int active = 0;
 		for(VpnConnection vpnConnection : ec2Client.describeVpnConnections().vpnConnections()) {
+			if("available".equals(vpnConnection.stateAsString())) active++;
 			if(vpnConnectionMap.containsKey(vpnConnection.vpnGatewayId())) {
 				vpnConnectionMap.get(vpnConnection.vpnGatewayId()).add(vpnConnection);
-			} else {
-				if(vpnConnection.state() == VpnState.AVAILABLE) active++; 
+			} else { 
 				List<VpnConnection> vpnConnections = new ArrayList<>();
 				vpnConnections.add(vpnConnection);
 				vpnConnectionMap.put(vpnConnection.vpnGatewayId(), vpnConnections);
@@ -231,6 +272,62 @@ public class Ec2Service extends AbstractNetworkService {
 		}
 		vpnConnectionMap.setActive(active);
 		return vpnConnectionMap;
+	}
+
+	public ServiceMap<InternetGateway> getInternetGateways(SessionProfile sessionProfile) {
+		ServiceMap<InternetGateway> internetGatewayMap = new ServiceMap<>();
+		Ec2Client ec2Client = this.getEc2Client(sessionProfile);
+		int active = 0;
+		for(InternetGateway internetGateway : ec2Client.describeInternetGateways().internetGateways()) {
+			if(internetGateway.attachments().size() > 0) {
+				active++;
+			}
+			internetGatewayMap.put(internetGateway.internetGatewayId(), internetGateway);
+		}
+		internetGatewayMap.setActive(active);
+		return internetGatewayMap;
+	}
+
+	public ServiceMap<EgressOnlyInternetGateway> getEgressInternetGateways(SessionProfile sessionProfile) {
+		ServiceMap<EgressOnlyInternetGateway> egressInternetGatewayMap = new ServiceMap<>();
+		Ec2Client ec2Client = this.getEc2Client(sessionProfile);
+		int active = 0;
+		for(EgressOnlyInternetGateway egressOnlyInternetGateway : ec2Client.describeEgressOnlyInternetGateways().egressOnlyInternetGateways()) {
+			if(egressOnlyInternetGateway.attachments().size() > 0) {
+				active++;
+			}
+			egressInternetGatewayMap.put(egressOnlyInternetGateway.egressOnlyInternetGatewayId(), egressOnlyInternetGateway);
+		}
+		egressInternetGatewayMap.setActive(active);
+		return egressInternetGatewayMap;
+	}
+
+	public ServiceMap<VpcEndpoint> getVpcEndpoints(SessionProfile sessionProfile) {
+		ServiceMap<VpcEndpoint> vpcEndpointMap = new ServiceMap<>();
+		Ec2Client ec2Client = this.getEc2Client(sessionProfile);
+		int active = 0;
+		for(VpcEndpoint vpcEndpoint : ec2Client.describeVpcEndpoints().vpcEndpoints()) {
+			if("available".equals(vpcEndpoint.stateAsString())) {
+				active++;
+			}
+			vpcEndpointMap.put(vpcEndpoint.vpcEndpointId(), vpcEndpoint);
+		}
+		vpcEndpointMap.setActive(active);
+		return vpcEndpointMap;
+	}
+
+	public ServiceMap<TransitGateway> getTransitGateways(SessionProfile sessionProfile) {
+		ServiceMap<TransitGateway> transitGatewayMap = new ServiceMap<>();
+		Ec2Client ec2Client = this.getEc2Client(sessionProfile);
+		int active = 0;
+		for(TransitGateway transitGateway : ec2Client.describeTransitGateways().transitGateways()) {
+			if(transitGateway.state() == TransitGatewayState.AVAILABLE) {
+				active++;
+			}
+			transitGatewayMap.put(transitGateway.transitGatewayId(), transitGateway);
+		}
+		transitGatewayMap.setActive(active);
+		return transitGatewayMap;
 	}
 	
 	public Collection<Instance> getInstances(ServiceRepository serviceRepository) {
@@ -269,13 +366,91 @@ public class Ec2Service extends AbstractNetworkService {
 			diagramResult.addNode(new DiagramData<DiagramNode>(new DiagramNode(targetId, targetId)).addClass(NodeType.SERVER));
 		}
 		
-		String routeTableId = this.setRouteTable(targetId, checkResults.get(CheckType.ROUTE_TABLE), diagramResult);
+		List<String> routeTableIds = this.setRouteTable(serviceRepository, targetId, checkResults.get(CheckType.ROUTE_TABLE), diagramResult);
 		
-		String networkAclId = this.setNetworkAcl(routeTableId, checkResults.get(CheckType.NETWORK_ACL), diagramResult);
+		for(String routeTableId : routeTableIds) {
+			String networkAclId = this.setNetworkAcl(routeTableId, checkResults.get(CheckType.NETWORK_ACL), diagramResult);
+			this.setSecurityGroup(networkAclId, checkResults.getResource().instanceId(), checkResults.get(CheckType.SECURITY_GROUP), diagramResult);
+		}
 		
-		this.setSecurityGroup(networkAclId, checkResults.getResource().instanceId(), checkResults.get(CheckType.SECURITY_GROUP), diagramResult);
+		diagramResult.addNode(
+				new DiagramData<DiagramNode>(
+						new DiagramNode(checkResults.getResource().instanceId(), DiagramLabelGenerator.generate(checkResults.getResource()), checkResults.getResource())
+				).addClass(NodeType.EC2_INSTANCE)
+		);
 		
-		diagramResult.addNode(new DiagramData<DiagramNode>(new DiagramNode(checkResults.getResource().instanceId(), checkResults.getResource().privateIpAddress(), checkResults.getResource())).addClass(NodeType.EC2_INSTANCE));
+		return diagramResult;
+	}
+
+	public DiagramResult getInstanceNetwork(ServiceRepository serviceRepository, DiagramResult diagramResult, String instanceId) {
+		
+		Instance instance = serviceRepository.getEc2InstanceMap().get(instanceId);
+		
+		diagramResult.addNode(
+				new DiagramData<DiagramNode>(
+						new DiagramNode(instance.instanceId(), DiagramLabelGenerator.generate(instance), instance)
+				).addClass(NodeType.EC2_INSTANCE)
+		);
+		
+		if(instance.iamInstanceProfile() != null) {
+			IamInstanceProfile iamInstanceProfile = instance.iamInstanceProfile();
+			String roleName = iamInstanceProfile.arn().substring(iamInstanceProfile.arn().lastIndexOf("/"), iamInstanceProfile.arn().length());
+			diagramResult.addNode(
+					new DiagramData<DiagramNode>(
+							new DiagramNode(iamInstanceProfile.id(), roleName, iamInstanceProfile)
+					).addClass(NodeType.IAM_ROLE)
+			);
+			
+			DiagramEdge diagramEdge = new DiagramEdge(iamInstanceProfile.id(), instance.instanceId());
+			diagramEdge.setLabel("instance profile");
+			diagramEdge.setBoth(true);
+			diagramResult.addEdge(new DiagramData<DiagramEdge>(diagramEdge));
+		}
+				
+		for(InstanceBlockDeviceMapping instanceBlockDeviceMapping : instance.blockDeviceMappings()) {
+			Volume volume = serviceRepository.getVolumeMap().get(instanceBlockDeviceMapping.ebs().volumeId());
+			
+			diagramResult.addNode(
+					new DiagramData<DiagramNode>(
+							new DiagramNode(volume.volumeId(), DiagramLabelGenerator.generate(volume))
+					).addClass(NodeType.EBS)
+			);
+
+			DiagramEdge diagramEdge = new DiagramEdge(instance.instanceId(), volume.volumeId());
+			diagramEdge.setLabel(instanceBlockDeviceMapping.deviceName());
+			diagramEdge.setBoth(true);
+			diagramResult.addEdge(new DiagramData<DiagramEdge>(diagramEdge));
+		}
+		
+		for(InstanceNetworkInterface instanceNetworkInterface : instance.networkInterfaces()) {
+			NetworkInterface networkInterface = serviceRepository.getNetworkInterfaceMap().get(instanceNetworkInterface.networkInterfaceId());
+						
+			diagramResult.addNode(
+					new DiagramData<DiagramNode>(
+							new DiagramNode(instanceNetworkInterface.networkInterfaceId(), DiagramLabelGenerator.generate(networkInterface), networkInterface)
+					).addClass(NodeType.NETWORK_INTERFACE)
+			);
+			
+			DiagramEdge diagramEdge = new DiagramEdge(instanceNetworkInterface.networkInterfaceId(), instance.instanceId());
+			diagramEdge.setLabel(instanceNetworkInterface.description());
+			diagramEdge.setBoth(true);
+			diagramResult.addEdge(new DiagramData<DiagramEdge>(diagramEdge));
+			
+			for(GroupIdentifier groupIdentifier : instanceNetworkInterface.groups()) {
+				SecurityGroup securityGroup  = serviceRepository.getSecurityGroupMap().get(groupIdentifier.groupId());
+				
+				diagramResult.addNode(
+						new DiagramData<DiagramNode>(
+								new DiagramNode(securityGroup.groupId(), DiagramLabelGenerator.generate(securityGroup), securityGroup)
+						).addClass(NodeType.SECURITY_GROUP)
+				);
+				
+				DiagramEdge diagramSGEdge = new DiagramEdge(securityGroup.groupId(), instanceNetworkInterface.networkInterfaceId());
+				diagramSGEdge.setLabel(securityGroup.description());
+				diagramSGEdge.setBoth(true);
+				diagramResult.addEdge(new DiagramData<DiagramEdge>(diagramSGEdge));				
+			}
+		}
 		
 		return diagramResult;
 	}

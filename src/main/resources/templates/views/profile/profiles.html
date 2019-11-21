@@ -8,10 +8,22 @@
 	    <title>Profiles ::: AWS Analyzer</title>    
 	</head>
 	
+	<th:block layout:fragment="customScript">
+		<script>
+			$("#BtnAddProfile").click(function() {
+				location.href = "/profiles/set";
+			});
+		</script>
+	</th:block>
+	
 	<body>
 		
 		<div layout:fragment="content">
 			<div class="container-fluid">
+				<button type="button" id="BtnAddProfile" class="btn btn-primary">
+					<i class="material-icons">edit</i>
+					Edit profile
+				</button>
 				<div class="row">
 		            <div class="col-lg-3 col-md-4 col-sm-6" th:each="profileName : ${profileNames}">
 						<div class="card card-stats">

@@ -1,5 +1,6 @@
 var NetworkLoad = function() {
 	
+	var _this = this;
 	var diagram;
 	var navigator;
 	
@@ -82,7 +83,38 @@ var NetworkLoad = function() {
 	
 	this.load = function(jsonURL) {
 		on();
-		diagram.elements().forEach(function(ele) { NetworkLoad.diagram().remove(ele); });
+		diagram.elements().forEach((ele) => { NetworkLoad.diagram().remove(ele); });
+		
+		Utils.async(jsonURL, (data) => {
+			diagram.add(data);
+			diagram.layout(layoutOptions).run();
+			diagram.elements().forEach(function(element, index) {
+				
+				if(element.data().label != null && element.data().label != "") {
+				    var popup = tippy(element.popperRef(), {
+				        content: function(){
+				            var div = document.createElement('div');
+	
+				            div.innerHTML = element.data().label;
+	
+				            return div;
+				        },
+				        animation: 'perspective-extreme',
+				        trigger: 'manual',
+				        arrow: true,
+				        placement: 'bottom',
+				        hideOnClick: true,
+				        multiple: false,
+				        sticky: true
+				    });
+				    element.on('mouseover', () => popup.show());
+				    element.on('mouseout', () => popup.hide());
+				}
+				
+			});
+		}, () => off());
+		
+		/*
 		fetch(jsonURL, {mode: 'no-cors'})
 		.then(function(res) {
 			if(!res.ok) {
@@ -90,31 +122,37 @@ var NetworkLoad = function() {
 			}
 			return res.json(); 
 		})
-		.then(function(data) {
-			diagram.add(data);
+		.then(function(res) {
+			console.log(res.data);
+			diagram.add(res.data);
 			diagram.layout(layoutOptions).run();
 			diagram.elements().forEach(function(element, index) {
-			    var popup = tippy(element.popperRef(), {
-			        content: function(){
-			            var div = document.createElement('div');
-
-			            div.innerHTML = element.data().label;
-
-			            return div;
-			        },
-			        animation: 'perspective-extreme',
-			        trigger: 'manual',
-			        arrow: true,
-			        placement: 'bottom',
-			        hideOnClick: true,
-			        multiple: false,
-			        sticky: true
-			    });
-			    element.on('mouseover', () => popup.show());
-			    element.on('mouseout', () => popup.hide());
+				
+				if(element.data().label != null && element.data().label != "") {
+				    var popup = tippy(element.popperRef(), {
+				        content: function(){
+				            var div = document.createElement('div');
+	
+				            div.innerHTML = element.data().label;
+	
+				            return div;
+				        },
+				        animation: 'perspective-extreme',
+				        trigger: 'manual',
+				        arrow: true,
+				        placement: 'bottom',
+				        hideOnClick: true,
+				        multiple: false,
+				        sticky: true
+				    });
+				    element.on('mouseover', () => popup.show());
+				    element.on('mouseout', () => popup.hide());
+				}
+				
 			});
 			off();
 		});
+		*/
 	};
 	
 	this.initialize = function() {
@@ -124,6 +162,7 @@ var NetworkLoad = function() {
 		
 		  boxSelectionEnabled: false,
 		  autounselectify: true,
+		  wheelSensitivity: 0.05,
 		
 		  style: cytoscape.stylesheet()
 		    .selector('node')
@@ -134,7 +173,7 @@ var NetworkLoad = function() {
 		        'background-fit': 'cover',
 		        'background-opacity': 0,
 		        "color": "#fff",
-		        "label": "data(label)"
+		        "text-valign": "bottom"
 		      })
 		    .selector('edge')
 		      .css({
@@ -147,7 +186,10 @@ var NetworkLoad = function() {
 		        'source-arrow-color': '#ffaaaa',
 		        'target-arrow-color': '#ffaaaa',
 		        "color": "#fff",
-		        "label": "data(label)"
+		        "label": "data(label)",
+		        "edge-text-rotation": "autorotate",
+			    "text-wrap": "wrap",
+		        "text-max-width": 150
 		      })
 		    .selector('.trafficAllow')
 		      .css({
@@ -167,9 +209,21 @@ var NetworkLoad = function() {
 		        "background-color": "#dc3545",
 		        "label": ""
 		      })
+		    .selector('.local')
+		      .css({
+		    	  'background-image': '/img/Virtual-private-cloud-VPC_dark-bg@4x.png'
+		      })
 		    .selector('.ec2Instance')
 		      .css({
-		        'background-image': '/img/Amazon-EC2_Instance_dark-bg@4x.png'
+		    	  'background-image': '/img/Amazon-EC2_Instance_dark-bg@4x.png'
+		      })
+		    .selector('.ebs')
+		      .css({
+		    	  'background-image': '/img/Amazon-Elastic-Block-Store-EBS_Volume_dark-bg@4x.png'
+		      })
+		    .selector('.iamRole')
+		      .css({
+		    	  'background-image' : '/img/AWS-Identity-and-Access-Management-IAM_Role_dark-bg@4x.png'
 		      })
 		    .selector('.internet')
 		      .css({
@@ -177,11 +231,11 @@ var NetworkLoad = function() {
 		      })
 		    .selector('.lambda')
 		      .css({
-		        'background-image': '/img/AWS-Lambda_Lambda-Function_dark-bg@4x.png'
+		    	  'background-image': '/img/AWS-Lambda_Lambda-Function_dark-bg@4x.png'
 		      })
 		    .selector('.classicLoadBalancer')
 		      .css({
-		        'background-image': '/img/Elastic-Load-Balancing_Classic-load-balancer_dark-bg@4x.png'
+		    	  'background-image': '/img/Elastic-Load-Balancing_Classic-load-balancer_dark-bg@4x.png'
 		      })
 		    .selector('.applicationLoadBalancer')
 		      .css({
@@ -263,6 +317,49 @@ var NetworkLoad = function() {
 			  name: 'preset'
 		  }
 		}); // cy init
+		
+		diagram.nodeHtmlLabel([
+	        {
+	            query: 'node',
+	            cssClass: 'cy-title',
+	            valign: "bottom",
+	            valignBox: "bottom",
+	            tpl: function (data) {
+	                return data.label;
+	            }
+	        }
+	    ]);
+		
+		diagram.dblclick();
+		diagram.on("dblclick", function(evt) {
+			var element = evt.target;
+			try {
+				if(element.isNode()) {
+					if(element.classes()[0] == "ec2Instance") {
+						var jsonURL = "/api/network/detail/";
+						jsonURL += element.classes()[0];
+						jsonURL += "/";
+						jsonURL += element.id();
+						_this.load(jsonURL);
+					}
+				}
+			}catch(e) {}
+		});
+		
+		diagram.on("mouseover", function(evt) {
+			var element = evt.target;
+			try {
+				if(element.isNode()) {					
+					if(element.classes()[0] == "ec2Instance") {
+						$('html,body').css('cursor', 'pointer');
+					}
+				}
+			}catch(e) {}
+		});
+		
+		diagram.on("mouseout", function(evt) {
+			$('html,body').css('cursor', 'default');
+		});
 		
 		// add the panzoom control
 		diagram.panzoom({

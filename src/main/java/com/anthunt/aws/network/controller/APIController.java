@@ -7,23 +7,37 @@ import java.util.Optional;
 
 import javax.servlet.http.HttpSession;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+import com.anthunt.aws.network.controller.model.Request;
+import com.anthunt.aws.network.controller.model.Response;
 import com.anthunt.aws.network.repository.model.ServiceStatistic;
 import com.anthunt.aws.network.service.Ec2Service;
 import com.anthunt.aws.network.service.LoadBalancerService;
+import com.anthunt.aws.network.service.ProfileService;
 import com.anthunt.aws.network.service.ServiceCollectorService;
 import com.anthunt.aws.network.service.model.diagram.DiagramResult;
+import com.anthunt.aws.network.session.SessionProvider;
 import com.anthunt.aws.network.utils.Utils;
 
 @RestController
 @RequestMapping("api")
 public class APIController extends AbstractController {
 
+	private static final Logger log = LoggerFactory.getLogger(APIController.class);
+
+	@Autowired
+	private ProfileService profileService;
+	
 	@Autowired
 	private ServiceCollectorService serviceCollectorService;
 	
@@ -42,7 +56,7 @@ public class APIController extends AbstractController {
 		if(targetIp.isPresent()) {
 			target = Utils.decodeB64URL(targetIp.get());
 		}
-		return this.ec2Service.getNetwork(getSessionServiceRepository(session), Utils.decodeB64URL(instanceId), target);
+		return this.ec2Service.getNetwork(SessionProvider.getSessionServiceRepository(session), Utils.decodeB64URL(instanceId), target);
 	}
 
 	@RequestMapping(value= {"/network/loadBalancer/{loadBalancerArn}", "/network/loadBalancer/{loadBalancerArn}/{targetIp}"})
@@ -54,7 +68,22 @@ public class APIController extends AbstractController {
 		if(targetIp.isPresent()) {
 			target = Utils.decodeB64URL(targetIp.get());
 		}
-		return this.loadBalancerService.getNetwork(getSessionServiceRepository(session), Utils.decodeB64URL(loadBalancerArn), target);
+		return this.loadBalancerService.getNetwork(SessionProvider.getSessionServiceRepository(session), Utils.decodeB64URL(loadBalancerArn), target);
+	}
+	
+	@RequestMapping("/network/detail/{className}/{resourceId}")
+	public DiagramResult loadResourceDetail(HttpSession session
+			                               , @PathVariable("className") String className
+			                               , @PathVariable("resourceId") String resourceId) {
+		
+		DiagramResult diagramResult = new DiagramResult();
+		
+		switch(className) {
+		case "ec2Instance" :
+			diagramResult = ec2Service.getInstanceNetwork(SessionProvider.getSessionServiceRepository(session), diagramResult, resourceId);
+		}
+		
+		return diagramResult;
 	}
 	
 	@RequestMapping(value= {"/collect", "/collect/{serviceName}"})
@@ -62,13 +91,23 @@ public class APIController extends AbstractController {
 			                         , @PathVariable("serviceName") Optional<String> serviceName) throws IOException {
 		
 		SseEmitter sseEmitter = new SseEmitter(180000L);
-		serviceCollectorService.collectServices(session, sseEmitter, this.getSessionProfile(session), serviceName);
+		serviceCollectorService.collectServices(session, sseEmitter, SessionProvider.getSessionProfile(session), serviceName);
 		return sseEmitter;
 	}
 	
 	@RequestMapping("/statistics")
 	public List<ServiceStatistic> getServiceStatistics(HttpSession session) {
-		return getSessionServiceRepository(session).getServiceStatistic();		
+		return SessionProvider.getSessionServiceRepository(session).getServiceStatistic();		
+	}
+	
+	@PostMapping("/profiles/set/{type}")
+	public @ResponseBody Response setCredentials( @PathVariable("type") String type
+							  , @RequestBody Request profileRequest) throws IOException {
+		
+		profileService.updateProfile(type, profileRequest.getData());
+		SessionProvider.loadProfiles();
+		
+		return new Response();
 	}
 	
 }

@@ -43,6 +43,8 @@
 		<script src="https://unpkg.com/popper.js@1.14.7/dist/umd/popper.js"></script>
 		<script src="/js/cytoscape/cytoscape-popper.js" th:src="'/js/cytoscape/cytoscape-popper.js?v=' + ${#dates.createNow().getTime()}"></script>
 		<script src="https://unpkg.com/tippy.js@4.0.1/umd/index.all.min.js"></script>
+		<script src="/js/cytoscape/cytoscape-dbclick.js" th:src="'/js/cytoscape/cytoscape-dbclick.js?v=' + ${#dates.createNow().getTime()}"></script>
+		<script src="/js/cytoscape/cytoscape-node-html-label.js" th:src="'/js/cytoscape/cytoscape-node-html-label.js?v=' + ${#dates.createNow().getTime()}"></script>
 		<script src="/js/network.js" th:src="'/js/network.js?v=' + ${#dates.createNow().getTime()}"></script>
 		<script th:inline="javascript">
 			
@@ -124,7 +126,7 @@
 											</a>
 										</div>
 									</div>
-									<div class="tab-pane active" id="elbList" role="tabpanel">
+									<div class="tab-pane" id="elbList" role="tabpanel">
 										<div class="list-group">
 											<a href="#" class="list-group-item list-group-item-action" th:each="loadbalancer : ${loadbalancers}" th:loadBalancerArn="${loadbalancer.loadBalancerArn()}" onclick="loadDiagram('loadBalancer', this.getAttribute('loadBalancerArn'))">
 											    <div class="d-flex w-100 justify-content-between">

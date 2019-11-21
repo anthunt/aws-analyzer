@@ -32,15 +32,8 @@
 							"</div>";
 						
 			function callDashboard() {
-				fetch("/api/statistics", {mode: 'no-cors'})
-				.then(function(res) {
-				    if(!res.ok) {
-				        alert(res.error);
-				    }
-				    return res.json(); 
-				})
-				.then(function(datas) {
-					datas.forEach(function(data) {
+				Utils.async("/api/statistics", (data) => {
+					data.forEach((data) => {
 						var content = template;
 						content = content.replace("{icon}", data.icon);
 						content = content.replace("{ServiceType}", data.serviceDisplayName);
@@ -57,16 +50,12 @@
 			}
 			
 			window.onload = function() {
-				if([[${session.profile != null}]]) {
-					if([[${session.serviceRepository == null}]]) {		
-							collectServiceData(false, function() {
-								callDashboard();
-							});
-					} else {
-						callDashboard();
-					}
+				if([[${session.serviceRepository == null}]]) {		
+						collectServiceData(false, function() {
+							callDashboard();
+						});
 				} else {
-					location.href = "/profiles";
+					callDashboard();
 				}
 			};
 		</script>

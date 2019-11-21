@@ -25,7 +25,7 @@
 						<li class="nav-item">
 							<select class="form-control nav-link">
 								<option>Select Profile</option>
-								<option th:each="profileName : ${T(com.anthunt.aws.network.controller.UIController).PROFILES}" 
+								<option th:each="profileName : ${T(com.anthunt.aws.network.session.SessionProvider).PROFILES}" 
 										th:text="${profileName}"
 										th:selected="${session.profile.getProfileName() == profileName} ? 'true' : 'false'">Default select</option>
 							</select>
@@ -33,7 +33,7 @@
 						<li class="nav-item">
 							<select class="form-control nav-link">
 								<option>Select Region</option>
-								<option th:each="region : ${T(com.anthunt.aws.network.controller.UIController).REGIONS}"
+								<option th:each="region : ${T(com.anthunt.aws.network.session.SessionProvider).REGIONS}"
 										th:text="${region.id()}"
 										th:selected="${session.profile.getRegionId() == region.id()} ? 'true' : 'false'">Default select</option>
 							</select>

@@ -1,8 +1,13 @@
 package com.anthunt.aws.network.utils;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Base64;
 import java.util.List;
 import java.util.Random;
@@ -11,14 +16,34 @@ import software.amazon.awssdk.services.ec2.model.Tag;
 
 public class Utils {
 
+	public final static String DEFAULT_NAME = "Unknown";
+	
+	public static String getNameFromDXTags(List<software.amazon.awssdk.services.directconnect.model.Tag> tags) {
+		String name = DEFAULT_NAME;
+		for (software.amazon.awssdk.services.directconnect.model.Tag tag : tags) {
+			if("Name".equals(tag.key())) {
+				name = tag.value();
+			}
+		}
+		return name;
+	}
+	
 	public static String getNameFromTags(List<Tag> tags) {
-		String name = "Unknown";
+		String name = DEFAULT_NAME;
 		for (Tag tag : tags) {
 			if("Name".equals(tag.key())) {
 				name = tag.value();
 			}
 		}
 		return name;
+	}
+	
+	public static String addChar(String str, char ch, int position) {
+	    StringBuilder sb = new StringBuilder(str);
+	    if(sb.length() >= position) {
+	    	sb.insert(position, ch);
+	    }
+	    return sb.toString();
 	}
 	
 	public static String decodeB64URL(String encodedURL) throws UnsupportedEncodingException {
@@ -84,6 +109,23 @@ public class Utils {
         } else hexStringToARGB("#FF" + hexARGB.substring(1));
 
         return intARGB;
+    }
+    
+    public static String readFile(String path, Charset encoding) 
+			  throws IOException
+	{
+	  return readFile(Paths.get(path), encoding);
+	}
+    
+    public static String readFile(Path path, Charset encoding) 
+			  throws IOException
+	{
+	  byte[] encoded = Files.readAllBytes(path);
+	  return new String(encoded, encoding);
+	}
+    
+    public static void writeFile(Path path, String content, Charset encoding) throws IOException {
+    	Files.write(path, content.getBytes(encoding));
     }
     
 }

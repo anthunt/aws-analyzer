@@ -14,13 +14,19 @@ import com.anthunt.aws.network.session.SessionProfile;
 
 import software.amazon.awssdk.services.directconnect.model.VirtualInterface;
 import software.amazon.awssdk.services.ec2.model.CustomerGateway;
+import software.amazon.awssdk.services.ec2.model.EgressOnlyInternetGateway;
 import software.amazon.awssdk.services.ec2.model.Instance;
+import software.amazon.awssdk.services.ec2.model.InternetGateway;
 import software.amazon.awssdk.services.ec2.model.NetworkAcl;
+import software.amazon.awssdk.services.ec2.model.NetworkInterface;
 import software.amazon.awssdk.services.ec2.model.PrefixList;
 import software.amazon.awssdk.services.ec2.model.RouteTable;
 import software.amazon.awssdk.services.ec2.model.SecurityGroup;
 import software.amazon.awssdk.services.ec2.model.Subnet;
+import software.amazon.awssdk.services.ec2.model.TransitGateway;
+import software.amazon.awssdk.services.ec2.model.Volume;
 import software.amazon.awssdk.services.ec2.model.Vpc;
+import software.amazon.awssdk.services.ec2.model.VpcEndpoint;
 import software.amazon.awssdk.services.ec2.model.VpcPeeringConnection;
 import software.amazon.awssdk.services.ec2.model.VpnConnection;
 import software.amazon.awssdk.services.ec2.model.VpnGateway;
@@ -43,6 +49,10 @@ public abstract class ServiceRepositoryProvider {
 
 	protected abstract ServiceMap<Instance> getEc2InstanceMap();
 
+	protected abstract ServiceMap<Volume> getVolumeMap();
+	
+	protected abstract ServiceMap<NetworkInterface> getNetworkInterfaceMap();
+	
 	protected abstract ServiceMap<Subnet> getSubnetMap();
 
 	protected abstract ServiceMap<VpcPeeringConnection> getVpcPeeringMap();
@@ -74,6 +84,14 @@ public abstract class ServiceRepositoryProvider {
 	protected abstract ServiceMap<List<VirtualInterface>> getVirtualInterfacesMap();
 
 	protected abstract ServiceMap<List<NetworkAcl>> getNetworkAclsMap();
+	
+	protected abstract ServiceMap<VpcEndpoint> getVpcEndpointMap();
+	
+	protected abstract ServiceMap<EgressOnlyInternetGateway> getEgressInternetGatewayMap();
+	
+	protected abstract ServiceMap<InternetGateway> getInternetGatewayMap();
+	
+	protected abstract ServiceMap<TransitGateway> getTransitGatewayMap();
 
 	protected abstract void setVirtualInterfacesMap(ServiceMap<List<VirtualInterface>> serviceMap);
 
@@ -108,8 +126,20 @@ public abstract class ServiceRepositoryProvider {
 	protected abstract void setSecurityGroupMap(ServiceMap<SecurityGroup> serviceMap);
 
 	protected abstract void setEc2InstanceMap(ServiceMap<Instance> serviceMap);
-
+	
+	protected abstract void setVolumeMap(ServiceMap<Volume> serviceMap);
+	
+	protected abstract void setNetworkInterfaceMap(ServiceMap<NetworkInterface> serviceMap);
+	
 	protected abstract void setVpcMap(ServiceMap<Vpc> serviceMap);
+	
+	protected abstract void setVpcEndpointMap(ServiceMap<VpcEndpoint> serviceMap);
+
+	protected abstract void setEgressInternetGatewayMap(ServiceMap<EgressOnlyInternetGateway> serviceMap);
+
+	protected abstract void setInternetGatewayMap(ServiceMap<InternetGateway> serviceMap);
+	
+	protected abstract void setTransitGatewayMap(ServiceMap<TransitGateway> serviceMap);
 	
 	public void setServiceRepositoryCollectListener(ServiceRepositoryCollectListener serviceRepositoryCollectListener) {
 		this.serviceRepositoryCollectListener = serviceRepositoryCollectListener;
@@ -122,6 +152,12 @@ public abstract class ServiceRepositoryProvider {
 		this.setEc2InstanceMap(ec2Service.getInstances(sessionProfile));
 		this.serviceRepositoryCollectListener.serviceLoaded(num, total, "Ec2 instances data is loaded");
 		num++;
+		this.setVolumeMap(ec2Service.getVolumes(sessionProfile));
+		this.serviceRepositoryCollectListener.serviceLoaded(num, total, "EBS volumes data is loaded");
+		num++;
+		this.setNetworkInterfaceMap(ec2Service.getNetworkInterfaces(sessionProfile));
+		this.serviceRepositoryCollectListener.serviceLoaded(num, total, "Network Interfaces data is loaded");
+		num++;
 		this.setSecurityGroupMap(ec2Service.getSecurityGroups(sessionProfile));
 		this.serviceRepositoryCollectListener.serviceLoaded(num, total, "Securitygroups data is loaded");
 		num++;
@@ -131,8 +167,20 @@ public abstract class ServiceRepositoryProvider {
 		this.setRouteTablesMap(ec2Service.getRouteTables(sessionProfile, subnetMap.values()));
 		this.serviceRepositoryCollectListener.serviceLoaded(num, total, "Routes data is loaded");
 		num++;
+		this.setInternetGatewayMap(ec2Service.getInternetGateways(sessionProfile));
+		this.serviceRepositoryCollectListener.serviceLoaded(num, total, "Internet Gateways data is loaded");
+		num++;
+		this.setEgressInternetGatewayMap(ec2Service.getEgressInternetGateways(sessionProfile));
+		this.serviceRepositoryCollectListener.serviceLoaded(num, total, "Egress Internet Gateways data is loaded");
+		num++;
+		this.setVpcEndpointMap(ec2Service.getVpcEndpoints(sessionProfile));
+		this.serviceRepositoryCollectListener.serviceLoaded(num, total, "Vpc Endpoints data is loaded");
+		num++;
 		this.setVpcPeeringMap(ec2Service.getVpcPeerings(sessionProfile));
 		this.serviceRepositoryCollectListener.serviceLoaded(num, total, "Vpc Peering data is loaded");
+		num++;
+		this.setTransitGatewayMap(ec2Service.getTransitGateways(sessionProfile));
+		this.serviceRepositoryCollectListener.serviceLoaded(num, total, "Trangit Gateways data is loaded");
 		num++;
 		this.setPrefixListMap(ec2Service.getPrefixLists(sessionProfile));
 		this.serviceRepositoryCollectListener.serviceLoaded(num, total, "PrefixLists data is loaded");
@@ -151,7 +199,7 @@ public abstract class ServiceRepositoryProvider {
 		num++;
 		return num;		
 	}
-	
+
 	public int elbSync(int num, int total, SessionProfile sessionProfile, LoadBalancerService loadBalancerService) throws IOException {
 		this.setClassicLoadBalancerMap(loadBalancerService.getClassicLoadBalancers(sessionProfile));
 		this.serviceRepositoryCollectListener.serviceLoaded(num, total, "Classic loadbalancers data is loaded");
@@ -188,12 +236,18 @@ public abstract class ServiceRepositoryProvider {
 		serviceStatistics.add(this.getNetworkAclsMap().getServiceStatistic(ServiceType.NACL));
 		serviceStatistics.add(this.getRouteTablesMap().getServiceStatistic(ServiceType.RT));
 		serviceStatistics.add(this.getSecurityGroupMap().getServiceStatistic(ServiceType.SG));
+		serviceStatistics.add(this.getVpcEndpointMap().getServiceStatistic(ServiceType.VND));
+		serviceStatistics.add(this.getInternetGatewayMap().getServiceStatistic(ServiceType.IGW));
+		serviceStatistics.add(this.getEgressInternetGatewayMap().getServiceStatistic(ServiceType.EGW));
+		serviceStatistics.add(this.getTransitGatewayMap().getServiceStatistic(ServiceType.TGW));
 		serviceStatistics.add(this.getVpcPeeringMap().getServiceStatistic(ServiceType.PEERING));
 		serviceStatistics.add(this.getVpnGatewayMap().getServiceStatistic(ServiceType.VGW));
 		serviceStatistics.add(this.getCustomerGatewayMap().getServiceStatistic(ServiceType.CGW));
 		serviceStatistics.add(this.getVpnConnectionsMap().getServiceStatistic(ServiceType.VPNC));
 		serviceStatistics.add(this.getVirtualInterfacesMap().getServiceStatistic(ServiceType.VIF));
 		serviceStatistics.add(this.getEc2InstanceMap().getServiceStatistic(ServiceType.EC2));
+		serviceStatistics.add(this.getVolumeMap().getServiceStatistic(ServiceType.EBS));
+		serviceStatistics.add(this.getNetworkInterfaceMap().getServiceStatistic(ServiceType.ENI));
 		serviceStatistics.add(this.getLoadBalancerMap().getServiceStatistic(ServiceType.ELB));
 		return serviceStatistics;
 	}

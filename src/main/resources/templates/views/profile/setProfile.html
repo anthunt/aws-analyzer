@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+  	  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="layout/defaultLayout">
+      
+	<head>
+	    <meta charset="utf-8">
+	    <title>Set Profile ::: AWS Analyzer</title>    
+	</head>
+	
+	<th:block layout:fragment="customCss">
+		<style type="text/css" media="screen">
+		    #credentialsEditor, #configEditor { 
+		        width: 100%;
+		        height: 500px;
+		    }
+		</style>
+	</th:block>
+
+	<th:block layout:fragment="customScript">
+		<script src="https://pagecdn.io/lib/ace/1.4.6/ace.js" integrity="sha256-CVkji/u32aj2TeC+D13f7scFSIfphw2pmu4LaKWMSY8=" crossorigin="anonymous"></script>
+		<script>
+		    var credentialsEditor = ace.edit("credentialsEditor");
+		    credentialsEditor.setTheme("ace/theme/monokai");
+		    credentialsEditor.session.setMode("ace/mode/properties");
+		    
+		    var configEditor = ace.edit("configEditor");
+		    configEditor.setTheme("ace/theme/monokai");
+		    configEditor.session.setMode("ace/mode/properties");
+		    
+		    $("#BtnSaveCredentials").click(function() {
+		    	fetch("/api/profiles/set/credentials", {
+		    		method: "POST",
+		    		headers: {
+		                "Content-Type": "application/json; charset=utf-8"
+		            },
+		            credentials: "same-origin",
+		    		body: JSON.stringify({data: credentialsEditor.getValue()})
+		    	}).then(e=>e.json()).then(function(data) {
+		    		console.log(data);
+		    		showAlert('success', "saved credentials successfully");
+		    	});
+		    });
+		    
+		    $("#BtnSaveConfig").click(function() {
+		    	fetch("/api/profiles/set/config", {
+		    		method: "POST",
+		    		headers: {
+		                "Content-Type": "application/json; charset=utf-8"
+		            },
+		            credentials: "same-origin",
+		    		body: JSON.stringify({data: configEditor.getValue()})
+		    	}).then(e=>e.json()).then(function(data) {
+		    		console.log(data);
+		    		showAlert('success', "saved config successfully");
+		    	});
+		    });
+		    
+		    function showAlert(type, message) {
+		    	$.notify({
+		    		message: message 
+		    	},{
+		    		type: type
+		    	    , delay: 2000
+		    	    , placement: {
+		    			from: "top",
+		    			align: "right"
+		    	    }
+		    	});
+		    }
+		</script>
+	</th:block>
+	
+	<body>
+		
+		<div layout:fragment="content">
+			<div class="container-fluid">
+				<a href="/profiles"><i class="material-icons">keyboard_backspace</i> Back</a>
+				<div class="row">
+					<div class="col-lg-6 col-md-6 col-sm-12">
+						<h3>Edit credentials file</h3>
+						<div id="credentialsEditor" th:text="${profiles.get('credentials')}"></div>
+						<button type="button" id="BtnSaveCredentials" class="btn btn-primary">Apply</button>
+					</div>
+					<div class="col-lg-6 col-md-6 col-sm-12">
+						<h3>Edit config file</h3>
+						<div id="configEditor" th:text="${profiles.get('config')}"></div>
+						<button type="button" id="BtnSaveConfig" class="btn btn-primary">Apply</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	
+	</body>
+</html>

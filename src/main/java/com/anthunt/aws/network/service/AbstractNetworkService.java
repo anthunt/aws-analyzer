@@ -21,6 +21,7 @@ import com.anthunt.aws.network.service.model.diagram.NodeType;
 
 import software.amazon.awssdk.services.directconnect.model.VirtualInterface;
 import software.amazon.awssdk.services.directconnect.model.VirtualInterfaceState;
+import software.amazon.awssdk.services.ec2.model.CustomerGateway;
 import software.amazon.awssdk.services.ec2.model.RouteState;
 import software.amazon.awssdk.services.ec2.model.RuleAction;
 import software.amazon.awssdk.services.ec2.model.VpnConnection;
@@ -35,32 +36,33 @@ public abstract class AbstractNetworkService {
 	
 	protected abstract DiagramResult getNetwork(ServiceRepository serviceRepository, String instanceId, String targetIp);
 	
-	protected String setRouteTable(String serverId, CheckResult routeCheckResult, DiagramResult diagramResult) {
+	protected List<String> setRouteTable(ServiceRepository serviceRepository, String serverId, CheckResult routeCheckResult, DiagramResult diagramResult) {
 
 		log.debug("set route table - {serverId: {}}", serverId);
 		
-		String routeTableId = "";
+		List<String> routeTableIds = new ArrayList<>();
 		for(CheckRule checkRule : routeCheckResult.getAllRules()) {
 			if(checkRule instanceof RouteCheckRule) {
 				RouteCheckRule routeCheckRule = (RouteCheckRule) checkRule;
-				
-				routeTableId = routeCheckRule.getId();
+				String routeTableId = routeCheckRule.getId(); 
+				routeTableIds.add(routeTableId);
 				log.debug("route table id - {}", routeTableId);
 				
 				List<String> gatewayIds = new ArrayList<>();
 				List<VpnConnection> vpnConnections = routeCheckRule.getVpnConnections();
 				
 				for(VpnConnection vpnConnection : vpnConnections) {
+					CustomerGateway customerGateway = serviceRepository.getCustomerGatewayMap().get(vpnConnection.customerGatewayId());
 					DiagramNode customerGatewayNode = diagramResult.addNode(
 							new DiagramData<DiagramNode>(
-									new DiagramNode(vpnConnection.customerGatewayId(), vpnConnection.customerGatewayId())
+									new DiagramNode(vpnConnection.customerGatewayId(), DiagramLabelGenerator.generate(customerGateway), customerGateway)
 							).addClass(NodeType.CUSTOMER_GATEWAY)
 					);
 					log.debug("added node - {routeTableId: {}, {}}", routeTableId, customerGatewayNode.toString());
 					
 					DiagramNode vpnConnectionNode = diagramResult.addNode(
 							new DiagramData<DiagramNode>(
-									new DiagramNode(vpnConnection.vpnConnectionId(), vpnConnection.vpnConnectionId(), vpnConnection)
+									new DiagramNode(vpnConnection.vpnConnectionId(), DiagramLabelGenerator.generate(vpnConnection), vpnConnection)
 							).addClass(NodeType.VPN_CONNECTION)
 					);
 					log.debug("added node - {routeTableId: {}, {}}", routeTableId, vpnConnectionNode.toString());
@@ -98,7 +100,7 @@ public abstract class AbstractNetworkService {
 					log.debug("added node - {routeTableId: {}, {}}", routeTableId, dxLoacationNode.toString());
 					DiagramNode vifConnectionNode = diagramResult.addNode(
 							new DiagramData<DiagramNode>(
-									new DiagramNode(virtualInterface.connectionId(), virtualInterface.connectionId(), virtualInterface)
+									new DiagramNode(virtualInterface.connectionId(), DiagramLabelGenerator.generate(virtualInterface), virtualInterface)
 							).addClass(NodeType.DIRECT_CONNECT)
 					);
 					log.debug("added node - {routeTableId: {}, {}}", routeTableId, vifConnectionNode.toString());
@@ -137,15 +139,45 @@ public abstract class AbstractNetworkService {
 					
 				}
 				
+				Object gateway = null;
+				switch(routeCheckRule.getGatewayType()) {
+				case VIRTUAL_GATEWAY:
+					gateway = serviceRepository.getVpnGatewayMap().get(routeCheckRule.getGatewayId());
+					break;
+				case LOCAL:
+					gateway = routeCheckRule.getGatewayId();
+					break;
+				case VPC_ENDPOINT:
+					gateway = serviceRepository.getVpcEndpointMap().get(routeCheckRule.getGatewayId());
+					break;
+				case TRANSIT_GATEWAY:
+					gateway = serviceRepository.getTransitGatewayMap().get(routeCheckRule.getGatewayId());
+					break;
+				case PEERING:
+					gateway = serviceRepository.getVpcPeeringMap().get(routeCheckRule.getGatewayId());
+					break;
+				case INTERNET_GATEWAY:
+					gateway = serviceRepository.getInternetGatewayMap().get(routeCheckRule.getGatewayId());
+					break;
+				case EGRESS_INTERNET_GATEWAY:
+					gateway = serviceRepository.getEgressInternetGatewayMap().get(routeCheckRule.getGatewayId());
+					break;
+				case NETWORK_INTERFACE:
+					gateway = serviceRepository.getNetworkInterfaceMap().get(routeCheckRule.getGatewayId());
+					break;
+				default:
+					break;
+				}
+				
 				DiagramNode gatewayNode = diagramResult.addNode(
 						new DiagramData<DiagramNode>(
-								new DiagramNode(routeCheckRule.getGatewayId(), routeCheckRule.getGatewayId())
+								new DiagramNode(routeCheckRule.getGatewayId(), DiagramLabelGenerator.generate(gateway), gateway)
 						).addClass(routeCheckRule.getGatewayType())
 				);
 				log.debug("added node - {routeTableId: {}, {}}", routeTableId, gatewayNode.toString());
 				DiagramNode routeNode = diagramResult.addNode(
 						new DiagramData<DiagramNode>(
-								new DiagramNode(routeCheckRule.getId(), routeCheckRule.getName(), routeCheckRule.getRouteTable())
+								new DiagramNode(routeCheckRule.getId(), DiagramLabelGenerator.generate(routeCheckRule.getRouteTable()), routeCheckRule.getRouteTable())
 						).addClass(NodeType.ROUTE_TABLE)
 				);
 				log.debug("added node - {routeTableId: {}, {}}", routeTableId, routeNode.toString());
@@ -184,7 +216,8 @@ public abstract class AbstractNetworkService {
 		if(routeCheckResult.getAllRules().size() < 1) {
 			String noRouteId = "noRoute";
 			String noRouteName = "Unknown Route";
-			routeTableId = noRouteId;
+			String routeTableId = noRouteId;
+			routeTableIds.add(routeTableId);
 			DiagramNode noRouteNode = diagramResult.addNode(
 					new DiagramData<DiagramNode>(
 							new DiagramNode(noRouteId, noRouteName)
@@ -200,7 +233,7 @@ public abstract class AbstractNetworkService {
 			}
 		}
 
-		return routeTableId;
+		return routeTableIds;
 	}
 	
 	protected String setNetworkAcl(String routeTableId, CheckResult networkAclCheckResult, DiagramResult diagramResult) {
@@ -211,35 +244,39 @@ public abstract class AbstractNetworkService {
 		for(CheckRule checkRule : networkAclCheckResult.getAllRules()) {
 			if(checkRule instanceof NetworkAclCheckRule) {
 				NetworkAclCheckRule networkAclCheckRule = (NetworkAclCheckRule) checkRule;
-				networkAclId = networkAclCheckRule.getId();
 				
-				DiagramNode diagramNode = diagramResult.addNode(
-						new DiagramData<DiagramNode>(
-								new DiagramNode(networkAclCheckRule.getId(), networkAclCheckRule.getName(), networkAclCheckRule.getNetworkAcl())
-						).addClass(NodeType.NETWORK_ACL)
-				);
-				log.debug("add node - {networkAclId:{}, {}}", networkAclId, diagramNode.toString());
-				
-				DiagramEdge diagramEdge = new DiagramEdge(routeTableId, networkAclCheckRule.getId());
-				
-				String port = "";
-				if("All".equals(networkAclCheckRule.getPrototol()) && networkAclCheckRule.getPortRange() == null) {
-					port = "All Traffic";
-				} else if(networkAclCheckRule.getPortRange() == null) {
-					port = "All " + networkAclCheckRule.getPrototol();
-				} else {
-					port = networkAclCheckRule.getPrototol() + ":" + networkAclCheckRule.getPortRange().toString();
+				if(routeTableId.equals(networkAclCheckRule.getRouteTableId())) {
+					networkAclId = networkAclCheckRule.getId();
+					
+					DiagramNode diagramNode = diagramResult.addNode(
+							new DiagramData<DiagramNode>(
+									new DiagramNode(networkAclCheckRule.getId(), DiagramLabelGenerator.generate(networkAclCheckRule.getNetworkAcl()), networkAclCheckRule.getNetworkAcl())
+							).addClass(NodeType.NETWORK_ACL)
+					);
+					log.debug("add node - {networkAclId:{}, {}}", networkAclId, diagramNode.toString());
+					
+					DiagramEdge diagramEdge = new DiagramEdge(routeTableId, networkAclCheckRule.getId());
+					
+					String port = "";
+					if("All".equals(networkAclCheckRule.getPrototol()) && networkAclCheckRule.getPortRange() == null) {
+						port = "All Traffic";
+					} else if(networkAclCheckRule.getPortRange() == null) {
+						port = "All " + networkAclCheckRule.getPrototol();
+					} else {
+						port = networkAclCheckRule.getPrototol() + ":" + networkAclCheckRule.getPortRange().toString();
+					}
+					
+					diagramEdge.setLabel(networkAclCheckRule.getCidr() + " " + port);
+					if(networkAclCheckRule.getDirectionType() == DirectionType.INGRESS) {
+						diagramEdge.setIn(networkAclCheckRule.getRuleAction() == RuleAction.ALLOW);
+					} else {
+						diagramEdge.setOut(networkAclCheckRule.getRuleAction() == RuleAction.ALLOW);
+					}
+					
+					diagramResult.addEdge(new DiagramData<DiagramEdge>(diagramEdge));
+					log.debug("add edge - {networkAclId:{}, {}}", networkAclId, diagramEdge.toString());
 				}
 				
-				diagramEdge.setLabel(networkAclCheckRule.getCidr() + " " + port);
-				if(networkAclCheckRule.getDirectionType() == DirectionType.INGRESS) {
-					diagramEdge.setIn(networkAclCheckRule.getRuleAction() == RuleAction.ALLOW);
-				} else {
-					diagramEdge.setOut(networkAclCheckRule.getRuleAction() == RuleAction.ALLOW);
-				}
-				
-				diagramResult.addEdge(new DiagramData<DiagramEdge>(diagramEdge));
-				log.debug("add edge - {networkAclId:{}, {}}", networkAclId, diagramEdge.toString());
 			}
 		}
 		return networkAclId;
@@ -251,7 +288,11 @@ public abstract class AbstractNetworkService {
 			if(checkRule instanceof SecurityGroupCheckRule) {
 				SecurityGroupCheckRule securityGroupCheckRule = (SecurityGroupCheckRule) checkRule;
 				
-				diagramResult.addNode(new DiagramData<DiagramNode>(new DiagramNode(securityGroupCheckRule.getId(), securityGroupCheckRule.getName(), securityGroupCheckRule.getSecurityGroup())).addClass(NodeType.SECURITY_GROUP));
+				diagramResult.addNode(
+						new DiagramData<DiagramNode>(
+								new DiagramNode(securityGroupCheckRule.getId(), DiagramLabelGenerator.generate(securityGroupCheckRule.getSecurityGroup()), securityGroupCheckRule.getSecurityGroup())
+						).addClass(NodeType.SECURITY_GROUP)
+				);
 				
 				String port = "";
 				if("-1".equals(securityGroupCheckRule.getPrototol())) {

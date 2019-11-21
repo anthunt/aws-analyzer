@@ -5,7 +5,10 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.LoadBalancer
 public enum NodeType {
 	
 	EC2_INSTANCE("ec2Instance")
+	, EBS("ebs")
+	, IAM_ROLE("iamRole")
 	, INTERNET("internet")
+	, LOCAL("local")
 	, LAMBDA("lambda")
 	, CLASSIC_LOADBALANCER("classicLoadBalancer")
 	, APPLICATION_LOADBALANCER("applicationLoadBalancer")
@@ -42,8 +45,12 @@ public enum NodeType {
 	public static NodeType getGatewayType(String gatewayId) {
 		if(gatewayId.startsWith("vgw")) {
 			return NodeType.VIRTUAL_GATEWAY;
-		} else {
+		} else if(gatewayId.startsWith("igw")){
 			return NodeType.INTERNET_GATEWAY;
+		} else if(gatewayId.startsWith("vpce")){
+			return NodeType.VPC_ENDPOINT;
+		} else {
+			return NodeType.LOCAL;
 		}
 	}
 	

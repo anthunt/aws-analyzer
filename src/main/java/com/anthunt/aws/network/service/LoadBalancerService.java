@@ -23,6 +23,7 @@ import com.anthunt.aws.network.session.SessionProfile;
 
 import software.amazon.awssdk.auth.credentials.ProfileCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.ec2.model.Instance;
 import software.amazon.awssdk.services.elasticloadbalancing.ElasticLoadBalancingClient;
 import software.amazon.awssdk.services.elasticloadbalancing.model.LoadBalancerDescription;
 import software.amazon.awssdk.services.elasticloadbalancingv2.ElasticLoadBalancingV2Client;
@@ -164,12 +165,13 @@ public class LoadBalancerService extends AbstractNetworkService {
 			diagramResult.addNode(new DiagramData<DiagramNode>(new DiagramNode(serverId, serverId)).addClass(NodeType.SERVER));
 		}
 		
-		String routeTableId = this.setRouteTable(serverId, checkResults.get(CheckType.ROUTE_TABLE), diagramResult);
-		String networkAclId = this.setNetworkAcl(routeTableId, checkResults.get(CheckType.NETWORK_ACL), diagramResult);
+		List<String> routeTableIds = this.setRouteTable(serviceRepository, serverId, checkResults.get(CheckType.ROUTE_TABLE), diagramResult);
+		for(String routeTableId : routeTableIds) {
+			String networkAclId = this.setNetworkAcl(routeTableId, checkResults.get(CheckType.NETWORK_ACL), diagramResult);
+			this.setSecurityGroup(networkAclId, loadBalancer, checkResults.get(CheckType.SECURITY_GROUP), diagramResult);
+		}
 		
-		this.setSecurityGroup(networkAclId, loadBalancer, checkResults.get(CheckType.SECURITY_GROUP), diagramResult);
-		
-		diagramResult.addNode(new DiagramData<DiagramNode>(new DiagramNode(loadBalancer.loadBalancerArn(), loadBalancer.loadBalancerName(), loadBalancer)).addClass(NodeType.getLoadBalancerType(loadBalancer.type())));
+		diagramResult.addNode(new DiagramData<DiagramNode>(new DiagramNode(loadBalancer.loadBalancerArn(), DiagramLabelGenerator.generate(loadBalancer), loadBalancer)).addClass(NodeType.getLoadBalancerType(loadBalancer.type())));
 		
 		this.setLoadBalancer(serviceRepository, loadBalancer, diagramResult);
 		
@@ -189,7 +191,11 @@ public class LoadBalancerService extends AbstractNetworkService {
 				if(checkRule instanceof SecurityGroupCheckRule) {
 					SecurityGroupCheckRule securityGroupCheckRule = (SecurityGroupCheckRule) checkRule;
 					
-					diagramResult.addNode(new DiagramData<DiagramNode>(new DiagramNode(securityGroupCheckRule.getId(), securityGroupCheckRule.getName(), securityGroupCheckRule.getSecurityGroup())).addClass(NodeType.SECURITY_GROUP));
+					diagramResult.addNode(
+							new DiagramData<DiagramNode>(
+									new DiagramNode(securityGroupCheckRule.getId(), DiagramLabelGenerator.generate(securityGroupCheckRule.getSecurityGroup()), securityGroupCheckRule.getSecurityGroup())
+							).addClass(NodeType.SECURITY_GROUP)
+					);
 					
 					String port = "";
 					if("-1".equals(securityGroupCheckRule.getPrototol())) {
@@ -268,7 +274,11 @@ public class LoadBalancerService extends AbstractNetworkService {
 					case FORWARD :
 						TargetGroup targetGroup = serviceRepository.getTargetGroupMap().get(action.targetGroupArn());
 						
-						diagramResult.addNode(new DiagramData<DiagramNode>(new DiagramNode(targetGroup.targetGroupArn(), targetGroup.targetGroupName(), targetGroup)).addClass(NodeType.TARGET_GROUP));
+						diagramResult.addNode(
+								new DiagramData<DiagramNode>(
+										new DiagramNode(targetGroup.targetGroupArn(), DiagramLabelGenerator.generate(targetGroup), targetGroup)
+								).addClass(NodeType.TARGET_GROUP)
+						);
 						DiagramEdge diagramTargetEdge = new DiagramEdge(loadBalancer.loadBalancerArn(), targetGroup.targetGroupArn());
 						diagramTargetEdge.setLabel(
 								(ruleConditions.size() == 0 ? "Default " : "")
@@ -286,13 +296,26 @@ public class LoadBalancerService extends AbstractNetworkService {
 
 							switch(targetGroup.targetType()) {
 							case INSTANCE :
-								diagramResult.addNode(new DiagramData<DiagramNode>(new DiagramNode(targetDescription.id(), targetDescription.id(), serviceRepository.getEc2InstanceMap().get(targetDescription.id()))).addClass(NodeType.EC2_INSTANCE));
+								Instance instance = serviceRepository.getEc2InstanceMap().get(targetDescription.id()); 
+								diagramResult.addNode(
+										new DiagramData<DiagramNode>(
+												new DiagramNode(targetDescription.id(), DiagramLabelGenerator.generate(instance), instance)
+										).addClass(NodeType.EC2_INSTANCE)
+								);
 								break;
 							case IP :
-								diagramResult.addNode(new DiagramData<DiagramNode>(new DiagramNode(targetDescription.id(), targetDescription.id())).addClass(NodeType.SERVER));
+								diagramResult.addNode(
+										new DiagramData<DiagramNode>(
+												new DiagramNode(targetDescription.id(), targetDescription.id())
+										).addClass(NodeType.SERVER)
+								);
 								break;
 							case LAMBDA :
-								diagramResult.addNode(new DiagramData<DiagramNode>(new DiagramNode(targetDescription.id(), targetDescription.id())).addClass(NodeType.LAMBDA));
+								diagramResult.addNode(
+										new DiagramData<DiagramNode>(
+												new DiagramNode(targetDescription.id(), targetDescription.id())
+										).addClass(NodeType.LAMBDA)
+								);
 								break;
 							default :
 								break;

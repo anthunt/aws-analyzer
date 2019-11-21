@@ -12,13 +12,20 @@ import com.anthunt.aws.network.service.LoadBalancerService;
 import com.anthunt.aws.network.session.SessionProfile;
 
 import software.amazon.awssdk.services.directconnect.model.VirtualInterface;
+import software.amazon.awssdk.services.ec2.model.CustomerGateway;
+import software.amazon.awssdk.services.ec2.model.EgressOnlyInternetGateway;
 import software.amazon.awssdk.services.ec2.model.Instance;
+import software.amazon.awssdk.services.ec2.model.InternetGateway;
 import software.amazon.awssdk.services.ec2.model.NetworkAcl;
+import software.amazon.awssdk.services.ec2.model.NetworkInterface;
 import software.amazon.awssdk.services.ec2.model.PrefixList;
 import software.amazon.awssdk.services.ec2.model.RouteTable;
 import software.amazon.awssdk.services.ec2.model.SecurityGroup;
 import software.amazon.awssdk.services.ec2.model.Subnet;
+import software.amazon.awssdk.services.ec2.model.TransitGateway;
+import software.amazon.awssdk.services.ec2.model.Volume;
 import software.amazon.awssdk.services.ec2.model.Vpc;
+import software.amazon.awssdk.services.ec2.model.VpcEndpoint;
 import software.amazon.awssdk.services.ec2.model.VpcPeeringConnection;
 import software.amazon.awssdk.services.ec2.model.VpnConnection;
 import software.amazon.awssdk.services.ec2.model.VpnGateway;
@@ -50,6 +57,14 @@ public class ServiceRepository {
 
 	public ServiceMap<Instance> getEc2InstanceMap() {
 		return this.serviceRepositoryProvider.getEc2InstanceMap();
+	}
+	
+	public ServiceMap<Volume> getVolumeMap() {
+		return this.serviceRepositoryProvider.getVolumeMap();
+	}
+	
+	public ServiceMap<NetworkInterface> getNetworkInterfaceMap() {
+		return this.serviceRepositoryProvider.getNetworkInterfaceMap();
 	}
 
 	public ServiceMap<Subnet> getSubnetMap() {
@@ -107,11 +122,31 @@ public class ServiceRepository {
 	public ServiceMap<List<VirtualInterface>> getVirtualInterfacesMap() {
 		return this.serviceRepositoryProvider.getVirtualInterfacesMap();
 	}
+	
+	public ServiceMap<CustomerGateway> getCustomerGatewayMap() {
+		return this.serviceRepositoryProvider.getCustomerGatewayMap();
+	}
 
 	public ServiceMap<List<NetworkAcl>> getNetworkAclsMap() {
 		return this.serviceRepositoryProvider.getNetworkAclsMap();
 	}
 
+	public ServiceMap<VpcEndpoint> getVpcEndpointMap() {
+		return this.serviceRepositoryProvider.getVpcEndpointMap();
+	}
+
+	public ServiceMap<EgressOnlyInternetGateway> getEgressInternetGatewayMap() {
+		return this.serviceRepositoryProvider.getEgressInternetGatewayMap();
+	}
+
+	public ServiceMap<InternetGateway> getInternetGatewayMap() {
+		return this.serviceRepositoryProvider.getInternetGatewayMap();
+	}
+
+	public ServiceMap<TransitGateway> getTransitGatewayMap() {
+		return this.serviceRepositoryProvider.getTransitGatewayMap();
+	}
+	
 	public List<ServiceStatistic> getServiceStatistic() {
 		return this.serviceStatistics;
 	}
