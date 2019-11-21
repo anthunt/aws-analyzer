@@ -6,7 +6,7 @@ var NetworkLoad = function() {
 	
 	var layoutOptions = {
 		name: 'klay',
-		nodeDimensionsIncludeLabels: false, // Boolean which changes whether label dimensions are included when calculating node dimensions
+		nodeDimensionsIncludeLabels: true, // Boolean which changes whether label dimensions are included when calculating node dimensions
 		fit: true, // Whether to fit
 		padding: 20, // Padding on fit
 		animate: false, // Whether to transition the node positions
@@ -18,7 +18,7 @@ var NetworkLoad = function() {
 		stop: undefined, // Callback on layoutstop
 		klay: {
 			// Following descriptions taken from http://layout.rtsys.informatik.uni-kiel.de:9444/Providedlayout.html?algorithm=de.cau.cs.kieler.klay.layered
-			addUnnecessaryBendpoints: false, // Adds bend points even if an edge does not change direction.
+			addUnnecessaryBendpoints: true, // Adds bend points even if an edge does not change direction.
 			aspectRatio: 1.6, // The aimed aspect ratio of the drawing, that is the quotient of width by height
 			borderSpacing: 20, // Minimal amount of space to be left to the border
 			compactComponents: false, // Tries to further compact components (disconnected sub-graphs).
@@ -32,7 +32,7 @@ var NetworkLoad = function() {
 			/* UNDEFINED, RIGHT, LEFT, DOWN, UP */
 			edgeRouting: 'ORTHOGONAL', // Defines how edges are routed (POLYLINE, ORTHOGONAL, SPLINES)
 			edgeSpacingFactor: 0.5, // Factor by which the object spacing is multiplied to arrive at the minimal spacing between edges.
-			feedbackEdges: false, // Whether feedback edges should be highlighted by routing around the nodes.
+			feedbackEdges: true, // Whether feedback edges should be highlighted by routing around the nodes.
 			fixedAlignment: 'NONE', // Tells the BK node placer to use a certain alignment instead of taking the optimal result.  This option should usually be left alone.
 			/* NONE Chooses the smallest layout from the four possible candidates.
 			LEFTUP Chooses the left-up candidate from the four possible candidates.
@@ -40,7 +40,7 @@ var NetworkLoad = function() {
 			LEFTDOWN Chooses the left-down candidate from the four possible candidates.
 			RIGHTDOWN Chooses the right-down candidate from the four possible candidates.
 			BALANCED Creates a balanced layout from the four possible candidates. */
-			inLayerSpacingFactor: 1.0, // Factor by which the usual spacing is multiplied to determine the in-layer spacing between objects.
+			inLayerSpacingFactor: 0.3, // Factor by which the usual spacing is multiplied to determine the in-layer spacing between objects.
 			layoutHierarchy: false, // Whether the selected layouter should consider the full hierarchy
 			linearSegmentsDeflectionDampening: 0.3, // Dampens the movement of nodes to keep the diagram from getting too large.
 			mergeEdges: false, // Edges that have no ports are merged so they touch the connected nodes at the same points.
@@ -57,7 +57,7 @@ var NetworkLoad = function() {
 			randomizationSeed: 1, // Seed used for pseudo-random number generators to control the layout algorithm; 0 means a new seed is generated
 			routeSelfLoopInside: false, // Whether a self-loop is routed around or inside its node.
 			separateConnectedComponents: true, // Whether each connected component should be processed separately
-			spacing: 200, // Overall setting for the minimal amount of space to be left between objects
+			spacing: 170, // Overall setting for the minimal amount of space to be left between objects
 			thoroughness: 7 // How much effort should be spent to produce a nice layout..
     	},
     	priority: function( edge ){ return null; }
@@ -88,6 +88,9 @@ var NetworkLoad = function() {
 		Utils.async(jsonURL, (data) => {
 			diagram.add(data);
 			diagram.layout(layoutOptions).run();
+			diagram.nodes().noOverlap({
+                padding: 5
+            });
 			diagram.elements().forEach(function(element, index) {
 				
 				if(element.data().label != null && element.data().label != "") {
@@ -139,8 +142,8 @@ var NetworkLoad = function() {
 		    .selector('edge')
 		      .css({
 		        'curve-style': 'bezier',
-		        "control-point-step-size": 60,
-		        'width': 3,
+		        "control-point-step-size": 80,
+		        'width': 6,
 		        'source-arrow-shape': "data(sourceArrowShape)",
 		        'target-arrow-shape': "data(targetArrowShape)",
 		        'line-color': "data(lineColor)",

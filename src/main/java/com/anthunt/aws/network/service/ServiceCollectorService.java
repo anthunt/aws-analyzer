@@ -46,8 +46,8 @@ public class ServiceCollectorService {
 		serviceRepository.setServiceRepositoryCollectListener(new ServiceRepositoryCollectListener(sseEmitter));
 		
 		int num = 0;
-		int total = !serviceName.isPresent() ? 19 
-					: ServiceType.EC2.getName().equals(serviceName.get()) ? 12 
+		int total = !serviceName.isPresent() ? 23 
+					: ServiceType.EC2.getName().equals(serviceName.get()) ? 16 
 					: ServiceType.ELB.getName().equals(serviceName.get()) ? 6 : 1;
 		
 		if(!serviceName.isPresent() || ServiceType.EC2.getName().equals(serviceName.get())) {

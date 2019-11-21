@@ -279,7 +279,7 @@ public abstract class AbstractNetworkService {
 				
 			}
 		}
-		return networkAclId;
+		return "".equals(networkAclId) ? routeTableId : networkAclId;
 	}
 
 	protected void setSecurityGroup(String networkAclId, String instanceId, CheckResult securityGroupCheckResult, DiagramResult diagramResult) {

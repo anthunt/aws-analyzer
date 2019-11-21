@@ -35,11 +35,19 @@
 		        referrer: 'no-referrer',
 		        body: data == null ? null : JSON.stringify(data)
 			})
+			.catch(error => {
+				_this.notify('danger', error);
+				if(typeof complete === 'function') complete();
+			})
 			.then(res => {
 				if(!res.ok) {
 					_this.notify('danger', res.error);
 				}
 				return res.json(); 
+			})
+			.catch(error => {
+				_this.notify('danger', error);
+				if(typeof complete === 'function') complete();
 			})
 			.then(res => {
 				if(res.success) {
