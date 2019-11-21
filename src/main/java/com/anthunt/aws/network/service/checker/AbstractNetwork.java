@@ -8,14 +8,14 @@ import java.util.Map;
 import java.util.Set;
 
 import com.anthunt.aws.network.repository.ServiceRepository;
-import com.anthunt.aws.network.service.model.CheckResult;
-import com.anthunt.aws.network.service.model.CheckResults;
-import com.anthunt.aws.network.service.model.CheckRule;
-import com.anthunt.aws.network.service.model.CheckType;
-import com.anthunt.aws.network.service.model.DirectionType;
-import com.anthunt.aws.network.service.model.NetworkAclCheckRule;
-import com.anthunt.aws.network.service.model.RouteCheckRule;
-import com.anthunt.aws.network.service.model.SecurityGroupCheckRule;
+import com.anthunt.aws.network.service.model.checker.CheckResult;
+import com.anthunt.aws.network.service.model.checker.CheckResults;
+import com.anthunt.aws.network.service.model.checker.CheckRule;
+import com.anthunt.aws.network.service.model.checker.CheckType;
+import com.anthunt.aws.network.service.model.checker.DirectionType;
+import com.anthunt.aws.network.service.model.checker.NetworkAclCheckRule;
+import com.anthunt.aws.network.service.model.checker.RouteCheckRule;
+import com.anthunt.aws.network.service.model.checker.SecurityGroupCheckRule;
 import com.anthunt.aws.network.service.model.diagram.NodeType;
 import com.anthunt.aws.network.utils.Utils;
 

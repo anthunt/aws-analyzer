@@ -1,4 +1,4 @@
-package com.anthunt.aws.network.service.model;
+package com.anthunt.aws.network.service.model.checker;
 
 import software.amazon.awssdk.services.ec2.model.NetworkAcl;
 import software.amazon.awssdk.services.ec2.model.PortRange;

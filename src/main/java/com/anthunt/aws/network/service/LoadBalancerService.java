@@ -8,12 +8,12 @@ import org.springframework.stereotype.Service;
 import com.anthunt.aws.network.repository.ServiceRepository;
 import com.anthunt.aws.network.repository.model.ServiceMap;
 import com.anthunt.aws.network.service.checker.LoadBalancerNetwork;
-import com.anthunt.aws.network.service.model.CheckResult;
-import com.anthunt.aws.network.service.model.CheckResults;
-import com.anthunt.aws.network.service.model.CheckRule;
-import com.anthunt.aws.network.service.model.CheckType;
-import com.anthunt.aws.network.service.model.DirectionType;
-import com.anthunt.aws.network.service.model.SecurityGroupCheckRule;
+import com.anthunt.aws.network.service.model.checker.CheckResult;
+import com.anthunt.aws.network.service.model.checker.CheckResults;
+import com.anthunt.aws.network.service.model.checker.CheckRule;
+import com.anthunt.aws.network.service.model.checker.CheckType;
+import com.anthunt.aws.network.service.model.checker.DirectionType;
+import com.anthunt.aws.network.service.model.checker.SecurityGroupCheckRule;
 import com.anthunt.aws.network.service.model.diagram.DiagramData;
 import com.anthunt.aws.network.service.model.diagram.DiagramEdge;
 import com.anthunt.aws.network.service.model.diagram.DiagramNode;
@@ -171,7 +171,7 @@ public class LoadBalancerService extends AbstractNetworkService {
 			this.setSecurityGroup(networkAclId, loadBalancer, checkResults.get(CheckType.SECURITY_GROUP), diagramResult);
 		}
 		
-		diagramResult.addNode(new DiagramData<DiagramNode>(new DiagramNode(loadBalancer.loadBalancerArn(), DiagramLabelGenerator.generate(loadBalancer), loadBalancer)).addClass(NodeType.getLoadBalancerType(loadBalancer.type())));
+		diagramResult.addNode(new DiagramData<DiagramNode>(new DiagramNode(loadBalancer.loadBalancerArn(), loadBalancer)).addClass(NodeType.getLoadBalancerType(loadBalancer.type())));
 		
 		this.setLoadBalancer(serviceRepository, loadBalancer, diagramResult);
 		
@@ -193,7 +193,7 @@ public class LoadBalancerService extends AbstractNetworkService {
 					
 					diagramResult.addNode(
 							new DiagramData<DiagramNode>(
-									new DiagramNode(securityGroupCheckRule.getId(), DiagramLabelGenerator.generate(securityGroupCheckRule.getSecurityGroup()), securityGroupCheckRule.getSecurityGroup())
+									new DiagramNode(securityGroupCheckRule.getId(), securityGroupCheckRule.getSecurityGroup())
 							).addClass(NodeType.SECURITY_GROUP)
 					);
 					
@@ -276,7 +276,7 @@ public class LoadBalancerService extends AbstractNetworkService {
 						
 						diagramResult.addNode(
 								new DiagramData<DiagramNode>(
-										new DiagramNode(targetGroup.targetGroupArn(), DiagramLabelGenerator.generate(targetGroup), targetGroup)
+										new DiagramNode(targetGroup.targetGroupArn(), targetGroup)
 								).addClass(NodeType.TARGET_GROUP)
 						);
 						DiagramEdge diagramTargetEdge = new DiagramEdge(loadBalancer.loadBalancerArn(), targetGroup.targetGroupArn());
@@ -299,7 +299,7 @@ public class LoadBalancerService extends AbstractNetworkService {
 								Instance instance = serviceRepository.getEc2InstanceMap().get(targetDescription.id()); 
 								diagramResult.addNode(
 										new DiagramData<DiagramNode>(
-												new DiagramNode(targetDescription.id(), DiagramLabelGenerator.generate(instance), instance)
+												new DiagramNode(targetDescription.id(), instance)
 										).addClass(NodeType.EC2_INSTANCE)
 								);
 								break;

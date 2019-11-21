@@ -8,7 +8,6 @@ import java.util.Optional;
 import javax.servlet.http.HttpSession;
 
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -27,13 +26,14 @@ import com.anthunt.aws.network.service.ProfileService;
 import com.anthunt.aws.network.service.ServiceCollectorService;
 import com.anthunt.aws.network.service.model.diagram.DiagramResult;
 import com.anthunt.aws.network.session.SessionProvider;
+import com.anthunt.aws.network.utils.Logging;
 import com.anthunt.aws.network.utils.Utils;
 
 @RestController
 @RequestMapping("api")
 public class APIController extends AbstractController {
 
-	private static final Logger log = LoggerFactory.getLogger(APIController.class);
+	private static final Logger log = Logging.getLogger(APIController.class);
 
 	@Autowired
 	private ProfileService profileService;
@@ -56,6 +56,8 @@ public class APIController extends AbstractController {
 		if(targetIp.isPresent()) {
 			target = Utils.decodeB64URL(targetIp.get());
 		}
+		log.trace("called /network/ec2/{}/{}", instanceId, target);
+		
 		return this.ec2Service.getNetwork(SessionProvider.getSessionServiceRepository(session), Utils.decodeB64URL(instanceId), target);
 	}
 
@@ -68,6 +70,8 @@ public class APIController extends AbstractController {
 		if(targetIp.isPresent()) {
 			target = Utils.decodeB64URL(targetIp.get());
 		}
+		log.trace("called /network/loadBalancer/{}/{}", loadBalancerArn, target);
+		
 		return this.loadBalancerService.getNetwork(SessionProvider.getSessionServiceRepository(session), Utils.decodeB64URL(loadBalancerArn), target);
 	}
 	

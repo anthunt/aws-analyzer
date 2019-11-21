@@ -114,45 +114,6 @@ var NetworkLoad = function() {
 			});
 		}, () => off());
 		
-		/*
-		fetch(jsonURL, {mode: 'no-cors'})
-		.then(function(res) {
-			if(!res.ok) {
-				alert(res.error);
-			}
-			return res.json(); 
-		})
-		.then(function(res) {
-			console.log(res.data);
-			diagram.add(res.data);
-			diagram.layout(layoutOptions).run();
-			diagram.elements().forEach(function(element, index) {
-				
-				if(element.data().label != null && element.data().label != "") {
-				    var popup = tippy(element.popperRef(), {
-				        content: function(){
-				            var div = document.createElement('div');
-	
-				            div.innerHTML = element.data().label;
-	
-				            return div;
-				        },
-				        animation: 'perspective-extreme',
-				        trigger: 'manual',
-				        arrow: true,
-				        placement: 'bottom',
-				        hideOnClick: true,
-				        multiple: false,
-				        sticky: true
-				    });
-				    element.on('mouseover', () => popup.show());
-				    element.on('mouseout', () => popup.hide());
-				}
-				
-			});
-			off();
-		});
-		*/
 	};
 	
 	this.initialize = function() {
@@ -325,7 +286,7 @@ var NetworkLoad = function() {
 	            valign: "bottom",
 	            valignBox: "bottom",
 	            tpl: function (data) {
-	                return data.label;
+	                return data.title;
 	            }
 	        }
 	    ]);

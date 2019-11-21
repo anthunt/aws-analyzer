@@ -7,12 +7,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.anthunt.aws.network.repository.ServiceRepository;
-import com.anthunt.aws.network.service.model.CheckResult;
-import com.anthunt.aws.network.service.model.CheckRule;
-import com.anthunt.aws.network.service.model.DirectionType;
-import com.anthunt.aws.network.service.model.NetworkAclCheckRule;
-import com.anthunt.aws.network.service.model.RouteCheckRule;
-import com.anthunt.aws.network.service.model.SecurityGroupCheckRule;
+import com.anthunt.aws.network.service.model.checker.CheckResult;
+import com.anthunt.aws.network.service.model.checker.CheckRule;
+import com.anthunt.aws.network.service.model.checker.DirectionType;
+import com.anthunt.aws.network.service.model.checker.NetworkAclCheckRule;
+import com.anthunt.aws.network.service.model.checker.RouteCheckRule;
+import com.anthunt.aws.network.service.model.checker.SecurityGroupCheckRule;
 import com.anthunt.aws.network.service.model.diagram.DiagramData;
 import com.anthunt.aws.network.service.model.diagram.DiagramEdge;
 import com.anthunt.aws.network.service.model.diagram.DiagramNode;
@@ -55,14 +55,14 @@ public abstract class AbstractNetworkService {
 					CustomerGateway customerGateway = serviceRepository.getCustomerGatewayMap().get(vpnConnection.customerGatewayId());
 					DiagramNode customerGatewayNode = diagramResult.addNode(
 							new DiagramData<DiagramNode>(
-									new DiagramNode(vpnConnection.customerGatewayId(), DiagramLabelGenerator.generate(customerGateway), customerGateway)
+									new DiagramNode(vpnConnection.customerGatewayId(), customerGateway)
 							).addClass(NodeType.CUSTOMER_GATEWAY)
 					);
 					log.debug("added node - {routeTableId: {}, {}}", routeTableId, customerGatewayNode.toString());
 					
 					DiagramNode vpnConnectionNode = diagramResult.addNode(
 							new DiagramData<DiagramNode>(
-									new DiagramNode(vpnConnection.vpnConnectionId(), DiagramLabelGenerator.generate(vpnConnection), vpnConnection)
+									new DiagramNode(vpnConnection.vpnConnectionId(), vpnConnection)
 							).addClass(NodeType.VPN_CONNECTION)
 					);
 					log.debug("added node - {routeTableId: {}, {}}", routeTableId, vpnConnectionNode.toString());
@@ -100,7 +100,7 @@ public abstract class AbstractNetworkService {
 					log.debug("added node - {routeTableId: {}, {}}", routeTableId, dxLoacationNode.toString());
 					DiagramNode vifConnectionNode = diagramResult.addNode(
 							new DiagramData<DiagramNode>(
-									new DiagramNode(virtualInterface.connectionId(), DiagramLabelGenerator.generate(virtualInterface), virtualInterface)
+									new DiagramNode(virtualInterface.connectionId(), virtualInterface)
 							).addClass(NodeType.DIRECT_CONNECT)
 					);
 					log.debug("added node - {routeTableId: {}, {}}", routeTableId, vifConnectionNode.toString());
@@ -171,13 +171,13 @@ public abstract class AbstractNetworkService {
 				
 				DiagramNode gatewayNode = diagramResult.addNode(
 						new DiagramData<DiagramNode>(
-								new DiagramNode(routeCheckRule.getGatewayId(), DiagramLabelGenerator.generate(gateway), gateway)
+								new DiagramNode(routeCheckRule.getGatewayId(), gateway)
 						).addClass(routeCheckRule.getGatewayType())
 				);
 				log.debug("added node - {routeTableId: {}, {}}", routeTableId, gatewayNode.toString());
 				DiagramNode routeNode = diagramResult.addNode(
 						new DiagramData<DiagramNode>(
-								new DiagramNode(routeCheckRule.getId(), DiagramLabelGenerator.generate(routeCheckRule.getRouteTable()), routeCheckRule.getRouteTable())
+								new DiagramNode(routeCheckRule.getId(), routeCheckRule.getRouteTable())
 						).addClass(NodeType.ROUTE_TABLE)
 				);
 				log.debug("added node - {routeTableId: {}, {}}", routeTableId, routeNode.toString());
@@ -250,7 +250,7 @@ public abstract class AbstractNetworkService {
 					
 					DiagramNode diagramNode = diagramResult.addNode(
 							new DiagramData<DiagramNode>(
-									new DiagramNode(networkAclCheckRule.getId(), DiagramLabelGenerator.generate(networkAclCheckRule.getNetworkAcl()), networkAclCheckRule.getNetworkAcl())
+									new DiagramNode(networkAclCheckRule.getId(), networkAclCheckRule.getNetworkAcl())
 							).addClass(NodeType.NETWORK_ACL)
 					);
 					log.debug("add node - {networkAclId:{}, {}}", networkAclId, diagramNode.toString());
@@ -290,7 +290,7 @@ public abstract class AbstractNetworkService {
 				
 				diagramResult.addNode(
 						new DiagramData<DiagramNode>(
-								new DiagramNode(securityGroupCheckRule.getId(), DiagramLabelGenerator.generate(securityGroupCheckRule.getSecurityGroup()), securityGroupCheckRule.getSecurityGroup())
+								new DiagramNode(securityGroupCheckRule.getId(), securityGroupCheckRule.getSecurityGroup())
 						).addClass(NodeType.SECURITY_GROUP)
 				);
 				

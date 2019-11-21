@@ -1,12 +1,10 @@
 package com.anthunt.aws.network.controller;
 
 import java.io.IOException;
-import java.util.Optional;
 
 import javax.servlet.http.HttpSession;
 
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -23,12 +21,13 @@ import com.anthunt.aws.network.service.LoadBalancerService;
 import com.anthunt.aws.network.service.ProfileService;
 import com.anthunt.aws.network.session.SessionProfile;
 import com.anthunt.aws.network.session.SessionProvider;
+import com.anthunt.aws.network.utils.Logging;
 
 @Controller
 @RequestMapping("/")
 public class UIController extends AbstractController {
 
-	private static final Logger log = LoggerFactory.getLogger(UIController.class);
+	private static final Logger log = Logging.getLogger(UIController.class);
 
 	@Autowired
 	private ProfileService profileService;
@@ -59,8 +58,7 @@ public class UIController extends AbstractController {
 	}
 	
 	@RequestMapping("profiles/set")
-	public String setProfile(Model model
-			                , @PathVariable("profileName") Optional<String> profileName) throws IOException {
+	public String setProfile(Model model) throws IOException {
 		
 		model.addAttribute("profiles", this.profileService.getCredentialFileContent());
 		
@@ -83,6 +81,7 @@ public class UIController extends AbstractController {
 		sessionProfile.setProfileName(profileName);
 		sessionProfile.setRegionId(regionId);
 		SessionProvider.setSessionProfile(session, sessionProfile);
+		log.trace("called /setProfiles/{}/{}", profileName, regionId);
 		
 		return "redirect:/dashboard";
 	}

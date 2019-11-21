@@ -1,4 +1,4 @@
-package com.anthunt.aws.network.service.model;
+package com.anthunt.aws.network.service.model.checker;
 import java.util.ArrayList;
 import java.util.List;
 

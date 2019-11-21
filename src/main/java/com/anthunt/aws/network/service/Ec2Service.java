@@ -10,9 +10,9 @@ import com.anthunt.aws.network.repository.ServiceRepository;
 import com.anthunt.aws.network.repository.model.ServiceMap;
 import com.anthunt.aws.network.repository.model.ServiceStatistic;
 import com.anthunt.aws.network.service.checker.Ec2InstanceNetwork;
-import com.anthunt.aws.network.service.model.CheckResults;
-import com.anthunt.aws.network.service.model.CheckType;
 import com.anthunt.aws.network.service.model.ServiceType;
+import com.anthunt.aws.network.service.model.checker.CheckResults;
+import com.anthunt.aws.network.service.model.checker.CheckType;
 import com.anthunt.aws.network.service.model.diagram.DiagramData;
 import com.anthunt.aws.network.service.model.diagram.DiagramEdge;
 import com.anthunt.aws.network.service.model.diagram.DiagramNode;
@@ -375,7 +375,7 @@ public class Ec2Service extends AbstractNetworkService {
 		
 		diagramResult.addNode(
 				new DiagramData<DiagramNode>(
-						new DiagramNode(checkResults.getResource().instanceId(), DiagramLabelGenerator.generate(checkResults.getResource()), checkResults.getResource())
+						new DiagramNode(checkResults.getResource().instanceId(), checkResults.getResource())
 				).addClass(NodeType.EC2_INSTANCE)
 		);
 		
@@ -388,16 +388,15 @@ public class Ec2Service extends AbstractNetworkService {
 		
 		diagramResult.addNode(
 				new DiagramData<DiagramNode>(
-						new DiagramNode(instance.instanceId(), DiagramLabelGenerator.generate(instance), instance)
+						new DiagramNode(instance.instanceId(), instance)
 				).addClass(NodeType.EC2_INSTANCE)
 		);
 		
 		if(instance.iamInstanceProfile() != null) {
 			IamInstanceProfile iamInstanceProfile = instance.iamInstanceProfile();
-			String roleName = iamInstanceProfile.arn().substring(iamInstanceProfile.arn().lastIndexOf("/"), iamInstanceProfile.arn().length());
 			diagramResult.addNode(
 					new DiagramData<DiagramNode>(
-							new DiagramNode(iamInstanceProfile.id(), roleName, iamInstanceProfile)
+							new DiagramNode(iamInstanceProfile.id(), iamInstanceProfile)
 					).addClass(NodeType.IAM_ROLE)
 			);
 			
@@ -412,7 +411,7 @@ public class Ec2Service extends AbstractNetworkService {
 			
 			diagramResult.addNode(
 					new DiagramData<DiagramNode>(
-							new DiagramNode(volume.volumeId(), DiagramLabelGenerator.generate(volume))
+							new DiagramNode(volume.volumeId(), volume)
 					).addClass(NodeType.EBS)
 			);
 
@@ -427,7 +426,7 @@ public class Ec2Service extends AbstractNetworkService {
 						
 			diagramResult.addNode(
 					new DiagramData<DiagramNode>(
-							new DiagramNode(instanceNetworkInterface.networkInterfaceId(), DiagramLabelGenerator.generate(networkInterface), networkInterface)
+							new DiagramNode(instanceNetworkInterface.networkInterfaceId(), networkInterface)
 					).addClass(NodeType.NETWORK_INTERFACE)
 			);
 			
@@ -441,7 +440,7 @@ public class Ec2Service extends AbstractNetworkService {
 				
 				diagramResult.addNode(
 						new DiagramData<DiagramNode>(
-								new DiagramNode(securityGroup.groupId(), DiagramLabelGenerator.generate(securityGroup), securityGroup)
+								new DiagramNode(securityGroup.groupId(), securityGroup)
 						).addClass(NodeType.SECURITY_GROUP)
 				);
 				

@@ -7,7 +7,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -19,19 +18,26 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import com.anthunt.aws.network.controller.model.RestResponse;
 import com.anthunt.aws.network.session.SessionProvider;
+import com.anthunt.aws.network.utils.Logging;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Configuration
 public class WebConfig  implements WebMvcConfigurer {
 
-	private static final Logger log = LoggerFactory.getLogger(WebConfig.class);
+	private static final Logger log = Logging.getLogger(WebConfig.class);
 
 	private static void sendResponseBody(HttpServletResponse response, Object object) throws JsonProcessingException, IOException {
 		ObjectMapper mapper = new ObjectMapper();
-		  response.setContentType("application/json");
-		  response.setStatus(HttpServletResponse.SC_OK);
-		  response.getWriter().write(mapper.writeValueAsString(object));
+		String objJson = mapper.writeValueAsString(object);
+		log.trace("generated response body : {}", objJson);
+		
+		response.setContentType("application/json");
+		log.trace("set response status HttpServletResponse.SC_OK");
+		response.setStatus(HttpServletResponse.SC_OK);
+		log.trace("set response status HttpServletResponse.SC_OK");
+		
+		response.getWriter().write(objJson);
 	}
 	
 	@Override
