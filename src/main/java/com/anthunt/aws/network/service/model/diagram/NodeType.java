@@ -30,7 +30,10 @@ public enum NodeType {
     , NETWORK_INTERFACE("networkInterface")
     , NETWORK_ACL("networkAcl")
     , SECURITY_GROUP("securityGroup")
-    , SERVER("server");
+    , SERVER("server")
+    , VPC("vpc")
+    , AWS("aws")
+    , REGION("region");
 	
 	private String name;
 	

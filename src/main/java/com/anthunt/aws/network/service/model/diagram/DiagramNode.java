@@ -1,19 +1,27 @@
 package com.anthunt.aws.network.service.model.diagram;
 
 import com.anthunt.aws.network.service.DiagramContentsGenerator;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class DiagramNode {
 
 	private String id;
+	private String parent;
 	private String title;
 	private String label;
 	private Object resource;
 	
 	public DiagramNode(String id, Object resource) {
+		this(id, resource, null);
+	}
+
+	public DiagramNode(String id, Object resource, String parentId) {
 		
 		DiagramContentsGenerator diagramContentsGenerator = DiagramContentsGenerator.getInstance(resource);
 		
 		this.setId(id);
+		this.setParent(parentId);
 		this.setTitle(diagramContentsGenerator.title());
 		this.setLabel(diagramContentsGenerator.label());
 		this.setResource(resource);
@@ -27,6 +35,14 @@ public class DiagramNode {
 		this.id = id;
 	}
 	
+	public String getParent() {
+		return parent;
+	}
+
+	private void setParent(String parent) {
+		this.parent = parent;
+	}
+
 	public String getTitle() {
 		return title;
 	}

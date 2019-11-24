@@ -1,5 +1,8 @@
 package com.anthunt.aws.network.service.model.diagram;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class DiagramEdge {
 
 	private boolean isAllMode;

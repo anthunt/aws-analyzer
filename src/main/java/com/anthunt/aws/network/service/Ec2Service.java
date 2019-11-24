@@ -357,8 +357,21 @@ public class Ec2Service extends AbstractNetworkService {
 		Ec2InstanceNetwork ec2InstanceNetwork = new Ec2InstanceNetwork(instanceId, serviceRepository);
 		
 		CheckResults<Instance> checkResults = ec2InstanceNetwork.checkCommunication(targetIp);
+		Vpc vpc = serviceRepository.getVpcMap().get(checkResults.getResource().vpcId());
 		
-		DiagramResult diagramResult = new DiagramResult(targetIp == null);
+		DiagramResult diagramResult = new DiagramResult(vpc.vpcId(), targetIp == null);
+		
+		diagramResult.addNode(
+				new DiagramData<DiagramNode>(
+						new DiagramNode(AWS, "")
+				).addClass(NodeType.AWS)
+		);
+		
+		diagramResult.addNode(
+				new DiagramData<DiagramNode>(
+						new DiagramNode(vpc.vpcId(), vpc.vpcId(), AWS)
+				).addClass(NodeType.VPC)
+		);
 		
 		String targetId = checkResults.getCidr();
 		
@@ -375,7 +388,7 @@ public class Ec2Service extends AbstractNetworkService {
 		
 		diagramResult.addNode(
 				new DiagramData<DiagramNode>(
-						new DiagramNode(checkResults.getResource().instanceId(), checkResults.getResource())
+						new DiagramNode(checkResults.getResource().instanceId(), checkResults.getResource(), diagramResult.getVpcId())
 				).addClass(NodeType.EC2_INSTANCE)
 		);
 		

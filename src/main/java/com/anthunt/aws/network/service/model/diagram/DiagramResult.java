@@ -18,19 +18,35 @@ public class DiagramResult {
 	@JsonIgnore
 	private List<DiagramEdge> diagramEdges;
 	
+	@JsonIgnore
+	private String vpcId;
+	
 	private List<DiagramData<DiagramNode>> nodes;
 	private List<DiagramData<DiagramEdge>> edges;
 	
 	public DiagramResult() {
-		this(false);
+		this(null);
 	}
 	
-	public DiagramResult(boolean isAllMode) {
+	public DiagramResult(String vpcId) {
+		this(vpcId, false);
+	}
+
+	public DiagramResult(String vpcId, boolean isAllMode) {
+		this.setVpcId(vpcId);
 		this.isAllMode = isAllMode;
 		this.nodeIds = new ArrayList<>();
 		this.diagramEdges = new ArrayList<>();
 		this.nodes = new ArrayList<>();
 		this.edges = new ArrayList<>();
+	}
+	
+	public String getVpcId() {
+		return vpcId;
+	}
+
+	private void setVpcId(String vpcId) {
+		this.vpcId = vpcId;
 	}
 	
 	public List<DiagramData<DiagramNode>> getNodes() {

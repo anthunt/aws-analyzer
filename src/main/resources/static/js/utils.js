@@ -43,6 +43,12 @@
 				if(!res.ok) {
 					_this.notify('danger', res.error);
 				}
+				
+				if(res.redirected) {
+					location.href = res.url;
+					return;
+				}
+				
 				return res.json(); 
 			})
 			.catch(error => {

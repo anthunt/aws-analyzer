@@ -24,6 +24,7 @@ import com.anthunt.aws.network.session.SessionProfile;
 import software.amazon.awssdk.auth.credentials.ProfileCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.ec2.model.Instance;
+import software.amazon.awssdk.services.ec2.model.Vpc;
 import software.amazon.awssdk.services.elasticloadbalancing.ElasticLoadBalancingClient;
 import software.amazon.awssdk.services.elasticloadbalancing.model.LoadBalancerDescription;
 import software.amazon.awssdk.services.elasticloadbalancingv2.ElasticLoadBalancingV2Client;
@@ -153,12 +154,26 @@ public class LoadBalancerService extends AbstractNetworkService {
 	}
 
 	public DiagramResult getNetwork(ServiceRepository serviceRepository, String loadBalancerArn, String targetIp) {
-		
-		DiagramResult diagramResult = new DiagramResult(targetIp == null);
-		
+				
 		LoadBalancerNetwork loadBalancerNetwork = new LoadBalancerNetwork(loadBalancerArn, serviceRepository);
 		CheckResults<LoadBalancer> checkResults = loadBalancerNetwork.checkCommunication(targetIp);
 		LoadBalancer loadBalancer = checkResults.getResource();
+		
+		Vpc vpc = serviceRepository.getVpcMap().get(loadBalancer.vpcId());
+		
+		DiagramResult diagramResult = new DiagramResult(vpc.vpcId(), targetIp == null);
+		
+		diagramResult.addNode(
+				new DiagramData<DiagramNode>(
+						new DiagramNode(AWS, "")
+				).addClass(NodeType.AWS)
+		);
+		
+		diagramResult.addNode(
+				new DiagramData<DiagramNode>(
+						new DiagramNode(vpc.vpcId(), vpc.vpcId(), AWS)
+				).addClass(NodeType.VPC)
+		);
 		
 		String serverId = checkResults.getCidr();
 		if(serverId != null) {
@@ -171,7 +186,11 @@ public class LoadBalancerService extends AbstractNetworkService {
 			this.setSecurityGroup(networkAclId, loadBalancer, checkResults.get(CheckType.SECURITY_GROUP), diagramResult);
 		}
 		
-		diagramResult.addNode(new DiagramData<DiagramNode>(new DiagramNode(loadBalancer.loadBalancerArn(), loadBalancer)).addClass(NodeType.getLoadBalancerType(loadBalancer.type())));
+		diagramResult.addNode(
+				new DiagramData<DiagramNode>(
+						new DiagramNode(loadBalancer.loadBalancerArn(), loadBalancer, vpc.vpcId())
+				).addClass(NodeType.getLoadBalancerType(loadBalancer.type()))
+		);
 		
 		this.setLoadBalancer(serviceRepository, loadBalancer, diagramResult);
 		
@@ -193,7 +212,7 @@ public class LoadBalancerService extends AbstractNetworkService {
 					
 					diagramResult.addNode(
 							new DiagramData<DiagramNode>(
-									new DiagramNode(securityGroupCheckRule.getId(), securityGroupCheckRule.getSecurityGroup())
+									new DiagramNode(securityGroupCheckRule.getId(), securityGroupCheckRule.getSecurityGroup(), diagramResult.getVpcId())
 							).addClass(NodeType.SECURITY_GROUP)
 					);
 					
@@ -276,7 +295,7 @@ public class LoadBalancerService extends AbstractNetworkService {
 						
 						diagramResult.addNode(
 								new DiagramData<DiagramNode>(
-										new DiagramNode(targetGroup.targetGroupArn(), targetGroup)
+										new DiagramNode(targetGroup.targetGroupArn(), targetGroup, diagramResult.getVpcId())
 								).addClass(NodeType.TARGET_GROUP)
 						);
 						DiagramEdge diagramTargetEdge = new DiagramEdge(loadBalancer.loadBalancerArn(), targetGroup.targetGroupArn());
@@ -299,21 +318,21 @@ public class LoadBalancerService extends AbstractNetworkService {
 								Instance instance = serviceRepository.getEc2InstanceMap().get(targetDescription.id()); 
 								diagramResult.addNode(
 										new DiagramData<DiagramNode>(
-												new DiagramNode(targetDescription.id(), instance)
+												new DiagramNode(targetDescription.id(), instance, diagramResult.getVpcId())
 										).addClass(NodeType.EC2_INSTANCE)
 								);
 								break;
 							case IP :
 								diagramResult.addNode(
 										new DiagramData<DiagramNode>(
-												new DiagramNode(targetDescription.id(), targetDescription.id())
+												new DiagramNode(targetDescription.id(), targetDescription.id(), diagramResult.getVpcId())
 										).addClass(NodeType.SERVER)
 								);
 								break;
 							case LAMBDA :
 								diagramResult.addNode(
 										new DiagramData<DiagramNode>(
-												new DiagramNode(targetDescription.id(), targetDescription.id())
+												new DiagramNode(targetDescription.id(), targetDescription.id(), diagramResult.getVpcId())
 										).addClass(NodeType.LAMBDA)
 								);
 								break;
@@ -342,7 +361,7 @@ public class LoadBalancerService extends AbstractNetworkService {
 																											.append("?")
 																											.append(redirectActionConfig.query())
 																											.append(" - ")
-																											.append(redirectActionConfig.statusCodeAsString()).toString())
+																											.append(redirectActionConfig.statusCodeAsString()).toString(), diagramResult.getVpcId())
 								).addClass(NodeType.INTERNET)
 						);
 						DiagramEdge diagramEdge = new DiagramEdge(loadBalancer.loadBalancerArn(), Integer.toString(redirectActionConfig.hashCode()));
@@ -357,7 +376,11 @@ public class LoadBalancerService extends AbstractNetworkService {
 						break;
 					case FIXED_RESPONSE :
 						FixedResponseActionConfig fixedResponseActionConfig = action.fixedResponseConfig();
-						diagramResult.addNode(new DiagramData<DiagramNode>(new DiagramNode(Integer.toString(fixedResponseActionConfig.hashCode()), fixedResponseActionConfig.contentType())).addClass(NodeType.INTERNET));
+						diagramResult.addNode(
+								new DiagramData<DiagramNode>(
+										new DiagramNode(Integer.toString(fixedResponseActionConfig.hashCode()), fixedResponseActionConfig.contentType(), diagramResult.getVpcId())
+								).addClass(NodeType.INTERNET)
+						);
 						DiagramEdge diagramFixedEdge = new DiagramEdge(loadBalancer.loadBalancerArn(), Integer.toString(fixedResponseActionConfig.hashCode()));
 						diagramFixedEdge.setLabel(
 								new StringBuilder()

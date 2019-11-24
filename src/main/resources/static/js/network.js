@@ -33,7 +33,7 @@ var NetworkLoad = function() {
 			edgeRouting: 'ORTHOGONAL', // Defines how edges are routed (POLYLINE, ORTHOGONAL, SPLINES)
 			edgeSpacingFactor: 0.5, // Factor by which the object spacing is multiplied to arrive at the minimal spacing between edges.
 			feedbackEdges: true, // Whether feedback edges should be highlighted by routing around the nodes.
-			fixedAlignment: 'NONE', // Tells the BK node placer to use a certain alignment instead of taking the optimal result.  This option should usually be left alone.
+			fixedAlignment: 'LEFTUP', // Tells the BK node placer to use a certain alignment instead of taking the optimal result.  This option should usually be left alone.
 			/* NONE Chooses the smallest layout from the four possible candidates.
 			LEFTUP Chooses the left-up candidate from the four possible candidates.
 			RIGHTUP Chooses the right-up candidate from the four possible candidates.
@@ -42,22 +42,22 @@ var NetworkLoad = function() {
 			BALANCED Creates a balanced layout from the four possible candidates. */
 			inLayerSpacingFactor: 0.3, // Factor by which the usual spacing is multiplied to determine the in-layer spacing between objects.
 			layoutHierarchy: false, // Whether the selected layouter should consider the full hierarchy
-			linearSegmentsDeflectionDampening: 0.3, // Dampens the movement of nodes to keep the diagram from getting too large.
+			linearSegmentsDeflectionDampening: 0.03, // Dampens the movement of nodes to keep the diagram from getting too large.
 			mergeEdges: false, // Edges that have no ports are merged so they touch the connected nodes at the same points.
 			mergeHierarchyCrossingEdges: true, // If hierarchical layout is active, hierarchy-crossing edges use as few hierarchical ports as possible.
 			nodeLayering:'NETWORK_SIMPLEX', // Strategy for node layering.
 			/* NETWORK_SIMPLEX This algorithm tries to minimize the length of edges. This is the most computationally intensive algorithm. The number of iterations after which it aborts if it hasn't found a result yet can be set with the Maximal Iterations option.
 			LONGEST_PATH A very simple algorithm that distributes nodes along their longest path to a sink node.
 			INTERACTIVE Distributes the nodes into layers by comparing their positions before the layout algorithm was started. The idea is that the relative horizontal order of nodes as it was before layout was applied is not changed. This of course requires valid positions for all nodes to have been set on the input graph before calling the layout algorithm. The interactive node layering algorithm uses the Interactive Reference Point option to determine which reference point of nodes are used to compare positions. */
-			nodePlacement:'BRANDES_KOEPF', // Strategy for Node Placement
+			nodePlacement:'LINEAR_SEGMENTS', // Strategy for Node Placement
 			/* BRANDES_KOEPF Minimizes the number of edge bends at the expense of diagram size: diagrams drawn with this algorithm are usually higher than diagrams drawn with other algorithms.
 			LINEAR_SEGMENTS Computes a balanced placement.
 			INTERACTIVE Tries to keep the preset y coordinates of nodes from the original layout. For dummy nodes, a guess is made to infer their coordinates. Requires the other interactive phase implementations to have run as well.
 			SIMPLE Minimizes the area at the expense of... well, pretty much everything else. */
 			randomizationSeed: 1, // Seed used for pseudo-random number generators to control the layout algorithm; 0 means a new seed is generated
 			routeSelfLoopInside: false, // Whether a self-loop is routed around or inside its node.
-			separateConnectedComponents: true, // Whether each connected component should be processed separately
-			spacing: 170, // Overall setting for the minimal amount of space to be left between objects
+			separateConnectedComponents: false, // Whether each connected component should be processed separately
+			spacing: 80, // Overall setting for the minimal amount of space to be left between objects
 			thoroughness: 7 // How much effort should be spent to produce a nice layout..
     	},
     	priority: function( edge ){ return null; }
@@ -87,10 +87,11 @@ var NetworkLoad = function() {
 		
 		Utils.async(jsonURL, (data) => {
 			diagram.add(data);
-			diagram.layout(layoutOptions).run();
 			diagram.nodes().noOverlap({
-                padding: 5
+                padding: 30
             });
+			diagram.layout(layoutOptions).run();
+            
 			diagram.elements().forEach(function(element, index) {
 				
 				if(element.data().label != null && element.data().label != "") {
@@ -123,27 +124,75 @@ var NetworkLoad = function() {
 		
 		diagram = cytoscape({
 		  container: document.getElementById('cy'),
-		
-		  boxSelectionEnabled: false,
-		  autounselectify: true,
+				  
+		  zoom: 1,
+		  pan: { x: 0, y: 0 },
+
+		  // interaction options:
+		  minZoom: 1e-50,
+		  maxZoom: 1e50,
+		  zoomingEnabled: true,
+		  userZoomingEnabled: true,
+		  panningEnabled: true,
+		  userPanningEnabled: true,
+		  boxSelectionEnabled: true,
+		  selectionType: 'single',
+		  touchTapThreshold: 8,
+		  desktopTapThreshold: 4,
+		  autolock: false,
+		  autoungrabify: false,
+		  autounselectify: false,
+
+		  // rendering options:
+		  headless: false,
+		  styleEnabled: true,
+		  hideEdgesOnViewport: false,
+		  textureOnViewport: false,
+		  motionBlur: false,
+		  motionBlurOpacity: 0.2,
 		  wheelSensitivity: 0.05,
+		  pixelRatio: 'auto',
 		
 		  style: cytoscape.stylesheet()
 		    .selector('node')
 		      .css({
 		        'shape': 'rectangle',
-		        'height': 80,
-		        'width': 80,
+		        'height': 40,
+		        'width': 40,
 		        'background-fit': 'cover',
 		        'background-opacity': 0,
 		        "color": "#fff",
-		        "text-valign": "bottom"
+		        "text-valign": "bottom",
+		        "label": "data(title)",
+		        'font-size': '10px',
+			    "text-wrap": "wrap",
+			    "text-overflow-wrap": "anywhere",
+		        "text-max-width": 100,
+		        "text-margin-y": 5
+		      })
+		    .selector(':parent')
+		      .css({
+			    "text-halign": "left",
+			    "text-valign": "top",
+			    "text-margin-x": 100,
+			    "text-margin-y": 50,
+			    "text-justification": "left",
+		    	'padding': '60px',
+		    	'background-fit': 'none',
+		    	'background-repeat': 'no-repeat',
+		    	'background-position-x': 0,
+		    	'background-position-y': 0,
+		    	'background-width': 40,
+		    	'background-height': 40,
+		    	'border-width': 1,
+		    	'border-style': 'solid',
+		    	'border-color': 'green'
 		      })
 		    .selector('edge')
 		      .css({
 		        'curve-style': 'bezier',
 		        "control-point-step-size": 80,
-		        'width': 6,
+		        'width': 1,
 		        'source-arrow-shape': "data(sourceArrowShape)",
 		        'target-arrow-shape': "data(targetArrowShape)",
 		        'line-color': "data(lineColor)",
@@ -152,9 +201,29 @@ var NetworkLoad = function() {
 		        "color": "#fff",
 		        "label": "data(label)",
 		        "edge-text-rotation": "autorotate",
+		        'font-size': '10px',
 			    "text-wrap": "wrap",
-		        "text-max-width": 150
+			    "text-overflow-wrap": "anywhere",
+		        "text-max-width": 100
 		      })
+		    .selector('edge:selected')
+              .css({
+            	    'width': 5,
+                    'line-color': 'white',
+                    'source-arrow-color': 'white',
+                    'target-arrow-color': 'white',
+	  		        'font-size': '14px',
+                    'color': 'orange',
+	  		        "text-max-width": 400                                 
+                })
+            .selector('node:selected')
+              .css({
+	            	'height': 60,
+	  		        'width': 60,
+	  		        'font-size': '14px',
+                    'color': 'orange',
+	  		        "text-max-width": 400
+              })
 		    .selector('.trafficAllow')
 		      .css({
 		    	'shape': 'rectangle',
@@ -176,6 +245,23 @@ var NetworkLoad = function() {
 		    .selector('.local')
 		      .css({
 		    	  'background-image': '/img/Virtual-private-cloud-VPC_dark-bg@4x.png'
+		      })
+		    .selector('.aws')
+		      .css({
+		    	  'background-image': '/img/AWS-Cloud-alt_dark-bg@4x.png',
+		    	  'border-color': '#dadada'
+		      })
+		    .selector('.region')
+		      .css({
+		    	  'background-image': '/img/Region_dark-bg@4x.png'
+		      })
+		    .selector('.vpc')
+		      .css({
+		    	  'background-image': '/img/Virtual-private-cloud-VPC_dark-bg@4x.png',
+		    	  'border-color': 'green',
+		    	  "text-max-width": 200,
+				  "text-margin-x": 170,
+				  "text-margin-y": 20,
 		      })
 		    .selector('.ec2Instance')
 		      .css({
@@ -282,6 +368,62 @@ var NetworkLoad = function() {
 		  }
 		}); // cy init
 		
+		var api = diagram.viewUtilities({
+            node: {
+              highlighted: {
+                'border-color': '#0B9BCD',  //blue
+                'border-width': 3
+              },
+              highlighted2: {
+                'border-color': '#04F06A',  //green
+                'border-width': 3
+              },
+              highlighted3: {
+                'border-color': '#F5E663',   //yellow
+                'border-width': 3
+              },
+              highlighted4: {
+                'border-color': '#BF0603',    //red
+                'border-width': 3
+              },
+              selected: {
+                'border-color': 'black',
+                'border-width': 3,
+                'background-color': 'lightgrey'
+              }
+
+            },
+            edge: {
+              highlighted: {
+                'line-color': '#0B9BCD',    //blue
+                'width' : 3
+              },
+              highlighted2: {
+                'line-color': '#04F06A',   //green
+                'width' : 3
+              },
+              highlighted3: {
+                'line-color': '#F5E663',    //yellow
+                'width' : 3
+              },
+              highlighted4: {
+                'line-color': '#BF0603',    //red
+                'width' : 3
+              },
+              selected: {
+                'line-color': 'black',
+                'width' : 3
+              }
+            },
+            setVisibilityOnHide: false, // whether to set visibility on hide/show
+            setDisplayOnHide: true, // whether to set display on hide/show
+            zoomAnimationDuration: 1500, //default duration for zoom animation speed                  
+            neighbor: function(node){
+                return node.closedNeighborhood();
+            },
+            neighborSelectTime: 1000
+        });
+		/*
 		diagram.nodeHtmlLabel([
 	        {
 	            query: 'node',
@@ -293,7 +435,7 @@ var NetworkLoad = function() {
 	            }
 	        }
 	    ]);
-		
+		*/
 		diagram.dblclick();
 		diagram.on("dblclick", function(evt) {
 			var element = evt.target;
