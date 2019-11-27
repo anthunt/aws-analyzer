@@ -163,17 +163,17 @@ public class LoadBalancerService extends AbstractNetworkService {
 		
 		DiagramResult diagramResult = new DiagramResult(vpc.vpcId(), targetIp == null);
 		
-		diagramResult.addNode(
-				new DiagramData<DiagramNode>(
-						new DiagramNode(AWS, "")
-				).addClass(NodeType.AWS)
-		);
-		
-		diagramResult.addNode(
-				new DiagramData<DiagramNode>(
-						new DiagramNode(vpc.vpcId(), vpc.vpcId(), AWS)
-				).addClass(NodeType.VPC)
-		);
+//		diagramResult.addNode(
+//				new DiagramData<DiagramNode>(
+//						new DiagramNode(AWS, "")
+//				).addClass(NodeType.AWS)
+//		);
+//		
+//		diagramResult.addNode(
+//				new DiagramData<DiagramNode>(
+//						new DiagramNode(vpc.vpcId(), vpc.vpcId(), AWS)
+//				).addClass(NodeType.VPC)
+//		);
 		
 		String serverId = checkResults.getCidr();
 		if(serverId != null) {
@@ -188,7 +188,7 @@ public class LoadBalancerService extends AbstractNetworkService {
 		
 		diagramResult.addNode(
 				new DiagramData<DiagramNode>(
-						new DiagramNode(loadBalancer.loadBalancerArn(), loadBalancer, vpc.vpcId())
+						new DiagramNode(loadBalancer.loadBalancerArn(), loadBalancer)
 				).addClass(NodeType.getLoadBalancerType(loadBalancer.type()))
 		);
 		
@@ -199,10 +199,11 @@ public class LoadBalancerService extends AbstractNetworkService {
 	
 	private void setSecurityGroup(String networkAclId, LoadBalancer loadBalancer, CheckResult securityGroupCheckResult, DiagramResult diagramResult) {
 		if(loadBalancer.type() == LoadBalancerTypeEnum.NETWORK) {
-			DiagramEdge serverEdge = new DiagramEdge(networkAclId, loadBalancer.loadBalancerArn());
-			serverEdge.setLabel("");
-			serverEdge.setBoth(true);
-			diagramResult.addEdge(new DiagramData<DiagramEdge>(serverEdge));
+			diagramResult.addEdge(new DiagramData<DiagramEdge>(
+					DiagramEdge.make(networkAclId, loadBalancer.loadBalancerArn())
+							   .setLabel("")
+							   .setBoth(true)
+			));
 			
 		} else {
 
@@ -212,7 +213,7 @@ public class LoadBalancerService extends AbstractNetworkService {
 					
 					diagramResult.addNode(
 							new DiagramData<DiagramNode>(
-									new DiagramNode(securityGroupCheckRule.getId(), securityGroupCheckRule.getSecurityGroup(), diagramResult.getVpcId())
+									new DiagramNode(securityGroupCheckRule.getId(), securityGroupCheckRule.getSecurityGroup())
 							).addClass(NodeType.SECURITY_GROUP)
 					);
 					
@@ -227,10 +228,8 @@ public class LoadBalancerService extends AbstractNetworkService {
 						port = securityGroupCheckRule.getPrototol() + ":" + securityGroupCheckRule.getFromPort() + "-" + securityGroupCheckRule.getToPort();
 					}
 					
-					DiagramEdge diagramEdge = new DiagramEdge(networkAclId, securityGroupCheckRule.getId());
-					DiagramEdge serverEdge = new DiagramEdge(securityGroupCheckRule.getId(), loadBalancer.loadBalancerArn());
-					serverEdge.setLabel(port);
-					diagramEdge.setLabel(securityGroupCheckRule.getCidr() + "\n" + port);
+					DiagramEdge diagramEdge = DiagramEdge.make(networkAclId, securityGroupCheckRule.getId()).setLabel(securityGroupCheckRule.getCidr() + "\n" + port);
+					DiagramEdge serverEdge = DiagramEdge.make(securityGroupCheckRule.getId(), loadBalancer.loadBalancerArn()).setLabel(port);
 					if(securityGroupCheckRule.getDirectionType() == DirectionType.INGRESS) {
 						diagramEdge.setIn(true);
 						serverEdge.setIn(true);
@@ -245,10 +244,11 @@ public class LoadBalancerService extends AbstractNetworkService {
 			}
 			
 			if(securityGroupCheckResult.getAllRules().size() < 1) {
-				DiagramEdge serverEdge = new DiagramEdge(networkAclId, loadBalancer.loadBalancerArn());
-				serverEdge.setLabel("Not allow in SecurityGroup");
-				serverEdge.setBoth(false);
-				diagramResult.addEdge(new DiagramData<DiagramEdge>(serverEdge));
+				diagramResult.addEdge(new DiagramData<DiagramEdge>(
+						DiagramEdge.make(networkAclId, loadBalancer.loadBalancerArn())
+								   .setLabel("Not allow in SecurityGroup")
+								   .setBoth(false)
+				));
 			}
 		}
 		
@@ -295,18 +295,20 @@ public class LoadBalancerService extends AbstractNetworkService {
 						
 						diagramResult.addNode(
 								new DiagramData<DiagramNode>(
-										new DiagramNode(targetGroup.targetGroupArn(), targetGroup, diagramResult.getVpcId())
+										new DiagramNode(targetGroup.targetGroupArn(), targetGroup)
 								).addClass(NodeType.TARGET_GROUP)
 						);
-						DiagramEdge diagramTargetEdge = new DiagramEdge(loadBalancer.loadBalancerArn(), targetGroup.targetGroupArn());
-						diagramTargetEdge.setLabel(
-								(ruleConditions.size() == 0 ? "Default " : "")
-								+ (hostString.length() > 0 ? (hostString.toString() + "->") : "")
-								+ (pathString.length() > 0 ? (pathString.toString() + "->") : "")
-								+ listener.protocolAsString() + ":" + listener.port()
-						);
-						diagramTargetEdge.setBoth(true);
-						diagramResult.addEdge(new DiagramData<DiagramEdge>(diagramTargetEdge));
+ 
+						diagramResult.addEdge(new DiagramData<DiagramEdge>(
+								DiagramEdge.make(loadBalancer.loadBalancerArn(), targetGroup.targetGroupArn())
+										   .setLabel(
+												(ruleConditions.size() == 0 ? "Default " : "")
+												+ (hostString.length() > 0 ? (hostString.toString() + "->") : "")
+												+ (pathString.length() > 0 ? (pathString.toString() + "->") : "")
+												+ listener.protocolAsString() + ":" + listener.port()
+										   )
+										   .setBoth(true)
+						));
 						
 						List<TargetHealthDescription> targetHealthDescriptions = serviceRepository.getTargetHealthDescriptionsMap().get(targetGroup.targetGroupArn());
 						
@@ -318,21 +320,21 @@ public class LoadBalancerService extends AbstractNetworkService {
 								Instance instance = serviceRepository.getEc2InstanceMap().get(targetDescription.id()); 
 								diagramResult.addNode(
 										new DiagramData<DiagramNode>(
-												new DiagramNode(targetDescription.id(), instance, diagramResult.getVpcId())
+												new DiagramNode(targetDescription.id(), instance)
 										).addClass(NodeType.EC2_INSTANCE)
 								);
 								break;
 							case IP :
 								diagramResult.addNode(
 										new DiagramData<DiagramNode>(
-												new DiagramNode(targetDescription.id(), targetDescription.id(), diagramResult.getVpcId())
+												new DiagramNode(targetDescription.id(), targetDescription.id())
 										).addClass(NodeType.SERVER)
 								);
 								break;
 							case LAMBDA :
 								diagramResult.addNode(
 										new DiagramData<DiagramNode>(
-												new DiagramNode(targetDescription.id(), targetDescription.id(), diagramResult.getVpcId())
+												new DiagramNode(targetDescription.id(), targetDescription.id())
 										).addClass(NodeType.LAMBDA)
 								);
 								break;
@@ -341,10 +343,11 @@ public class LoadBalancerService extends AbstractNetworkService {
 							}
 							
 							if(targetGroup.targetType() != TargetTypeEnum.UNKNOWN_TO_SDK_VERSION) {
-								DiagramEdge diagramEdge = new DiagramEdge(targetGroup.targetGroupArn(), targetDescription.id());
-								diagramEdge.setLabel(listener.protocolAsString() + ":" + listener.port() + "->" + targetDescription.port());
-								diagramEdge.setBoth(targetHealthDescription.targetHealth().state() == TargetHealthStateEnum.HEALTHY);
-								diagramResult.addEdge(new DiagramData<DiagramEdge>(diagramEdge));
+								diagramResult.addEdge(new DiagramData<DiagramEdge>(
+										DiagramEdge.make(targetGroup.targetGroupArn(), targetDescription.id())
+												   .setLabel(listener.protocolAsString() + ":" + listener.port() + "->" + targetDescription.port())
+												   .setBoth(targetHealthDescription.targetHealth().state() == TargetHealthStateEnum.HEALTHY)
+								));
 							}
 						}						
 							
@@ -361,35 +364,37 @@ public class LoadBalancerService extends AbstractNetworkService {
 																											.append("?")
 																											.append(redirectActionConfig.query())
 																											.append(" - ")
-																											.append(redirectActionConfig.statusCodeAsString()).toString(), diagramResult.getVpcId())
+																											.append(redirectActionConfig.statusCodeAsString()).toString())
 								).addClass(NodeType.INTERNET)
 						);
-						DiagramEdge diagramEdge = new DiagramEdge(loadBalancer.loadBalancerArn(), Integer.toString(redirectActionConfig.hashCode()));
-						diagramEdge.setLabel(
-								new StringBuilder()
-								.append(listener.protocolAsString())
-								.append(":")
-								.append(listener.port()).toString()
-						);
-						diagramEdge.setBoth(true);
-						diagramResult.addEdge(new DiagramData<DiagramEdge>(diagramEdge));
+						diagramResult.addEdge(new DiagramData<DiagramEdge>(
+								DiagramEdge.make(loadBalancer.loadBalancerArn(), Integer.toString(redirectActionConfig.hashCode()))
+										.setLabel(
+												new StringBuilder()
+												.append(listener.protocolAsString())
+												.append(":")
+												.append(listener.port()).toString()
+										)
+										.setBoth(true)
+						));
 						break;
 					case FIXED_RESPONSE :
 						FixedResponseActionConfig fixedResponseActionConfig = action.fixedResponseConfig();
 						diagramResult.addNode(
 								new DiagramData<DiagramNode>(
-										new DiagramNode(Integer.toString(fixedResponseActionConfig.hashCode()), fixedResponseActionConfig.contentType(), diagramResult.getVpcId())
+										new DiagramNode(Integer.toString(fixedResponseActionConfig.hashCode()), fixedResponseActionConfig.contentType())
 								).addClass(NodeType.INTERNET)
 						);
-						DiagramEdge diagramFixedEdge = new DiagramEdge(loadBalancer.loadBalancerArn(), Integer.toString(fixedResponseActionConfig.hashCode()));
-						diagramFixedEdge.setLabel(
-								new StringBuilder()
-								.append(listener.protocolAsString())
-								.append(":")
-								.append(listener.port()).toString()
-						);
-						diagramFixedEdge.setBoth(true);
-						diagramResult.addEdge(new DiagramData<DiagramEdge>(diagramFixedEdge));
+						diagramResult.addEdge(new DiagramData<DiagramEdge>(
+								DiagramEdge.make(loadBalancer.loadBalancerArn(), Integer.toString(fixedResponseActionConfig.hashCode()))
+										.setLabel(
+												new StringBuilder()
+												.append(listener.protocolAsString())
+												.append(":")
+												.append(listener.port()).toString()
+										)
+										.setBoth(true)
+						));
 						break;
 					case AUTHENTICATE_COGNITO :
 						action.authenticateCognitoConfig();

@@ -64,7 +64,7 @@ public abstract class AbstractNetworkService {
 					
 					DiagramNode vpnConnectionNode = diagramResult.addNode(
 							new DiagramData<DiagramNode>(
-									new DiagramNode(vpnConnection.vpnConnectionId(), vpnConnection, AWS)
+									new DiagramNode(vpnConnection.vpnConnectionId(), vpnConnection)
 							).addClass(NodeType.VPN_CONNECTION)
 					);
 					log.debug("added node - {routeTableId: {}, {}}", routeTableId, vpnConnectionNode.toString());
@@ -72,23 +72,30 @@ public abstract class AbstractNetworkService {
 					gatewayIds.add(vpnConnection.vpnConnectionId());
 					
 					if(serverId != null) {
-						DiagramEdge diagramCustomerGatewayEdge = new DiagramEdge(serverId, vpnConnection.customerGatewayId());
-						diagramCustomerGatewayEdge.setLabel(vpnConnection.category());
-						diagramCustomerGatewayEdge.setBoth(true);
-						diagramResult.addEdge(new DiagramData<DiagramEdge>(diagramCustomerGatewayEdge));
+//						diagramResult.addEdge(new DiagramData<DiagramEdge>(
+//								DiagramEdge.make(vpnConnection.customerGatewayId(), AWS)
+//								.setAllMode(true)
+//						));
+						DiagramEdge diagramCustomerGatewayEdge = diagramResult.addEdge(new DiagramData<DiagramEdge>(
+								DiagramEdge.make(serverId, vpnConnection.customerGatewayId())
+										   .setLabel(vpnConnection.category())
+										   .setBoth(true)
+						));
 						log.debug("added edge - {routeTableId: {}, {}}", routeTableId, diagramCustomerGatewayEdge.toString());
 					}
 					
-					DiagramEdge diagramVpnConnectionEdge = new DiagramEdge(vpnConnection.customerGatewayId(), vpnConnection.vpnConnectionId());
-					diagramVpnConnectionEdge.setLabel(vpnConnection.typeAsString());
-					diagramVpnConnectionEdge.setBoth(true);
-					diagramResult.addEdge(new DiagramData<DiagramEdge>(diagramVpnConnectionEdge));
+					DiagramEdge diagramVpnConnectionEdge = diagramResult.addEdge(new DiagramData<DiagramEdge>(
+							DiagramEdge.make(vpnConnection.customerGatewayId(), vpnConnection.vpnConnectionId())
+									   .setLabel(vpnConnection.typeAsString())
+									   .setBoth(true)
+					));
 					log.debug("added edge - {routeTableId: {}, {}}", routeTableId, diagramVpnConnectionEdge.toString());
 					
-					DiagramEdge diagramVpnGatewayEdge = new DiagramEdge(vpnConnection.vpnConnectionId(), vpnConnection.vpnGatewayId());
-					diagramVpnGatewayEdge.setLabel(vpnConnection.options().staticRoutesOnly() ? "static" : "dynamic");
-					diagramVpnGatewayEdge.setBoth(true);
-					diagramResult.addEdge(new DiagramData<DiagramEdge>(diagramVpnGatewayEdge));
+					DiagramEdge diagramVpnGatewayEdge = diagramResult.addEdge(new DiagramData<DiagramEdge>(
+							DiagramEdge.make(vpnConnection.vpnConnectionId(), vpnConnection.vpnGatewayId())
+									   .setLabel(vpnConnection.options().staticRoutesOnly() ? "static" : "dynamic")
+									   .setBoth(true)
+					));
 					log.debug("added edge - {routeTableId: {}, {}}", routeTableId, diagramVpnGatewayEdge.toString());
 				}
 				
@@ -102,7 +109,7 @@ public abstract class AbstractNetworkService {
 					log.debug("added node - {routeTableId: {}, {}}", routeTableId, dxLoacationNode.toString());
 					DiagramNode vifConnectionNode = diagramResult.addNode(
 							new DiagramData<DiagramNode>(
-									new DiagramNode(virtualInterface.connectionId(), virtualInterface, AWS)
+									new DiagramNode(virtualInterface.connectionId(), virtualInterface)
 							).addClass(NodeType.DIRECT_CONNECT)
 					);
 					log.debug("added node - {routeTableId: {}, {}}", routeTableId, vifConnectionNode.toString());
@@ -110,32 +117,40 @@ public abstract class AbstractNetworkService {
 					gatewayIds.add(virtualInterface.connectionId());
 					
 					if(serverId != null) {
-						DiagramEdge diagramLocationEdge = new DiagramEdge(serverId, virtualInterface.location());
-						diagramLocationEdge.setLabel(virtualInterface.customerAddress() + " (Vlan : " + virtualInterface.vlan() + ", Asn :" + virtualInterface.asn() + ")");
-						diagramLocationEdge.setBoth(true);
-						diagramResult.addEdge(new DiagramData<DiagramEdge>(diagramLocationEdge));
+//						diagramResult.addEdge(new DiagramData<DiagramEdge>(
+//								DiagramEdge.make(virtualInterface.location(), AWS)
+//										   .setAllMode(true)
+//						));
+						DiagramEdge diagramLocationEdge = diagramResult.addEdge(new DiagramData<DiagramEdge>(
+								DiagramEdge.make(serverId, virtualInterface.location())
+										   .setLabel(virtualInterface.customerAddress() + " (Vlan : " + virtualInterface.vlan() + ", Asn :" + virtualInterface.asn() + ")")
+										   .setBoth(true)
+						));
 						log.debug("added edge - {routeTableId: {}, {}}", routeTableId, diagramLocationEdge.toString());
 					}
 					
-					DiagramEdge diagramDirectConnectEdge = new DiagramEdge(virtualInterface.location(), virtualInterface.connectionId());
-					diagramDirectConnectEdge.setLabel(virtualInterface.amazonAddress() + " (" + virtualInterface.awsDeviceV2() + ")");
-					diagramDirectConnectEdge.setBoth(true);
-					diagramResult.addEdge(new DiagramData<DiagramEdge>(diagramDirectConnectEdge));
+					DiagramEdge diagramDirectConnectEdge = diagramResult.addEdge(new DiagramData<DiagramEdge>(
+							DiagramEdge.make(virtualInterface.location(), virtualInterface.connectionId())
+									   .setLabel(virtualInterface.amazonAddress() + " (" + virtualInterface.awsDeviceV2() + ")")
+									   .setBoth(true)
+					));
 					log.debug("added edge - {routeTableId: {}, {}}", routeTableId, diagramDirectConnectEdge.toString());
 					
 					if(virtualInterface.directConnectGatewayId() != null && !"".equals(virtualInterface.directConnectGatewayId())) {
-						DiagramEdge diagramEdge = new DiagramEdge(virtualInterface.connectionId(), virtualInterface.directConnectGatewayId());
-						diagramEdge.setLabel(virtualInterface.virtualInterfaceType() + ":" + virtualInterface.virtualInterfaceName() + " (Asn :" + virtualInterface.amazonSideAsn() + ")");
-						diagramEdge.setBoth(virtualInterface.virtualInterfaceState() == VirtualInterfaceState.AVAILABLE);
-						diagramResult.addEdge(new DiagramData<DiagramEdge>(diagramEdge));
+						DiagramEdge diagramEdge = diagramResult.addEdge(new DiagramData<DiagramEdge>(
+								DiagramEdge.make(virtualInterface.connectionId(), virtualInterface.directConnectGatewayId())
+										   .setLabel(virtualInterface.virtualInterfaceType() + ":" + virtualInterface.virtualInterfaceName() + " (Asn :" + virtualInterface.amazonSideAsn() + ")")
+										   .setBoth(virtualInterface.virtualInterfaceState() == VirtualInterfaceState.AVAILABLE)
+						));
 						log.debug("added edge - {routeTableId: {}, {}}", routeTableId, diagramEdge.toString());
 					}
 					
 					if(virtualInterface.virtualGatewayId() != null && !"".equals(virtualInterface.virtualGatewayId())) {
-						DiagramEdge diagramEdge = new DiagramEdge(virtualInterface.connectionId(), virtualInterface.virtualGatewayId());
-						diagramEdge.setLabel(virtualInterface.virtualInterfaceType() + ":" + virtualInterface.virtualInterfaceName() + " (Asn :" + virtualInterface.amazonSideAsn() + ")");
-						diagramEdge.setBoth(virtualInterface.virtualInterfaceState() == VirtualInterfaceState.AVAILABLE);
-						diagramResult.addEdge(new DiagramData<DiagramEdge>(diagramEdge));
+						DiagramEdge diagramEdge = diagramResult.addEdge(new DiagramData<DiagramEdge>(
+								DiagramEdge.make(virtualInterface.connectionId(), virtualInterface.virtualGatewayId())
+										   .setLabel(virtualInterface.virtualInterfaceType() + ":" + virtualInterface.virtualInterfaceName() + " (Asn :" + virtualInterface.amazonSideAsn() + ")")
+										   .setBoth(virtualInterface.virtualInterfaceState() == VirtualInterfaceState.AVAILABLE)
+						));
 						log.debug("added edge - {routeTableId: {}, {}}", routeTableId, diagramEdge.toString());
 					}
 					
@@ -173,13 +188,13 @@ public abstract class AbstractNetworkService {
 				
 				DiagramNode gatewayNode = diagramResult.addNode(
 						new DiagramData<DiagramNode>(
-								new DiagramNode(routeCheckRule.getGatewayId(), gateway, AWS)
+								new DiagramNode(routeCheckRule.getGatewayId(), gateway)
 						).addClass(routeCheckRule.getGatewayType())
 				);
 				log.debug("added node - {routeTableId: {}, {}}", routeTableId, gatewayNode.toString());
 				DiagramNode routeNode = diagramResult.addNode(
 						new DiagramData<DiagramNode>(
-								new DiagramNode(routeCheckRule.getId(), routeCheckRule.getRouteTable(), diagramResult.getVpcId())
+								new DiagramNode(routeCheckRule.getId(), routeCheckRule.getRouteTable())
 						).addClass(NodeType.ROUTE_TABLE)
 				);
 				log.debug("added node - {routeTableId: {}, {}}", routeTableId, routeNode.toString());
@@ -188,8 +203,7 @@ public abstract class AbstractNetworkService {
 					
 					if(serverId != null) {
 						if(gatewayIds.size() < 1) {
-							DiagramEdge diagramGatewayEdge = new DiagramEdge(serverId, routeCheckRule.getGatewayId());
-							diagramGatewayEdge.setLabel(cidr);
+							DiagramEdge diagramGatewayEdge = DiagramEdge.make(serverId, routeCheckRule.getGatewayId()).setLabel(cidr);
 							if(routeCheckRule.getGatewayType() == NodeType.EGRESS_INTERNET_GATEWAY || routeCheckRule.getGatewayType() == NodeType.NAT_GATEWAY) {
 								diagramGatewayEdge.setOut(routeCheckRule.getRouteState() == RouteState.ACTIVE);
 							} else {
@@ -200,8 +214,7 @@ public abstract class AbstractNetworkService {
 						}
 					}
 					
-					DiagramEdge diagramEdge = new DiagramEdge(routeCheckRule.getGatewayId(), routeCheckRule.getId());
-					diagramEdge.setLabel(cidr);
+					DiagramEdge diagramEdge = DiagramEdge.make(routeCheckRule.getGatewayId(), routeCheckRule.getId()).setLabel(cidr);
 					if(routeCheckRule.getGatewayType() == NodeType.EGRESS_INTERNET_GATEWAY || routeCheckRule.getGatewayType() == NodeType.NAT_GATEWAY) {
 						diagramEdge.setOut(routeCheckRule.getRouteState() == RouteState.ACTIVE);
 					} else {
@@ -222,15 +235,16 @@ public abstract class AbstractNetworkService {
 			routeTableIds.add(routeTableId);
 			DiagramNode noRouteNode = diagramResult.addNode(
 					new DiagramData<DiagramNode>(
-							new DiagramNode(noRouteId, noRouteName, diagramResult.getVpcId())
+							new DiagramNode(noRouteId, noRouteName)
 					).addClass(NodeType.ROUTE_TABLE)
 			);
 			log.debug("added node - {routeTableId: {}, {}}", routeTableId, noRouteNode.toString());
 			if(serverId != null) {
-				DiagramEdge diagramEdge = new DiagramEdge(serverId, noRouteId);
-				diagramEdge.setLabel("Have no route");
-				diagramEdge.setBoth(false);
-				diagramResult.addEdge(new DiagramData<DiagramEdge>(diagramEdge));
+				DiagramEdge diagramEdge = diagramResult.addEdge(new DiagramData<DiagramEdge>(
+						DiagramEdge.make(serverId, noRouteId)
+								   .setLabel("Have no route")
+								   .setBoth(false)
+				));
 				log.debug("added edge - {routeTableId: {}, {}}", routeTableId, diagramEdge.toString());
 			}
 		}
@@ -252,12 +266,12 @@ public abstract class AbstractNetworkService {
 					
 					DiagramNode diagramNode = diagramResult.addNode(
 							new DiagramData<DiagramNode>(
-									new DiagramNode(networkAclCheckRule.getId(), networkAclCheckRule.getNetworkAcl(), diagramResult.getVpcId())
+									new DiagramNode(networkAclCheckRule.getId(), networkAclCheckRule.getNetworkAcl())
 							).addClass(NodeType.NETWORK_ACL)
 					);
 					log.debug("add node - {networkAclId:{}, {}}", networkAclId, diagramNode.toString());
 					
-					DiagramEdge diagramEdge = new DiagramEdge(routeTableId, networkAclCheckRule.getId());
+					DiagramEdge diagramEdge = DiagramEdge.make(routeTableId, networkAclCheckRule.getId());
 					
 					String port = "";
 					if("All".equals(networkAclCheckRule.getPrototol()) && networkAclCheckRule.getPortRange() == null) {
@@ -292,7 +306,7 @@ public abstract class AbstractNetworkService {
 				
 				diagramResult.addNode(
 						new DiagramData<DiagramNode>(
-								new DiagramNode(securityGroupCheckRule.getId(), securityGroupCheckRule.getSecurityGroup(), diagramResult.getVpcId())
+								new DiagramNode(securityGroupCheckRule.getId(), securityGroupCheckRule.getSecurityGroup())
 						).addClass(NodeType.SECURITY_GROUP)
 				);
 				
@@ -307,8 +321,8 @@ public abstract class AbstractNetworkService {
 					port = securityGroupCheckRule.getPrototol() + ":" + securityGroupCheckRule.getFromPort() + "-" + securityGroupCheckRule.getToPort();
 				}
 				
-				DiagramEdge diagramEdge = new DiagramEdge(networkAclId, securityGroupCheckRule.getId());
-				DiagramEdge serverEdge = new DiagramEdge(securityGroupCheckRule.getId(), instanceId);
+				DiagramEdge diagramEdge = DiagramEdge.make(networkAclId, securityGroupCheckRule.getId());
+				DiagramEdge serverEdge = DiagramEdge.make(securityGroupCheckRule.getId(), instanceId);
 				serverEdge.setLabel(port);
 				diagramEdge.setLabel(securityGroupCheckRule.getCidr() + "\n" + port);
 				if(securityGroupCheckRule.getDirectionType() == DirectionType.INGRESS) {
@@ -325,10 +339,11 @@ public abstract class AbstractNetworkService {
 		}
 		
 		if(securityGroupCheckResult.getAllRules().size() < 1) {
-			DiagramEdge serverEdge = new DiagramEdge(networkAclId, instanceId);
-			serverEdge.setLabel("Not allow in SecurityGroup");
-			serverEdge.setBoth(false);
-			diagramResult.addEdge(new DiagramData<DiagramEdge>(serverEdge));
+			diagramResult.addEdge(new DiagramData<DiagramEdge>(
+					DiagramEdge.make(networkAclId, instanceId)
+							   .setLabel("Not allow in SecurityGroup")
+							   .setBoth(false)
+			));
 		}
 	}
 

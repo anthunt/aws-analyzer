@@ -15,135 +15,152 @@ public class DiagramEdge {
 	private boolean allow;
 	private boolean in;
 	private boolean out;
+
+	public static DiagramEdge make(String source, String target) {
+		return new DiagramEdge(source, target);
+	}
 	
-	public DiagramEdge(String source, String target) {
-		this.setSource(source);
-		this.setTarget(target);
+	private DiagramEdge(String source, String target) {
+		this.setSource(source)
+		    .setTarget(target);
 	}
 	
 	public boolean isAllMode() {
 		return isAllMode;
 	}
 
-	public void setAllMode(boolean isAllMode) {
+	public DiagramEdge setAllMode(boolean isAllMode) {
 		this.isAllMode = isAllMode;
+		return this;
 	}
 
 	public String getSource() {
 		return source;
 	}
 	
-	public void setSource(String source) {
+	public DiagramEdge setSource(String source) {
 		this.source = source;
+		return this;
 	}
 	
 	public String getTarget() {
 		return target;
 	}
 	
-	public void setTarget(String target) {
+	public DiagramEdge setTarget(String target) {
 		this.target = target;
+		return this;
 	}
 	
 	public String getLabel() {
 		return label;
 	}
 	
-	public void setLabel(String label) {
+	public DiagramEdge setLabel(String label) {
 		this.label = label;
+		return this;
 	}
 	
-	public void setBoth(boolean allow) {
-		this.setAllow(allow);
-		this.setInBound(true);
-		this.setOutBound(true);
+	public DiagramEdge setBoth(boolean allow) {
+		this.setAllow(allow)
+		    .setInBound(true)
+		    .setOutBound(true);
 		if(allow) {
-			this.setSourceArrowShape(ArrowType.TRIANGLE_BACKCURVE);
-			this.setTargetArrowShape(ArrowType.TRIANGLE_BACKCURVE);
-			this.setLineColor("green");
+			this.setSourceArrowShape(ArrowType.TRIANGLE_BACKCURVE)
+			    .setTargetArrowShape(ArrowType.TRIANGLE_BACKCURVE)
+			    .setLineColor("green");
 		} else {
-			this.setSourceArrowShape(ArrowType.TEE);
-			this.setTargetArrowShape(ArrowType.TEE);
-			this.setLineColor("#999");
+			this.setSourceArrowShape(ArrowType.TEE)
+			    .setTargetArrowShape(ArrowType.TEE)
+			    .setLineColor("#999");
 		}
+		return this;
 	}
 
-	public void setIn(boolean allow) {
-		this.setAllow(allow);
-		this.setInBound(true);
-		this.setOutBound(false);
+	public DiagramEdge setIn(boolean allow) {
+		this.setAllow(allow)
+		    .setInBound(true)
+		    .setOutBound(false);
 		if(allow) {
-			this.setSourceArrowShape(ArrowType.NONE);
-			this.setTargetArrowShape(ArrowType.TRIANGLE_BACKCURVE);
-			this.setLineColor("green");
+			this.setSourceArrowShape(ArrowType.NONE)
+			    .setTargetArrowShape(ArrowType.TRIANGLE_BACKCURVE)
+			    .setLineColor("green");
 		} else {
-			this.setSourceArrowShape(ArrowType.NONE);
-			this.setTargetArrowShape(ArrowType.TEE);
-			this.setLineColor("#999");
+			this.setSourceArrowShape(ArrowType.NONE)
+			    .setTargetArrowShape(ArrowType.TEE)
+			    .setLineColor("#999");
 		}
+		return this;
 	}
 
-	public void setOut(boolean allow) {
-		this.setAllow(allow);
-		this.setInBound(false);
-		this.setOutBound(true);
+	public DiagramEdge setOut(boolean allow) {
+		this.setAllow(allow)
+			.setInBound(false)
+			.setOutBound(true);
 		if(allow) {
-			this.setSourceArrowShape(ArrowType.TRIANGLE_BACKCURVE);
-			this.setTargetArrowShape(ArrowType.NONE);
-			this.setLineColor("green");
+			this.setSourceArrowShape(ArrowType.TRIANGLE_BACKCURVE)
+			    .setTargetArrowShape(ArrowType.NONE)
+			    .setLineColor("green");
 		} else {
-			this.setSourceArrowShape(ArrowType.TEE);
-			this.setTargetArrowShape(ArrowType.NONE);
-			this.setLineColor("#999");
+			this.setSourceArrowShape(ArrowType.TEE)
+			    .setTargetArrowShape(ArrowType.NONE)
+			    .setLineColor("#999");
 		}
+		return this;
 	}
 	
 	public String getSourceArrowShape() {
 		return sourceArrowShape;
 	}
 	
-	private void setSourceArrowShape(ArrowType sourceArrowShape) {
+	private DiagramEdge setSourceArrowShape(ArrowType sourceArrowShape) {
 		this.sourceArrowShape = sourceArrowShape.getName();
+		return this;
 	}
 	
 	public String getTargetArrowShape() {
 		return targetArrowShape;
 	}
 	
-	private void setTargetArrowShape(ArrowType targetArrowShape) {
+	private DiagramEdge setTargetArrowShape(ArrowType targetArrowShape) {
 		this.targetArrowShape = targetArrowShape.getName();
+		return this;
 	}
 	
 	public String getLineColor() {
 		return lineColor;
 	}
 	
-	private void setLineColor(String lineColor) {
+	private DiagramEdge setLineColor(String lineColor) {
 		this.lineColor = lineColor;
+		return this;
 	}
 	
 	public boolean isAllow() {
 		return this.allow;
 	}
 	
-	private void setAllow(boolean allow) {
+	private DiagramEdge setAllow(boolean allow) {
 		this.allow = allow;
+		return this;
 	}
 	
 	public boolean isIn() {
 		return this.in;
 	}
 	
-	private void setInBound(boolean in) {
+	private DiagramEdge setInBound(boolean in) {
 		this.in = in;
+		return this;
 	}
 	
 	public boolean isOut() {
 		return this.out;
 	}
 	
-	private void setOutBound(boolean out) {
+	private DiagramEdge setOutBound(boolean out) {
 		this.out = out;
+		return this;
 	}
 	
 	@Override

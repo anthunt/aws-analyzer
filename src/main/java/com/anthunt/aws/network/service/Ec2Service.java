@@ -361,17 +361,17 @@ public class Ec2Service extends AbstractNetworkService {
 		
 		DiagramResult diagramResult = new DiagramResult(vpc.vpcId(), targetIp == null);
 		
-		diagramResult.addNode(
-				new DiagramData<DiagramNode>(
-						new DiagramNode(AWS, "")
-				).addClass(NodeType.AWS)
-		);
-		
-		diagramResult.addNode(
-				new DiagramData<DiagramNode>(
-						new DiagramNode(vpc.vpcId(), vpc.vpcId(), AWS)
-				).addClass(NodeType.VPC)
-		);
+//		diagramResult.addNode(
+//				new DiagramData<DiagramNode>(
+//						new DiagramNode(AWS, "")
+//				).addClass(NodeType.AWS)
+//		);
+//		
+//		diagramResult.addNode(
+//				new DiagramData<DiagramNode>(
+//						new DiagramNode(vpc.vpcId(), vpc.vpcId(), AWS)
+//				).addClass(NodeType.VPC)
+//		);
 		
 		String targetId = checkResults.getCidr();
 		
@@ -388,7 +388,7 @@ public class Ec2Service extends AbstractNetworkService {
 		
 		diagramResult.addNode(
 				new DiagramData<DiagramNode>(
-						new DiagramNode(checkResults.getResource().instanceId(), checkResults.getResource(), diagramResult.getVpcId())
+						new DiagramNode(checkResults.getResource().instanceId(), checkResults.getResource())
 				).addClass(NodeType.EC2_INSTANCE)
 		);
 		
@@ -398,10 +398,36 @@ public class Ec2Service extends AbstractNetworkService {
 	public DiagramResult getInstanceNetwork(ServiceRepository serviceRepository, DiagramResult diagramResult, String instanceId) {
 		
 		Instance instance = serviceRepository.getEc2InstanceMap().get(instanceId);
+		Vpc vpc = serviceRepository.getVpcMap().get(instance.vpcId());
+		Subnet subnet = serviceRepository.getSubnetMap().get(instance.subnetId());
+		
+		diagramResult.addNode(
+			new DiagramData<DiagramNode>(
+					new DiagramNode(AWS, "Amazon Web Service")
+			).addClass(NodeType.AWS)
+		);
+
+		diagramResult.addNode(
+			new DiagramData<DiagramNode>(
+					new DiagramNode(vpc.vpcId(), vpc, AWS)
+			).addClass(NodeType.VPC)
+		);
+		
+		diagramResult.addNode(
+			new DiagramData<DiagramNode>(
+					new DiagramNode(subnet.availabilityZone(), subnet.availabilityZone(), vpc.vpcId())
+			).addClass(NodeType.AZ)
+		);
+		
+		diagramResult.addNode(
+			new DiagramData<DiagramNode>(
+					new DiagramNode(subnet.subnetId(), subnet, subnet.availabilityZone())
+			).addClass(NodeType.PRIVATE_SUBNET)
+		);
 		
 		diagramResult.addNode(
 				new DiagramData<DiagramNode>(
-						new DiagramNode(instance.instanceId(), instance)
+						new DiagramNode(instance.instanceId(), instance, subnet.subnetId())
 				).addClass(NodeType.EC2_INSTANCE)
 		);
 		
@@ -409,14 +435,15 @@ public class Ec2Service extends AbstractNetworkService {
 			IamInstanceProfile iamInstanceProfile = instance.iamInstanceProfile();
 			diagramResult.addNode(
 					new DiagramData<DiagramNode>(
-							new DiagramNode(iamInstanceProfile.id(), iamInstanceProfile)
+							new DiagramNode(iamInstanceProfile.id(), iamInstanceProfile, AWS)
 					).addClass(NodeType.IAM_ROLE)
 			);
 			
-			DiagramEdge diagramEdge = new DiagramEdge(iamInstanceProfile.id(), instance.instanceId());
-			diagramEdge.setLabel("instance profile");
-			diagramEdge.setBoth(true);
-			diagramResult.addEdge(new DiagramData<DiagramEdge>(diagramEdge));
+			diagramResult.addEdge(new DiagramData<DiagramEdge>(
+					DiagramEdge.make(iamInstanceProfile.id(), instance.instanceId())
+							   .setLabel("instance profile")
+							   .setBoth(true)
+			));
 		}
 				
 		for(InstanceBlockDeviceMapping instanceBlockDeviceMapping : instance.blockDeviceMappings()) {
@@ -424,43 +451,60 @@ public class Ec2Service extends AbstractNetworkService {
 			
 			diagramResult.addNode(
 					new DiagramData<DiagramNode>(
-							new DiagramNode(volume.volumeId(), volume)
+							new DiagramNode(volume.volumeId(), volume, volume.availabilityZone())
 					).addClass(NodeType.EBS)
 			);
 
-			DiagramEdge diagramEdge = new DiagramEdge(instance.instanceId(), volume.volumeId());
-			diagramEdge.setLabel(instanceBlockDeviceMapping.deviceName());
-			diagramEdge.setBoth(true);
-			diagramResult.addEdge(new DiagramData<DiagramEdge>(diagramEdge));
+			diagramResult.addEdge(new DiagramData<DiagramEdge>(
+					DiagramEdge.make(instance.instanceId(), volume.volumeId())
+							   .setLabel(instanceBlockDeviceMapping.deviceName())
+							   .setBoth(true)
+			));
 		}
 		
 		for(InstanceNetworkInterface instanceNetworkInterface : instance.networkInterfaces()) {
 			NetworkInterface networkInterface = serviceRepository.getNetworkInterfaceMap().get(instanceNetworkInterface.networkInterfaceId());
-						
+			
+			subnet = serviceRepository.getSubnetMap().get(networkInterface.subnetId());
+			
+			diagramResult.addNode(
+				new DiagramData<DiagramNode>(
+						new DiagramNode(subnet.availabilityZone(), subnet.availabilityZone(), subnet.vpcId())
+				).addClass(NodeType.AZ)
+			);
+			
+			diagramResult.addNode(
+				new DiagramData<DiagramNode>(
+						new DiagramNode(subnet.subnetId(), subnet, subnet.availabilityZone())
+				).addClass(NodeType.PRIVATE_SUBNET)
+			);
+				
 			diagramResult.addNode(
 					new DiagramData<DiagramNode>(
-							new DiagramNode(instanceNetworkInterface.networkInterfaceId(), networkInterface)
+							new DiagramNode(instanceNetworkInterface.networkInterfaceId(), networkInterface, subnet.subnetId())
 					).addClass(NodeType.NETWORK_INTERFACE)
 			);
 			
-			DiagramEdge diagramEdge = new DiagramEdge(instanceNetworkInterface.networkInterfaceId(), instance.instanceId());
-			diagramEdge.setLabel(instanceNetworkInterface.description());
-			diagramEdge.setBoth(true);
-			diagramResult.addEdge(new DiagramData<DiagramEdge>(diagramEdge));
+			diagramResult.addEdge(new DiagramData<DiagramEdge>(
+					DiagramEdge.make(instanceNetworkInterface.networkInterfaceId(), instance.instanceId())
+							   .setLabel(instanceNetworkInterface.description())
+							   .setBoth(true)
+			));
 			
 			for(GroupIdentifier groupIdentifier : instanceNetworkInterface.groups()) {
 				SecurityGroup securityGroup  = serviceRepository.getSecurityGroupMap().get(groupIdentifier.groupId());
 				
 				diagramResult.addNode(
 						new DiagramData<DiagramNode>(
-								new DiagramNode(securityGroup.groupId(), securityGroup)
+								new DiagramNode(securityGroup.groupId(), securityGroup, securityGroup.vpcId())
 						).addClass(NodeType.SECURITY_GROUP)
 				);
 				
-				DiagramEdge diagramSGEdge = new DiagramEdge(securityGroup.groupId(), instanceNetworkInterface.networkInterfaceId());
-				diagramSGEdge.setLabel(securityGroup.description());
-				diagramSGEdge.setBoth(true);
-				diagramResult.addEdge(new DiagramData<DiagramEdge>(diagramSGEdge));				
+				diagramResult.addEdge(new DiagramData<DiagramEdge>(
+						DiagramEdge.make(securityGroup.groupId(), instanceNetworkInterface.networkInterfaceId())
+							       .setLabel(securityGroup.description())
+							       .setBoth(true)
+				));				
 			}
 		}
 		

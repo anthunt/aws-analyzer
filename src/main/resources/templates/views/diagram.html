@@ -11,7 +11,8 @@
 	<th:block layout:fragment="customCssLink">
 		<link rel="stylesheet" type="text/css" href="/js/cytoscape/cytoscape-panzoom.css" th:href="'/js/cytoscape/cytoscape-panzoom.css?v=' + ${#dates.createNow().getTime()}">
 		<link rel="stylesheet" type="text/css" href="/js/cytoscape/cytoscape-navigator.css" th:href="'/js/cytoscape/cytoscape-navigator.css?v=' + ${#dates.createNow().getTime()}">
-		<link rel="stylesheet" type="text/css" href="https://unpkg.com/tippy.js@4.0.1/index.css" />
+		<link rel="stylesheet" type="text/css" href="/js/cytoscape/cytoscape-context-menus.css" th:href="'/js/cytoscape/cytoscape-context-menus.css?v=' + ${#dates.createNow().getTime()}">
+		<link rel="stylesheet" type="text/css" href="/js/tippy/index.css" th:href="'/js/tippy/index.css?v=' + ${#dates.createNow().getTime()}" />
 		<link rel="stylesheet" type="text/css" href="/css/style.css" th:href="'/css/style.css?v=' + ${#dates.createNow().getTime()}">
 	</th:block>
 	
@@ -35,18 +36,24 @@
 	</th:block>
 	
 	<th:block layout:fragment="customScript">
-		<script src="https://js.cytoscape.org/js/cytoscape.min.js"></script>
-		<script src="https://unpkg.com/klayjs@0.4.1/klay.js"></script>
-		<script src="https://cytoscape.org/cytoscape.js-klay/cytoscape-klay.js"></script>
+		<script src="/js/cytoscape/cytoscape.min.js" th:src="'/js/cytoscape/cytoscape.min.js?v=' + ${#dates.createNow().getTime()}"></script>
+		<script src="/js/klay/klay.js" th:src="'/js/klay/klay.js?v=' + ${#dates.createNow().getTime()}"></script>
+		<script src="/js/cytoscape/cytoscape-klay.js" th:src="'/js/cytoscape/cytoscape-klay.js?v=' + ${#dates.createNow().getTime()}"></script>
 		<script src="/js/cytoscape/cytoscape-panzoom.js" th:src="'/js/cytoscape/cytoscape-panzoom.js?v=' + ${#dates.createNow().getTime()}"></script>
 		<script src="/js/cytoscape/cytoscape-navigator.js" th:src="'/js/cytoscape/cytoscape-navigator.js?v=' + ${#dates.createNow().getTime()}"></script>
-		<script src="https://unpkg.com/popper.js@1.14.7/dist/umd/popper.js"></script>
+		<script src="/js/popper/popper.js" th:src="'/js/popper/popper.js?v=' + ${#dates.createNow().getTime()}"></script>
 		<script src="/js/cytoscape/cytoscape-popper.js" th:src="'/js/cytoscape/cytoscape-popper.js?v=' + ${#dates.createNow().getTime()}"></script>
-		<script src="https://unpkg.com/tippy.js@4.0.1/umd/index.all.min.js"></script>
+		<script src="/js/tippy/index.all.min.js" th:src="'/js/tippy/index.all.min.js?v=' + ${#dates.createNow().getTime()}"></script>
 		<script src="/js/cytoscape/cytoscape-dbclick.js" th:src="'/js/cytoscape/cytoscape-dbclick.js?v=' + ${#dates.createNow().getTime()}"></script>
 		<script src="/js/cytoscape/cytoscape-node-html-label.js" th:src="'/js/cytoscape/cytoscape-node-html-label.js?v=' + ${#dates.createNow().getTime()}"></script>
 		<script src="/js/cytoscape/cytoscape-no-overlap.js" th:src="'/js/cytoscape/cytoscape-no-overlap.js?v=' + ${#dates.createNow().getTime()}"></script>
 		<script src="/js/cytoscape/cytoscape-view-utilities.js" th:src="'/js/cytoscape/cytoscape-view-utilities.js?v=' + ${#dates.createNow().getTime()}"></script>
+		<script src="/js/cytoscape/cytoscape-toolbar.js" th:src="'/js/cytoscape/cytoscape-toolbar.js?v=' + ${#dates.createNow().getTime()}"></script>
+		<script src="/js/cytoscape/cytoscape-context-menus.js" th:src="'/js/cytoscape/cytoscape-context-menus.js?v=' + ${#dates.createNow().getTime()}"></script>
+		
+		<script src="https://cdn.jsdelivr.net/npm/elkjs@0.3.0/lib/elk.bundled.js"></script>
+		<script src="/js/cytoscape/cytoscape-elk.js" th:src="'/js/cytoscape/cytoscape-elk.js?v=' + ${#dates.createNow().getTime()}"></script>
+	
 		<script src="/js/network.js" th:src="'/js/network.js?v=' + ${#dates.createNow().getTime()}"></script>
 		<script th:inline="javascript">
 			

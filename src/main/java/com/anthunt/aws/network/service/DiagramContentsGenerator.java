@@ -12,8 +12,10 @@ import software.amazon.awssdk.services.ec2.model.NetworkAcl;
 import software.amazon.awssdk.services.ec2.model.NetworkInterface;
 import software.amazon.awssdk.services.ec2.model.RouteTable;
 import software.amazon.awssdk.services.ec2.model.SecurityGroup;
+import software.amazon.awssdk.services.ec2.model.Subnet;
 import software.amazon.awssdk.services.ec2.model.TransitGateway;
 import software.amazon.awssdk.services.ec2.model.Volume;
+import software.amazon.awssdk.services.ec2.model.Vpc;
 import software.amazon.awssdk.services.ec2.model.VpcEndpoint;
 import software.amazon.awssdk.services.ec2.model.VpcPeeringConnection;
 import software.amazon.awssdk.services.ec2.model.VpcPeeringConnectionVpcInfo;
@@ -88,6 +90,10 @@ public class DiagramContentsGenerator {
 			label = type == Type.TITLE ? getEgressOnlyInternetGatewayTitle() : getEgressOnlyInternetGatewayLabel();
 		} else if(resource instanceof IamInstanceProfile) {
 			//String roleName = iamInstanceProfile.arn().substring(iamInstanceProfile.arn().lastIndexOf("/"), iamInstanceProfile.arn().length());
+		} else if(resource instanceof Vpc) {
+			
+		} else if(resource instanceof Subnet) {
+			
 		} else if(resource instanceof String) {
 			label = (String) resource;
 		}

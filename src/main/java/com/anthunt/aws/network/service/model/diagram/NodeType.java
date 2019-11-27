@@ -32,6 +32,9 @@ public enum NodeType {
     , SECURITY_GROUP("securityGroup")
     , SERVER("server")
     , VPC("vpc")
+    , PUBLIC_SUBNET("publicSubnet")
+    , PRIVATE_SUBNET("privateSubnet")
+    , AZ("az")
     , AWS("aws")
     , REGION("region");
 	

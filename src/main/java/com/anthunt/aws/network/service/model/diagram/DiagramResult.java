@@ -62,6 +62,10 @@ public class DiagramResult {
 		return node.getData();
 	}
 	
+	public boolean containsNode(String nodeId) {
+		return this.nodeIds.contains(nodeId);
+	}
+	
 	public List<DiagramData<DiagramEdge>> getEdges() {
 		return edges;
 	}
