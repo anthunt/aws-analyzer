@@ -118,6 +118,7 @@
 						<div class="list-group list-group-horizontal" id="resourceTab" role="tablist" style="flex-direction: row;">
 							<a class="list-group-item list-group-item-action active" data-toggle="list" href="#ec2InstanceList" role="tab">Ec2</a>
 							<a class="list-group-item list-group-item-action" data-toggle="list" href="#elbList" role="tab">ELB</a>
+							<a class="list-group-item list-group-item-action" data-toggle="list" href="#rdsList" role="tab">RDS</a>
 						</div>
 						<div id="instanceList" class="row">
 							<div class="col width-200">
@@ -145,6 +146,11 @@
 											    <p class="mb-1"><strong><abbr th:title="${loadbalancer.loadBalancerName()}" th:text="${#strings.abbreviate(loadbalancer.loadBalancerName(), 30)}">210.0.0.0</abbr></strong></p>
 											    <p class="mb-1"><span th:text="${loadbalancer.dnsName()}">210.0.0.0</span></p>
 											</a>
+										</div>
+									</div>
+									<div class="tab-pane" id="rdsList" role="tabpanel">
+										<div class="list-group">
+											
 										</div>
 									</div>
 								</div>

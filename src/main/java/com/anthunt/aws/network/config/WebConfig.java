@@ -56,7 +56,8 @@ public class WebConfig  implements WebMvcConfigurer {
 		        		if(authentication.getPrincipal() instanceof UserDetails) {
 				        	
 				        	HttpSession session = request.getSession();
-				        	if(("/profiles".equals(request.getRequestURI()) || request.getRequestURI().startsWith("/setProfile"))) {
+				        	
+				        	if((request.getRequestURI().startsWith("/profiles") || request.getRequestURI().startsWith("/setProfile"))) {
 				        		return true;
 				        	} else if(!SessionProvider.hasSessionProfile(session)) {
 				        		if(request.getRequestURI().startsWith("/api")) {

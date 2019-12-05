@@ -1,8 +1,14 @@
 package com.anthunt.aws.network.service;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.slf4j.Logger;
 import org.springframework.stereotype.Service;
 
 import com.anthunt.aws.network.repository.ServiceRepository;
@@ -20,14 +26,16 @@ import com.anthunt.aws.network.service.model.diagram.DiagramNode;
 import com.anthunt.aws.network.service.model.diagram.DiagramResult;
 import com.anthunt.aws.network.service.model.diagram.NodeType;
 import com.anthunt.aws.network.session.SessionProfile;
+import com.anthunt.aws.network.utils.Logging;
+import com.anthunt.aws.network.utils.Utils;
 
-import software.amazon.awssdk.auth.credentials.ProfileCredentialsProvider;
-import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.ec2.model.GroupIdentifier;
 import software.amazon.awssdk.services.ec2.model.Instance;
+import software.amazon.awssdk.services.ec2.model.SecurityGroup;
 import software.amazon.awssdk.services.ec2.model.Vpc;
-import software.amazon.awssdk.services.elasticloadbalancing.ElasticLoadBalancingClient;
+import software.amazon.awssdk.services.elasticloadbalancing.ElasticLoadBalancingAsyncClient;
 import software.amazon.awssdk.services.elasticloadbalancing.model.LoadBalancerDescription;
-import software.amazon.awssdk.services.elasticloadbalancingv2.ElasticLoadBalancingV2Client;
+import software.amazon.awssdk.services.elasticloadbalancingv2.ElasticLoadBalancingV2AsyncClient;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Action;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeListenersRequest;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeListenersResponse;
@@ -46,37 +54,30 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetDescri
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroup;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetHealthDescription;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetHealthStateEnum;
-import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetTypeEnum;
 
 @Service
 public class LoadBalancerService extends AbstractNetworkService {
 
-	private ElasticLoadBalancingClient getElasticLoadBalancingClient(SessionProfile sessionProfile) {
-		return this.getElasticLoadBalancingClient(sessionProfile.getProfileName(), sessionProfile.getRegionId());
-	}
-	
-	private ElasticLoadBalancingClient getElasticLoadBalancingClient(String profileName, String regionId) {
-		return ElasticLoadBalancingClient.builder()
-			   .credentialsProvider(ProfileCredentialsProvider.create(profileName))
-			   .region(Region.of(regionId))
+	private static final Logger log = Logging.getLogger(LoadBalancerService.class);
+			
+	private ElasticLoadBalancingAsyncClient getElasticLoadBalancingClient(SessionProfile sessionProfile) {
+		return ElasticLoadBalancingAsyncClient.builder()
+			   .credentialsProvider(sessionProfile.getProfileCredentialsProvider())
+			   .region(sessionProfile.getRegion())
 			   .build();
 	}
 	
-	private ElasticLoadBalancingV2Client getElasticLoadBalancingV2Client(SessionProfile sessionProfile) {
-		return this.getElasticLoadBalancingV2Client(sessionProfile.getProfileName(), sessionProfile.getRegionId());
-	}
-	
-	private ElasticLoadBalancingV2Client getElasticLoadBalancingV2Client(String profileName, String regionId) {
-		return ElasticLoadBalancingV2Client.builder()
-				   .credentialsProvider(ProfileCredentialsProvider.create(profileName))
-				   .region(Region.of(regionId))
+	private ElasticLoadBalancingV2AsyncClient getElasticLoadBalancingV2Client(SessionProfile sessionProfile) {
+		return ElasticLoadBalancingV2AsyncClient.builder()
+				   .credentialsProvider(sessionProfile.getProfileCredentialsProvider())
+				   .region(sessionProfile.getRegion())
 				   .build();
 	}
 	
 	public ServiceMap<LoadBalancerDescription> getClassicLoadBalancers(SessionProfile sessionProfile) {
 		ServiceMap<LoadBalancerDescription> classicLoadBalancerMap = new ServiceMap<>();
-		ElasticLoadBalancingClient elasticLoadBalancingClient = this.getElasticLoadBalancingClient(sessionProfile);
-		for(LoadBalancerDescription loadBalancerDescription : elasticLoadBalancingClient.describeLoadBalancers().loadBalancerDescriptions()) {
+		ElasticLoadBalancingAsyncClient elasticLoadBalancingClient = this.getElasticLoadBalancingClient(sessionProfile);
+		for(LoadBalancerDescription loadBalancerDescription : elasticLoadBalancingClient.describeLoadBalancers().join().loadBalancerDescriptions()) {
 			classicLoadBalancerMap.put(loadBalancerDescription.loadBalancerName(), loadBalancerDescription);
 		}
 		return classicLoadBalancerMap;
@@ -84,8 +85,8 @@ public class LoadBalancerService extends AbstractNetworkService {
 	
 	public ServiceMap<LoadBalancer> getLoadBalancers(SessionProfile sessionProfile) {
 		ServiceMap<LoadBalancer> loadBalancerMap = new ServiceMap<>();
-		ElasticLoadBalancingV2Client elasticLoadBalancingV2Client = this.getElasticLoadBalancingV2Client(sessionProfile);
-		for(LoadBalancer loadBalancer : elasticLoadBalancingV2Client.describeLoadBalancers().loadBalancers()) {
+		ElasticLoadBalancingV2AsyncClient elasticLoadBalancingV2Client = this.getElasticLoadBalancingV2Client(sessionProfile);
+		for(LoadBalancer loadBalancer : elasticLoadBalancingV2Client.describeLoadBalancers().join().loadBalancers()) {
 			loadBalancerMap.put(loadBalancer.loadBalancerArn(), loadBalancer);
 		}
 		return loadBalancerMap;
@@ -93,14 +94,15 @@ public class LoadBalancerService extends AbstractNetworkService {
 	
 	public ServiceMap<List<Listener>> getLoadBalancerListeners(SessionProfile sessionProfile, Collection<LoadBalancer> loadBalancers) {
 		ServiceMap<List<Listener>> loadBalancerListenerMap = new ServiceMap<>();
-		ElasticLoadBalancingV2Client elasticLoadBalancingV2Client = this.getElasticLoadBalancingV2Client(sessionProfile);
+		ElasticLoadBalancingV2AsyncClient elasticLoadBalancingV2Client = this.getElasticLoadBalancingV2Client(sessionProfile);
 		for(LoadBalancer loadBalancer : loadBalancers) {
 			DescribeListenersResponse describeListenersResponse = elasticLoadBalancingV2Client.describeListeners(
 					DescribeListenersRequest.builder()
 						.loadBalancerArn(loadBalancer.loadBalancerArn())
 						.build()
-			);
+			).join();
 			loadBalancerListenerMap.put(loadBalancer.loadBalancerArn(), describeListenersResponse.listeners());
+			Utils.sleep(100);
 		}
 		
 		return loadBalancerListenerMap;
@@ -108,15 +110,16 @@ public class LoadBalancerService extends AbstractNetworkService {
 	
 	public ServiceMap<List<Rule>> getLoadBalancerRules(SessionProfile sessionProfile, Collection<List<Listener>> listenerss) {
 		ServiceMap<List<Rule>> loadBalancerRuleMap = new ServiceMap<>();
-		ElasticLoadBalancingV2Client elasticLoadBalancingV2Client = this.getElasticLoadBalancingV2Client(sessionProfile);		
+		ElasticLoadBalancingV2AsyncClient elasticLoadBalancingV2Client = this.getElasticLoadBalancingV2Client(sessionProfile);		
 		for(List<Listener> listeners : listenerss) {
 			for(Listener listener : listeners) {
 				DescribeRulesResponse describeRulesResponse = elasticLoadBalancingV2Client.describeRules(
 						DescribeRulesRequest.builder()
 											.listenerArn(listener.listenerArn())
 											.build()
-				);
+				).join();
 				loadBalancerRuleMap.put(listener.listenerArn(), describeRulesResponse.rules());
+				Utils.sleep(100);
 			}
 		}
 		return loadBalancerRuleMap;
@@ -124,8 +127,8 @@ public class LoadBalancerService extends AbstractNetworkService {
 	
 	public ServiceMap<TargetGroup> getTargetGroups(SessionProfile sessionProfile) {
 		ServiceMap<TargetGroup> targetGroupMap = new ServiceMap<>();
-		ElasticLoadBalancingV2Client elasticLoadBalancingV2Client = this.getElasticLoadBalancingV2Client(sessionProfile);
-		for(TargetGroup targetGroup : elasticLoadBalancingV2Client.describeTargetGroups().targetGroups()) {
+		ElasticLoadBalancingV2AsyncClient elasticLoadBalancingV2Client = this.getElasticLoadBalancingV2Client(sessionProfile);
+		for(TargetGroup targetGroup : elasticLoadBalancingV2Client.describeTargetGroups().join().targetGroups()) {
 			targetGroupMap.put(targetGroup.targetGroupArn(), targetGroup);
 		}
 		return targetGroupMap;
@@ -133,14 +136,15 @@ public class LoadBalancerService extends AbstractNetworkService {
 	
 	public ServiceMap<List<TargetHealthDescription>> getTargetHealthDescriptions(SessionProfile sessionProfile, Collection<TargetGroup> targetGroups) {
 		ServiceMap<List<TargetHealthDescription>> targetHealthDescriptionsMap = new ServiceMap<>();
-		ElasticLoadBalancingV2Client elasticLoadBalancingV2Client = this.getElasticLoadBalancingV2Client(sessionProfile);		
+		ElasticLoadBalancingV2AsyncClient elasticLoadBalancingV2Client = this.getElasticLoadBalancingV2Client(sessionProfile);		
 		for(TargetGroup targetGroup : targetGroups) {
 			DescribeTargetHealthResponse describeTargetHealthResponse = elasticLoadBalancingV2Client.describeTargetHealth(
 					DescribeTargetHealthRequest.builder()
 						.targetGroupArn(targetGroup.targetGroupArn())
 						.build()
-			);
+			).join();
 			targetHealthDescriptionsMap.put(targetGroup.targetGroupArn(), describeTargetHealthResponse.targetHealthDescriptions());
+			Utils.sleep(100);
 		}
 		return targetHealthDescriptionsMap;
 	}
@@ -192,7 +196,7 @@ public class LoadBalancerService extends AbstractNetworkService {
 				).addClass(NodeType.getLoadBalancerType(loadBalancer.type()))
 		);
 		
-		this.setLoadBalancer(serviceRepository, loadBalancer, diagramResult);
+		this.setLoadBalancer(serviceRepository, targetIp, loadBalancerNetwork, loadBalancer, diagramResult);
 		
 		return diagramResult;
 	}
@@ -206,55 +210,60 @@ public class LoadBalancerService extends AbstractNetworkService {
 			));
 			
 		} else {
-
-			for(CheckRule checkRule : securityGroupCheckResult.getAllRules()) {
-				if(checkRule instanceof SecurityGroupCheckRule) {
-					SecurityGroupCheckRule securityGroupCheckRule = (SecurityGroupCheckRule) checkRule;
-					
-					diagramResult.addNode(
-							new DiagramData<DiagramNode>(
-									new DiagramNode(securityGroupCheckRule.getId(), securityGroupCheckRule.getSecurityGroup())
-							).addClass(NodeType.SECURITY_GROUP)
-					);
-					
-					String port = "";
-					if("-1".equals(securityGroupCheckRule.getPrototol())) {
-						port = "All Traffic";
-					} else if(securityGroupCheckRule.getFromPort() == -1 && securityGroupCheckRule.getToPort() == -1){
-						port = securityGroupCheckRule.getPrototol();
-					} else if(securityGroupCheckRule.getFromPort() == securityGroupCheckRule.getToPort()) {
-						port = securityGroupCheckRule.getPrototol() + ":" + securityGroupCheckRule.getToPort();
-					} else {
-						port = securityGroupCheckRule.getPrototol() + ":" + securityGroupCheckRule.getFromPort() + "-" + securityGroupCheckRule.getToPort();
-					}
-					
-					DiagramEdge diagramEdge = DiagramEdge.make(networkAclId, securityGroupCheckRule.getId()).setLabel(securityGroupCheckRule.getCidr() + "\n" + port);
-					DiagramEdge serverEdge = DiagramEdge.make(securityGroupCheckRule.getId(), loadBalancer.loadBalancerArn()).setLabel(port);
-					if(securityGroupCheckRule.getDirectionType() == DirectionType.INGRESS) {
-						diagramEdge.setIn(true);
-						serverEdge.setIn(true);
-					} else {
-						diagramEdge.setOut(true);
-						serverEdge.setOut(true);
-					}
-					diagramResult.addEdge(new DiagramData<DiagramEdge>(diagramEdge));
-					diagramResult.addEdge(new DiagramData<DiagramEdge>(serverEdge));
-					
+			this.setSecurityGroupSet(networkAclId, loadBalancer.loadBalancerArn(), securityGroupCheckResult, diagramResult);
+		}
+		
+	}
+	
+	private void setSecurityGroupSet(String sourceId, String targetId, CheckResult securityGroupCheckResult, DiagramResult diagramResult) {
+		
+		for(CheckRule checkRule : securityGroupCheckResult.getAllRules()) {
+			if(checkRule instanceof SecurityGroupCheckRule) {
+				SecurityGroupCheckRule securityGroupCheckRule = (SecurityGroupCheckRule) checkRule;
+				
+				diagramResult.addNode(
+						new DiagramData<DiagramNode>(
+								new DiagramNode(targetId + "." + securityGroupCheckRule.getId(), securityGroupCheckRule.getSecurityGroup())
+						).addClass(NodeType.SECURITY_GROUP)
+				);
+				
+				String port = "";
+				if("-1".equals(securityGroupCheckRule.getPrototol())) {
+					port = "All Traffic";
+				} else if(securityGroupCheckRule.getFromPort() == -1 && securityGroupCheckRule.getToPort() == -1){
+					port = securityGroupCheckRule.getPrototol();
+				} else if(securityGroupCheckRule.getFromPort() == securityGroupCheckRule.getToPort()) {
+					port = securityGroupCheckRule.getPrototol() + ":" + securityGroupCheckRule.getToPort();
+				} else {
+					port = securityGroupCheckRule.getPrototol() + ":" + securityGroupCheckRule.getFromPort() + "-" + securityGroupCheckRule.getToPort();
 				}
+				
+				DiagramEdge diagramEdge = DiagramEdge.make(sourceId, targetId + "." + securityGroupCheckRule.getId()).setLabel(securityGroupCheckRule.getCidr() + "\n" + port);
+				DiagramEdge serverEdge = DiagramEdge.make(targetId + "." + securityGroupCheckRule.getId(), targetId).setLabel(port);
+				if(securityGroupCheckRule.getDirectionType() == DirectionType.INGRESS) {
+					diagramEdge.setIn(true);
+					serverEdge.setIn(true);
+				} else {
+					diagramEdge.setOut(true);
+					serverEdge.setOut(true);
+				}
+				diagramResult.addEdge(new DiagramData<DiagramEdge>(diagramEdge));
+				diagramResult.addEdge(new DiagramData<DiagramEdge>(serverEdge));
+				
 			}
-			
-			if(securityGroupCheckResult.getAllRules().size() < 1) {
-				diagramResult.addEdge(new DiagramData<DiagramEdge>(
-						DiagramEdge.make(networkAclId, loadBalancer.loadBalancerArn())
-								   .setLabel("Not allow in SecurityGroup")
-								   .setBoth(false)
-				));
-			}
+		}
+		
+		if(securityGroupCheckResult.getAllRules().size() < 1) {
+			diagramResult.addEdge(new DiagramData<DiagramEdge>(
+					DiagramEdge.make(sourceId, targetId)
+							   .setLabel("Not allow in SecurityGroup")
+							   .setBoth(false)
+			));
 		}
 		
 	}
 
-	private void setLoadBalancer(ServiceRepository serviceRepository, LoadBalancer loadBalancer, DiagramResult diagramResult) {
+	private void setLoadBalancer(ServiceRepository serviceRepository, String targetIp, LoadBalancerNetwork loadBalancerNetwork, LoadBalancer loadBalancer, DiagramResult diagramResult) {
 
 		List<Listener> listeners = serviceRepository.getLoadBalancerListenersMap().get(loadBalancer.loadBalancerArn());
 		for (Listener listener : listeners) {
@@ -317,12 +326,7 @@ public class LoadBalancerService extends AbstractNetworkService {
 
 							switch(targetGroup.targetType()) {
 							case INSTANCE :
-								Instance instance = serviceRepository.getEc2InstanceMap().get(targetDescription.id()); 
-								diagramResult.addNode(
-										new DiagramData<DiagramNode>(
-												new DiagramNode(targetDescription.id(), instance)
-										).addClass(NodeType.EC2_INSTANCE)
-								);
+								this.setTargetInstance(serviceRepository, targetIp, loadBalancerNetwork, loadBalancer, listener, targetGroup, targetDescription, targetHealthDescription, diagramResult);
 								break;
 							case IP :
 								diagramResult.addNode(
@@ -330,6 +334,11 @@ public class LoadBalancerService extends AbstractNetworkService {
 												new DiagramNode(targetDescription.id(), targetDescription.id())
 										).addClass(NodeType.SERVER)
 								);
+								diagramResult.addEdge(new DiagramData<DiagramEdge>(
+										DiagramEdge.make(targetGroup.targetGroupArn(), targetDescription.id())
+												   .setLabel(listener.protocolAsString() + ":" + listener.port() + "->" + targetDescription.port())
+												   .setBoth(targetHealthDescription.targetHealth().state() == TargetHealthStateEnum.HEALTHY)
+								));
 								break;
 							case LAMBDA :
 								diagramResult.addNode(
@@ -337,18 +346,16 @@ public class LoadBalancerService extends AbstractNetworkService {
 												new DiagramNode(targetDescription.id(), targetDescription.id())
 										).addClass(NodeType.LAMBDA)
 								);
+								diagramResult.addEdge(new DiagramData<DiagramEdge>(
+										DiagramEdge.make(targetGroup.targetGroupArn(), targetDescription.id())
+												   .setLabel(listener.protocolAsString() + ":" + listener.port())
+												   .setBoth(true)
+								));
 								break;
 							default :
 								break;
 							}
-							
-							if(targetGroup.targetType() != TargetTypeEnum.UNKNOWN_TO_SDK_VERSION) {
-								diagramResult.addEdge(new DiagramData<DiagramEdge>(
-										DiagramEdge.make(targetGroup.targetGroupArn(), targetDescription.id())
-												   .setLabel(listener.protocolAsString() + ":" + listener.port() + "->" + targetDescription.port())
-												   .setBoth(targetHealthDescription.targetHealth().state() == TargetHealthStateEnum.HEALTHY)
-								));
-							}
+
 						}						
 							
 						break;
@@ -409,6 +416,79 @@ public class LoadBalancerService extends AbstractNetworkService {
 			}
 
 		}
+	}
+	
+	private void setTargetInstance(ServiceRepository serviceRepository, String targetIp, LoadBalancerNetwork loadBalancerNetwork, LoadBalancer loadBalancer, Listener listener, TargetGroup targetGroup, TargetDescription targetDescription, TargetHealthDescription targetHealthDescription, DiagramResult diagramResult) {
+		Instance instance = serviceRepository.getEc2InstanceMap().get(targetDescription.id());
+		
+		if(instance == null) {
+			/* Target Instance가 존재하지 않을 경우 표시 제외 처리 SDK 버그인가?
+			diagramResult.addNode(
+					new DiagramData<DiagramNode>(
+							new DiagramNode(targetDescription.id(), targetDescription.id() + "\nUnknown Instance")
+					).addClass(NodeType.EC2_INSTANCE)
+			);
+			diagramResult.addEdge(new DiagramData<DiagramEdge>(
+					DiagramEdge.make(targetGroup.targetGroupArn(), targetDescription.id())
+							   .setLabel(listener.protocolAsString() + ":" + listener.port() + " port")
+							   .setBoth(targetHealthDescription.targetHealth().state() == TargetHealthStateEnum.HEALTHY)
+			));
+			*/
+			return;
+		}
+		
+		String targetPortId = targetDescription.id() + "." + targetDescription.port();
+		
+		Map<String, List<SecurityGroupCheckRule>> sgRulesMap = new HashMap<>();		
+		for(GroupIdentifier groupIdentifier : instance.securityGroups()) {
+			SecurityGroup securityGroup = serviceRepository.getSecurityGroupMap().get(groupIdentifier.groupId());
+			sgRulesMap.put(securityGroup.groupName(), loadBalancerNetwork.getSecurityGroupRules(securityGroup));
+		}
+		
+		List<String> targetIps = new ArrayList<>();
+		
+		if(loadBalancer.type() == LoadBalancerTypeEnum.APPLICATION) {
+			
+			//ALB인 경우 targetIp를 ALB의 해당 Region에 대한 IP로 NAT 처리 필요
+			try {
+				InetAddress[] inetAddresses = InetAddress.getAllByName(loadBalancer.dnsName());
+				for(InetAddress inetAddress : inetAddresses) {
+					targetIps.add(inetAddress.getHostAddress());
+				}
+			} catch (UnknownHostException e) {
+				e.printStackTrace();
+			}
+
+		} else {
+			targetIps.add(targetIp);
+		}
+		
+		CheckResult securityGroupCheckResult = null;		
+		if(targetIp == null) {
+			securityGroupCheckResult = loadBalancerNetwork.getAllSecurityGroup(sgRulesMap);
+		} else {
+			securityGroupCheckResult = loadBalancerNetwork.checkSecurityGroup(sgRulesMap, targetIps);
+		}		
+		this.setSecurityGroupSet(targetPortId, targetDescription.id(), securityGroupCheckResult, diagramResult);
+		
+		diagramResult.addNode(
+				new DiagramData<DiagramNode>(
+						new DiagramNode(targetPortId, Utils.getNameTag(Utils.getNameFromTags(instance.tags()), targetDescription.id()) + "\n" + targetDescription.port() + " port")
+				).addClass(NodeType.NETWORK_INTERFACE)
+		);
+		
+		diagramResult.addEdge(new DiagramData<DiagramEdge>(
+				DiagramEdge.make(targetGroup.targetGroupArn(), targetPortId)
+						   .setLabel(listener.protocolAsString() + ":" + listener.port() + " port")
+						   .setBoth(targetHealthDescription.targetHealth().state() == TargetHealthStateEnum.HEALTHY)
+		));
+		
+		diagramResult.addNode(
+				new DiagramData<DiagramNode>(
+						new DiagramNode(targetDescription.id(), instance)
+				).addClass(NodeType.EC2_INSTANCE)
+		);
+		
 	}
 
 }

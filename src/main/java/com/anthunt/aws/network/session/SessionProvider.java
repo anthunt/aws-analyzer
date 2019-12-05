@@ -1,17 +1,21 @@
 package com.anthunt.aws.network.session;
 
-import java.util.ArrayList;
-import java.util.Iterator;
+import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import javax.servlet.http.HttpSession;
 
-import com.anthunt.aws.network.repository.ServiceRepository;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 
-import software.amazon.awssdk.profiles.Profile;
-import software.amazon.awssdk.profiles.ProfileFile;
+import com.anthunt.aws.network.controller.model.ProfileContents;
+import com.anthunt.aws.network.repository.ServiceRepository;
+import com.anthunt.aws.network.utils.Utils;
+
+import software.amazon.awssdk.profiles.ProfileFileLocation;
 import software.amazon.awssdk.regions.Region;
 
 public class SessionProvider {
@@ -22,29 +26,19 @@ public class SessionProvider {
 	public static List<Region> REGIONS;
 	
 	static {
-		loadProfiles();
 	    REGIONS = Region.regions();
 	}
 	
-	public static void loadProfiles() {
-		if(PROFILES == null) {
-			PROFILES = new ArrayList<String>();
-		} else {
-			PROFILES.clear();
-		}
-		ProfileFile profileFile = ProfileFile.defaultProfileFile();
-	    Map<String, Profile> profileMap = profileFile.profiles();
-	    Set<String> keys = profileMap.keySet();
-	    Iterator<String> iKey = keys.iterator();
-	    while(iKey.hasNext()) {
-	    	PROFILES.add(iKey.next());
-	    }
-	}
-	
-	public static SessionProfile getSessionProfile(HttpSession session) {
+	public static SessionProfile getSessionProfile(HttpSession session) throws IOException {
 		SessionProfile sessionProfile = (SessionProfile) session.getAttribute(SESSION_PROFILE_KEY);
 		if(sessionProfile == null) {
 			sessionProfile = new SessionProfile();
+			
+			ProfileContents profileContents = new ProfileContents();
+			profileContents.setConfig(Utils.readFile(ProfileFileLocation.configurationFilePath(), Charset.forName("utf-8")));
+			profileContents.setCredentials(Utils.readFile(ProfileFileLocation.credentialsFilePath(), Charset.forName("utf-8")));
+			
+			sessionProfile.setProfileFile(profileContents);
 		}
 		return sessionProfile;
 	}
@@ -71,4 +65,16 @@ public class SessionProvider {
 		session.setAttribute(SESSION_SERVICE_REPOSITORY, serviceRepository);
 	}
 	
+	public static String getUserName() {
+        SecurityContext securityContext = SecurityContextHolder.getContext();
+        Authentication authentication = securityContext.getAuthentication();
+        String userName = null;
+        if (authentication != null) {
+
+                UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+                userName = userDetails.getUsername();
+
+        }
+        return userName;
+    }
 }

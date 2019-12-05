@@ -19,18 +19,27 @@ import com.anthunt.aws.network.service.model.diagram.DiagramNode;
 import com.anthunt.aws.network.service.model.diagram.DiagramResult;
 import com.anthunt.aws.network.service.model.diagram.NodeType;
 import com.anthunt.aws.network.session.SessionProfile;
+import com.anthunt.aws.network.utils.Utils;
 
-import software.amazon.awssdk.auth.credentials.ProfileCredentialsProvider;
-import software.amazon.awssdk.regions.Region;
-import software.amazon.awssdk.services.ec2.Ec2Client;
+import software.amazon.awssdk.services.ec2.Ec2AsyncClient;
 import software.amazon.awssdk.services.ec2.model.CustomerGateway;
+import software.amazon.awssdk.services.ec2.model.DescribeCustomerGatewaysResponse;
+import software.amazon.awssdk.services.ec2.model.DescribeEgressOnlyInternetGatewaysResponse;
 import software.amazon.awssdk.services.ec2.model.DescribeInstancesResponse;
+import software.amazon.awssdk.services.ec2.model.DescribeInternetGatewaysResponse;
 import software.amazon.awssdk.services.ec2.model.DescribeNetworkAclsRequest;
+import software.amazon.awssdk.services.ec2.model.DescribeNetworkInterfacesResponse;
+import software.amazon.awssdk.services.ec2.model.DescribePrefixListsResponse;
 import software.amazon.awssdk.services.ec2.model.DescribeRouteTablesRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeRouteTablesResponse;
 import software.amazon.awssdk.services.ec2.model.DescribeSecurityGroupsResponse;
 import software.amazon.awssdk.services.ec2.model.DescribeSubnetsResponse;
+import software.amazon.awssdk.services.ec2.model.DescribeTransitGatewaysResponse;
+import software.amazon.awssdk.services.ec2.model.DescribeVpcEndpointsResponse;
+import software.amazon.awssdk.services.ec2.model.DescribeVpcPeeringConnectionsResponse;
 import software.amazon.awssdk.services.ec2.model.DescribeVpcsResponse;
+import software.amazon.awssdk.services.ec2.model.DescribeVpnConnectionsResponse;
+import software.amazon.awssdk.services.ec2.model.DescribeVpnGatewaysResponse;
 import software.amazon.awssdk.services.ec2.model.EgressOnlyInternetGateway;
 import software.amazon.awssdk.services.ec2.model.Filter;
 import software.amazon.awssdk.services.ec2.model.GroupIdentifier;
@@ -61,21 +70,17 @@ import software.amazon.awssdk.services.ec2.model.VpnGateway;
 @Service
 public class Ec2Service extends AbstractNetworkService {
 
-	public Ec2Client getEc2Client(SessionProfile sessionProfile) {
-		return this.getEc2Client(sessionProfile.getProfileName(), sessionProfile.getRegionId());
-	}
-	
-	public Ec2Client getEc2Client(String profileName, String regionId) {
-		return Ec2Client.builder()
-				   .credentialsProvider(ProfileCredentialsProvider.create(profileName))
-				   .region(Region.of(regionId))
+	public Ec2AsyncClient getEc2Client(SessionProfile sessionProfile) {
+		return Ec2AsyncClient.builder()
+				   .credentialsProvider(sessionProfile.getProfileCredentialsProvider())
+				   .region(sessionProfile.getRegion())
 				   .build();
 	}
 	
 	public ServiceMap<Vpc> getVpcs(SessionProfile sessionProfile) {
 		ServiceMap<Vpc> vpcMap = new ServiceMap<>();
-		Ec2Client ec2Client = this.getEc2Client(sessionProfile);
-		DescribeVpcsResponse describeVpcsResponse = ec2Client.describeVpcs();
+		Ec2AsyncClient ec2Client = this.getEc2Client(sessionProfile);
+		DescribeVpcsResponse describeVpcsResponse = ec2Client.describeVpcs().join();		
 		for(Vpc vpc : describeVpcsResponse.vpcs()) {
 			vpcMap.put(vpc.vpcId(), vpc);
 		}
@@ -83,16 +88,16 @@ public class Ec2Service extends AbstractNetworkService {
 	}
 	
 	public ServiceMap<Instance> getInstances(SessionProfile sessionProfile) {
-		return this.getInstanceMap(sessionProfile.getProfileName(), sessionProfile.getRegionId());
+		return this.getInstanceMap(sessionProfile);
 	}
 	
-	public ServiceMap<Instance> getInstanceMap(String profileName, String regionId) {
+	public ServiceMap<Instance> getInstanceMap(SessionProfile sessionProfile) {
 		
 		ServiceMap<Instance> instanceMap = new ServiceMap<Instance>();
 		
-		Ec2Client ec2Client = this.getEc2Client(profileName, regionId);
+		Ec2AsyncClient ec2Client = this.getEc2Client(sessionProfile);
 		
-		DescribeInstancesResponse describeInstancesResponse = ec2Client.describeInstances();
+		DescribeInstancesResponse describeInstancesResponse = ec2Client.describeInstances().join();
 		List<Reservation> reservations = describeInstancesResponse.reservations();
 		int active = 0;
 		for (Reservation reservation : reservations) {
@@ -107,9 +112,9 @@ public class Ec2Service extends AbstractNetworkService {
 
 	public ServiceMap<Volume> getVolumes(SessionProfile sessionProfile) {
 		ServiceMap<Volume> volumeMap = new ServiceMap<>();
-		Ec2Client ec2Client = this.getEc2Client(sessionProfile);
+		Ec2AsyncClient ec2Client = this.getEc2Client(sessionProfile);
 		int active = 0;
-		for(Volume volume : ec2Client.describeVolumes().volumes()) {
+		for(Volume volume : ec2Client.describeVolumes().join().volumes()) {
 			if(volume.state() == VolumeState.IN_USE) {
 				active++;
 			}
@@ -121,9 +126,10 @@ public class Ec2Service extends AbstractNetworkService {
 	
 	public ServiceMap<NetworkInterface> getNetworkInterfaces(SessionProfile sessionProfile) {
 		ServiceMap<NetworkInterface> networkInterfaceMap = new ServiceMap<>();
-		Ec2Client ec2Client = this.getEc2Client(sessionProfile);
+		Ec2AsyncClient ec2Client = this.getEc2Client(sessionProfile);
 		int active = 0;
-		for(NetworkInterface networkInterface : ec2Client.describeNetworkInterfaces().networkInterfaces()) {
+		DescribeNetworkInterfacesResponse describeNetworkInterfacesResponse = ec2Client.describeNetworkInterfaces().join();
+		for(NetworkInterface networkInterface : describeNetworkInterfacesResponse.networkInterfaces()) {
 			if(networkInterface.status() == NetworkInterfaceStatus.IN_USE) {
 				active++;
 			}
@@ -135,8 +141,8 @@ public class Ec2Service extends AbstractNetworkService {
 	
 	public ServiceMap<SecurityGroup> getSecurityGroups(SessionProfile sessionProfile) {
 		ServiceMap<SecurityGroup> securityGroupMap = new ServiceMap<>();
-		Ec2Client ec2Client = this.getEc2Client(sessionProfile);
-		DescribeSecurityGroupsResponse describeSecurityGroupsResponse = ec2Client.describeSecurityGroups();
+		Ec2AsyncClient ec2Client = this.getEc2Client(sessionProfile);
+		DescribeSecurityGroupsResponse describeSecurityGroupsResponse = ec2Client.describeSecurityGroups().join();
 		for (SecurityGroup securityGroup : describeSecurityGroupsResponse.securityGroups()) {
 			securityGroupMap.put(securityGroup.groupId(), securityGroup);
 		}
@@ -145,8 +151,8 @@ public class Ec2Service extends AbstractNetworkService {
 	
 	public ServiceMap<Subnet> getSubnets(SessionProfile sessionProfile) {
 		ServiceMap<Subnet> subnetMap = new ServiceMap<>();
-		Ec2Client ec2Client = this.getEc2Client(sessionProfile);
-		DescribeSubnetsResponse describeSubnetsResponse = ec2Client.describeSubnets();
+		Ec2AsyncClient ec2Client = this.getEc2Client(sessionProfile);
+		DescribeSubnetsResponse describeSubnetsResponse = ec2Client.describeSubnets().join();
 		for(Subnet subnet : describeSubnetsResponse.subnets()) {
 			subnetMap.put(subnet.subnetId(), subnet);
 		}
@@ -155,7 +161,7 @@ public class Ec2Service extends AbstractNetworkService {
 	
 	public ServiceMap<List<RouteTable>> getRouteTables(SessionProfile sessionProfile, Collection<Subnet> subnets) {
 		ServiceMap<List<RouteTable>> routeTablesMap = new ServiceMap<>();
-		Ec2Client ec2Client = this.getEc2Client(sessionProfile);
+		Ec2AsyncClient ec2Client = this.getEc2Client(sessionProfile);
 		for(Subnet subnet : subnets) {
 			DescribeRouteTablesResponse describeRouteTablesResponse = ec2Client.describeRouteTables(
 					DescribeRouteTablesRequest.builder()
@@ -166,8 +172,9 @@ public class Ec2Service extends AbstractNetworkService {
 								  .build()
 						)
 						.build()
-			);
+			).join();
 			
+			Utils.sleep(100);
 			List<RouteTable> routeTables = describeRouteTablesResponse.routeTables();
 			if(routeTables.size() < 1) {
 				describeRouteTablesResponse = ec2Client.describeRouteTables(
@@ -183,20 +190,22 @@ public class Ec2Service extends AbstractNetworkService {
 											.build()
 							)
 							.build()
-				);
+				).join();
 				routeTables = describeRouteTablesResponse.routeTables();
 			}
 			
 			routeTablesMap.put(subnet.subnetId(), routeTables);
+			Utils.sleep(100);
 		}
 		return routeTablesMap;
 	}
 	
 	public ServiceMap<VpcPeeringConnection> getVpcPeerings(SessionProfile sessionProfile) {
 		ServiceMap<VpcPeeringConnection> vpcPeeringConnectionsMap = new ServiceMap<>();
-		Ec2Client ec2Client = this.getEc2Client(sessionProfile);
+		Ec2AsyncClient ec2Client = this.getEc2Client(sessionProfile);
 		int active = 0;
-		for(VpcPeeringConnection vpcPeeringConnection : ec2Client.describeVpcPeeringConnections().vpcPeeringConnections()) {
+		DescribeVpcPeeringConnectionsResponse describeVpcPeeringConnectionsResponse = ec2Client.describeVpcPeeringConnections().join();
+		for(VpcPeeringConnection vpcPeeringConnection : describeVpcPeeringConnectionsResponse.vpcPeeringConnections()) {
 			if(vpcPeeringConnection.status().code() == VpcPeeringConnectionStateReasonCode.ACTIVE) {
 				active++;
 			}
@@ -208,8 +217,9 @@ public class Ec2Service extends AbstractNetworkService {
 	
 	public ServiceMap<PrefixList> getPrefixLists(SessionProfile sessionProfile) {
 		ServiceMap<PrefixList> prefixListMap = new ServiceMap<>();
-		Ec2Client ec2Client = this.getEc2Client(sessionProfile);
-		for(PrefixList prefixList : ec2Client.describePrefixLists().prefixLists()) {
+		Ec2AsyncClient ec2Client = this.getEc2Client(sessionProfile);
+		DescribePrefixListsResponse describePrefixListsResponse = ec2Client.describePrefixLists().join();
+		for(PrefixList prefixList : describePrefixListsResponse.prefixLists()) {
 			prefixListMap.put(prefixList.prefixListId(), prefixList);
 		}
 		return prefixListMap;
@@ -217,7 +227,7 @@ public class Ec2Service extends AbstractNetworkService {
 	
 	public ServiceMap<List<NetworkAcl>> getNetworkAcls(SessionProfile sessionProfile, Collection<Subnet> subnets) {
 		ServiceMap<List<NetworkAcl>> networkAclMap = new ServiceMap<>();
-		Ec2Client ec2Client = this.getEc2Client(sessionProfile);
+		Ec2AsyncClient ec2Client = this.getEc2Client(sessionProfile);
 		for(Subnet subnet : subnets) {
 			networkAclMap.put(subnet.subnetId(), ec2Client.describeNetworkAcls(
 					DescribeNetworkAclsRequest.builder()
@@ -228,16 +238,18 @@ public class Ec2Service extends AbstractNetworkService {
 								  .build()
 						)
 						.build()
-			).networkAcls()); 
+			).join().networkAcls()); 
+			Utils.sleep(100);
 		}
 		return networkAclMap;
 	}
 	
 	public ServiceMap<CustomerGateway> getCustomerGateways(SessionProfile sessionProfile) {
 		ServiceMap<CustomerGateway> customerGatewayMap = new ServiceMap<>();
-		Ec2Client ec2Client = this.getEc2Client(sessionProfile);
+		Ec2AsyncClient ec2Client = this.getEc2Client(sessionProfile);
 		int active = 0;
-		for(CustomerGateway customerGateway : ec2Client.describeCustomerGateways().customerGateways()) {
+		DescribeCustomerGatewaysResponse describeCustomerGatewaysResponse = ec2Client.describeCustomerGateways().join();
+		for(CustomerGateway customerGateway : describeCustomerGatewaysResponse.customerGateways()) {
 			if("available".equals(customerGateway.state())) {
 				active++;
 			}
@@ -249,8 +261,9 @@ public class Ec2Service extends AbstractNetworkService {
 	
 	public ServiceMap<VpnGateway> getVpnGateways(SessionProfile sessionProfile) {
 		ServiceMap<VpnGateway> vpnGatewayMap = new ServiceMap<>();
-		Ec2Client ec2Client = this.getEc2Client(sessionProfile);
-		for(VpnGateway vpnGateway : ec2Client.describeVpnGateways().vpnGateways()) {
+		Ec2AsyncClient ec2Client = this.getEc2Client(sessionProfile);
+		DescribeVpnGatewaysResponse describeVpnGatewaysResponse = ec2Client.describeVpnGateways().join();
+		for(VpnGateway vpnGateway : describeVpnGatewaysResponse.vpnGateways()) {
 			vpnGatewayMap.put(vpnGateway.vpnGatewayId(), vpnGateway);
 		}
 		return vpnGatewayMap;
@@ -258,9 +271,10 @@ public class Ec2Service extends AbstractNetworkService {
 	
 	public ServiceMap<List<VpnConnection>> getVpnConnections(SessionProfile sessionProfile) {
 		ServiceMap<List<VpnConnection>> vpnConnectionMap = new ServiceMap<>();
-		Ec2Client ec2Client = this.getEc2Client(sessionProfile);
+		Ec2AsyncClient ec2Client = this.getEc2Client(sessionProfile);
 		int active = 0;
-		for(VpnConnection vpnConnection : ec2Client.describeVpnConnections().vpnConnections()) {
+		DescribeVpnConnectionsResponse describeVpnConnectionsResponse = ec2Client.describeVpnConnections().join();
+		for(VpnConnection vpnConnection : describeVpnConnectionsResponse.vpnConnections()) {
 			if("available".equals(vpnConnection.stateAsString())) active++;
 			if(vpnConnectionMap.containsKey(vpnConnection.vpnGatewayId())) {
 				vpnConnectionMap.get(vpnConnection.vpnGatewayId()).add(vpnConnection);
@@ -276,9 +290,10 @@ public class Ec2Service extends AbstractNetworkService {
 
 	public ServiceMap<InternetGateway> getInternetGateways(SessionProfile sessionProfile) {
 		ServiceMap<InternetGateway> internetGatewayMap = new ServiceMap<>();
-		Ec2Client ec2Client = this.getEc2Client(sessionProfile);
+		Ec2AsyncClient ec2Client = this.getEc2Client(sessionProfile);
 		int active = 0;
-		for(InternetGateway internetGateway : ec2Client.describeInternetGateways().internetGateways()) {
+		DescribeInternetGatewaysResponse describeInternetGatewaysResponse = ec2Client.describeInternetGateways().join();
+		for(InternetGateway internetGateway : describeInternetGatewaysResponse.internetGateways()) {
 			if(internetGateway.attachments().size() > 0) {
 				active++;
 			}
@@ -290,9 +305,10 @@ public class Ec2Service extends AbstractNetworkService {
 
 	public ServiceMap<EgressOnlyInternetGateway> getEgressInternetGateways(SessionProfile sessionProfile) {
 		ServiceMap<EgressOnlyInternetGateway> egressInternetGatewayMap = new ServiceMap<>();
-		Ec2Client ec2Client = this.getEc2Client(sessionProfile);
+		Ec2AsyncClient ec2Client = this.getEc2Client(sessionProfile);
 		int active = 0;
-		for(EgressOnlyInternetGateway egressOnlyInternetGateway : ec2Client.describeEgressOnlyInternetGateways().egressOnlyInternetGateways()) {
+		DescribeEgressOnlyInternetGatewaysResponse describeEgressOnlyInternetGatewaysResponse = ec2Client.describeEgressOnlyInternetGateways().join();
+		for(EgressOnlyInternetGateway egressOnlyInternetGateway : describeEgressOnlyInternetGatewaysResponse.egressOnlyInternetGateways()) {
 			if(egressOnlyInternetGateway.attachments().size() > 0) {
 				active++;
 			}
@@ -304,9 +320,10 @@ public class Ec2Service extends AbstractNetworkService {
 
 	public ServiceMap<VpcEndpoint> getVpcEndpoints(SessionProfile sessionProfile) {
 		ServiceMap<VpcEndpoint> vpcEndpointMap = new ServiceMap<>();
-		Ec2Client ec2Client = this.getEc2Client(sessionProfile);
+		Ec2AsyncClient ec2Client = this.getEc2Client(sessionProfile);
 		int active = 0;
-		for(VpcEndpoint vpcEndpoint : ec2Client.describeVpcEndpoints().vpcEndpoints()) {
+		DescribeVpcEndpointsResponse describeVpcEndpointsResponse = ec2Client.describeVpcEndpoints().join();
+		for(VpcEndpoint vpcEndpoint : describeVpcEndpointsResponse.vpcEndpoints()) {
 			if("available".equals(vpcEndpoint.stateAsString())) {
 				active++;
 			}
@@ -318,9 +335,10 @@ public class Ec2Service extends AbstractNetworkService {
 
 	public ServiceMap<TransitGateway> getTransitGateways(SessionProfile sessionProfile) {
 		ServiceMap<TransitGateway> transitGatewayMap = new ServiceMap<>();
-		Ec2Client ec2Client = this.getEc2Client(sessionProfile);
+		Ec2AsyncClient ec2Client = this.getEc2Client(sessionProfile);
 		int active = 0;
-		for(TransitGateway transitGateway : ec2Client.describeTransitGateways().transitGateways()) {
+		DescribeTransitGatewaysResponse describeTransitGatewaysResponse = ec2Client.describeTransitGateways().join();
+		for(TransitGateway transitGateway : describeTransitGatewaysResponse.transitGateways()) {
 			if(transitGateway.state() == TransitGatewayState.AVAILABLE) {
 				active++;
 			}

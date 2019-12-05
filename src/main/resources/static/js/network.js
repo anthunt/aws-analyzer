@@ -141,17 +141,16 @@ var NetworkLoad = function() {
 		}
 	}
 	
-	this.load = function(jsonURL) {
+	this.load = (jsonURL)=>{
 		on();
 		diagram.elements().forEach((ele) => { NetworkLoad.diagram().remove(ele); });
 		
 		Utils.async(jsonURL, (data) => {
 			diagram.add(data);
+			diagram.layout(layoutOptions).run();
 			diagram.nodes().noOverlap({
                 padding: 30
             });
-			diagram.layout(layoutOptions).run();
-            
 			diagram.elements().forEach(function(element, index) {
 				
 				if(element.data().label != null && element.data().label != "") {
@@ -182,7 +181,7 @@ var NetworkLoad = function() {
 		
 	};
 	
-	this.initialize = function() {
+	this.initialize = ()=>{
 		
 		diagram = cytoscape({
 		  container: document.getElementById('cy'),
@@ -334,6 +333,9 @@ var NetworkLoad = function() {
 		    .selector('.vpc')
 		      .css({
 		    	  'background-image': '/img/Virtual-private-cloud-VPC_dark-bg@4x.png',
+		      })
+		    .selector('.vpc:parent')
+		      .css({		    	  
 		    	  'border-color': 'green',
 		    	  "text-max-width": 200,
 				  "text-margin-x": 170,
@@ -486,7 +488,7 @@ var NetworkLoad = function() {
 	    ]);
 		*/
 		diagram.dblclick();
-		diagram.on("dblclick", function(evt) {
+		diagram.on("dblclick", (evt)=>{
 			var element = evt.target;
 			try {
 				if(element.isNode()) {
@@ -501,7 +503,7 @@ var NetworkLoad = function() {
 			}catch(e) {}
 		});
 		
-		diagram.on("mouseover", function(evt) {
+		diagram.on("mouseover", (evt)=>{
 			var element = evt.target;
 			try {
 				if(element.isNode()) {					
@@ -512,7 +514,7 @@ var NetworkLoad = function() {
 			}catch(e) {}
 		});
 		
-		diagram.on("mouseout", function(evt) {
+		diagram.on("mouseout", (evt)=>{
 			$('html,body').css('cursor', 'default');
 		});
 		

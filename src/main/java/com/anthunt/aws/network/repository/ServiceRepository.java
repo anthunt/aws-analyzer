@@ -9,6 +9,7 @@ import com.anthunt.aws.network.repository.model.ServiceStatistic;
 import com.anthunt.aws.network.service.DirectConnectService;
 import com.anthunt.aws.network.service.Ec2Service;
 import com.anthunt.aws.network.service.LoadBalancerService;
+import com.anthunt.aws.network.service.RdsService;
 import com.anthunt.aws.network.session.SessionProfile;
 
 import software.amazon.awssdk.services.directconnect.model.VirtualInterface;
@@ -35,6 +36,8 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.LoadBalancer
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroup;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetHealthDescription;
+import software.amazon.awssdk.services.rds.model.DBCluster;
+import software.amazon.awssdk.services.rds.model.DBInstance;
 
 public class ServiceRepository {
 	
@@ -147,6 +150,14 @@ public class ServiceRepository {
 		return this.serviceRepositoryProvider.getTransitGatewayMap();
 	}
 	
+	public ServiceMap<DBCluster> getRdsClusterMap() {
+		return this.serviceRepositoryProvider.getRdsClusterMap();
+	}
+	
+	public ServiceMap<DBInstance> getRdsInstanceMap() {
+		return this.serviceRepositoryProvider.getRdsInstanceMap();
+	}
+	
 	public List<ServiceStatistic> getServiceStatistic() {
 		return this.serviceStatistics;
 	}
@@ -157,6 +168,10 @@ public class ServiceRepository {
 	
 	public int elbSync(int num, int total, SessionProfile sessionProfile, LoadBalancerService loadBalancerService) throws IOException {
 		return this.serviceRepositoryProvider.elbSync(num, total, sessionProfile, loadBalancerService);
+	}
+	
+	public int rdsSync(int num, int total, SessionProfile sessionProfile, RdsService rdsService) throws IOException {
+		return this.serviceRepositoryProvider.rdsSync(num, total, sessionProfile, rdsService);
 	}
 	
 	public int dxSync(int num, int total, SessionProfile sessionProfile, DirectConnectService directConnectService) throws IOException {

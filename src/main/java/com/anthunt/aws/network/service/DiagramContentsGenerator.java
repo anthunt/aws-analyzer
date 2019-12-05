@@ -101,13 +101,6 @@ public class DiagramContentsGenerator {
 		return label;
 	}
 	
-	private static String getNameTag(String name, String resourceId) {
-		if(Utils.DEFAULT_NAME.equals(name)) {
-			return resourceId;
-		}
-		return name;
-	}
-	
 	private String getEgressOnlyInternetGatewayTitle() {
 		return ((EgressOnlyInternetGateway) this.resource).egressOnlyInternetGatewayId();
 	}
@@ -121,7 +114,7 @@ public class DiagramContentsGenerator {
 
 	private String getInternetGatewayTitle() {
 		InternetGateway internetGateway = (InternetGateway) this.resource;
-		return getNameTag(Utils.getNameFromTags(internetGateway.tags()), internetGateway.internetGatewayId());
+		return Utils.getNameTag(Utils.getNameFromTags(internetGateway.tags()), internetGateway.internetGatewayId());
 	}
 	
 	private String getInternetGatewayLabel() {
@@ -137,7 +130,7 @@ public class DiagramContentsGenerator {
 
 	private String getVpcPeeringTitle() {
 		VpcPeeringConnection vpcPeeringConnection = (VpcPeeringConnection) this.resource;
-		return getNameTag(Utils.getNameFromTags(vpcPeeringConnection.tags()), vpcPeeringConnection.vpcPeeringConnectionId());
+		return Utils.getNameTag(Utils.getNameFromTags(vpcPeeringConnection.tags()), vpcPeeringConnection.vpcPeeringConnectionId());
 	}
 	
 	private String getVpcPeeringLabel() {
@@ -168,7 +161,7 @@ public class DiagramContentsGenerator {
 
 	private String getTransitGatewayTitle() {
 		TransitGateway transitGateway = (TransitGateway) this.resource;
-		return getNameTag(Utils.getNameFromTags(transitGateway.tags()), transitGateway.transitGatewayId());
+		return Utils.getNameTag(Utils.getNameFromTags(transitGateway.tags()), transitGateway.transitGatewayId());
 	}
 	
 	private String getTransitGatewayLabel() {
@@ -184,7 +177,7 @@ public class DiagramContentsGenerator {
 
 	private String getVpcEndpointTitle() {
 		VpcEndpoint vpcEndpoint = (VpcEndpoint) this.resource;
-		return getNameTag(Utils.getNameFromTags(vpcEndpoint.tags()), vpcEndpoint.vpcEndpointId());
+		return Utils.getNameTag(Utils.getNameFromTags(vpcEndpoint.tags()), vpcEndpoint.vpcEndpointId());
 	}
 	
 	private String getVpcEndpointLabel() {
@@ -201,7 +194,7 @@ public class DiagramContentsGenerator {
 
 	private String getVpnGatewayTitle() {
 		VpnGateway vpnGateway = (VpnGateway) this.resource;
-		return getNameTag(Utils.getNameFromTags(vpnGateway.tags()), vpnGateway.vpnGatewayId());
+		return Utils.getNameTag(Utils.getNameFromTags(vpnGateway.tags()), vpnGateway.vpnGatewayId());
 	}
 	
 	private String getVpnGatewayLabel() {
@@ -264,7 +257,7 @@ public class DiagramContentsGenerator {
 
 	private String getNetworkAclTitle() {
 		NetworkAcl networkAcl = (NetworkAcl) this.resource;
-		return getNameTag(Utils.getNameFromTags(networkAcl.tags()), networkAcl.networkAclId());
+		return Utils.getNameTag(Utils.getNameFromTags(networkAcl.tags()), networkAcl.networkAclId());
 	}
 	
 	private String getNetworkAclLabel() {
@@ -281,7 +274,7 @@ public class DiagramContentsGenerator {
 
 	private String getCustomerGatewayTitle() {
 		CustomerGateway customerGateway = (CustomerGateway) this.resource;
-		return getNameTag(Utils.getNameFromTags(customerGateway.tags()), customerGateway.customerGatewayId());
+		return Utils.getNameTag(Utils.getNameFromTags(customerGateway.tags()), customerGateway.customerGatewayId());
 	}
 	
 	private String getCustomerGatewayLabel() {
@@ -300,7 +293,7 @@ public class DiagramContentsGenerator {
 
 	private String getVpnConnectionTitle() {
 		VpnConnection vpnConnection = (VpnConnection) this.resource;
-		return getNameTag(Utils.getNameFromTags(vpnConnection.tags()), vpnConnection.vpnConnectionId());
+		return Utils.getNameTag(Utils.getNameFromTags(vpnConnection.tags()), vpnConnection.vpnConnectionId());
 	}
 	
 	private String getVpnConnectionLabel() {
@@ -318,7 +311,7 @@ public class DiagramContentsGenerator {
 
 	private String getVirtualInterfaceTitle() {
 		VirtualInterface virtualInterface = (VirtualInterface) this.resource;
-		return getNameTag(Utils.getNameFromDXTags(virtualInterface.tags()), virtualInterface.virtualInterfaceId());
+		return Utils.getNameTag(Utils.getNameFromDXTags(virtualInterface.tags()), virtualInterface.virtualInterfaceId());
 	}
 	
 	private String getVirtualInterfaceLabel() {
@@ -340,7 +333,7 @@ public class DiagramContentsGenerator {
 
 	private String getRouteTableTitle() {
 		RouteTable routeTable = (RouteTable) this.resource;
-		return getNameTag(Utils.getNameFromTags(routeTable.tags()), routeTable.routeTableId());
+		return Utils.getNameTag(Utils.getNameFromTags(routeTable.tags()), routeTable.routeTableId());
 	}
 	
 	private String getRouteTableLabel() {
@@ -358,7 +351,7 @@ public class DiagramContentsGenerator {
 
 	private String getEc2InstanceTitle() {
 		Instance instance = (Instance) this.resource;
-		return getNameTag(Utils.getNameFromTags(instance.tags()), instance.instanceId());
+		return Utils.getNameTag(Utils.getNameFromTags(instance.tags()), instance.instanceId());
 	}
 	
 	private String getEc2InstanceLabel() {
@@ -377,7 +370,7 @@ public class DiagramContentsGenerator {
 	
 	private String getVolumeTitle() {
 		Volume volume = (Volume) this.resource;
-		return getNameTag(Utils.getNameFromTags(volume.tags()), volume.volumeId());
+		return Utils.getNameTag(Utils.getNameFromTags(volume.tags()), volume.volumeId());
 	}
 	
 	private String getVolumeLabel() {
@@ -397,7 +390,7 @@ public class DiagramContentsGenerator {
 	
 	private String getNetworkInterfaceTitle() {
 		NetworkInterface networkInterface = (NetworkInterface) this.resource;
-		return getNameTag(Utils.getNameFromTags(networkInterface.tagSet()), networkInterface.networkInterfaceId());
+		return Utils.getNameTag(Utils.getNameFromTags(networkInterface.tagSet()), networkInterface.networkInterfaceId());
 	}
 	
 	private String getNetworkInterfaceLabel() {
@@ -420,7 +413,7 @@ public class DiagramContentsGenerator {
 	
 	private String getSecurityGroupTitle() {
 		SecurityGroup securityGroup = (SecurityGroup) this.resource;
-		return getNameTag(Utils.getNameFromTags(securityGroup.tags()), securityGroup.groupName());
+		return Utils.getNameTag(Utils.getNameFromTags(securityGroup.tags()), securityGroup.groupName());
 	}
 	
 	private String getSecurityGroupLabel() {

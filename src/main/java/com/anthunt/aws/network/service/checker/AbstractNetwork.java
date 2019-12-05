@@ -41,8 +41,6 @@ public abstract class AbstractNetwork<T> {
 	
 	private ServiceRepository serviceRepository;
 	private T resource;
-	//private List<String> subnetIds;
-	private List<String> securityGroupIds;
 	private Map<String, List<SecurityGroupCheckRule>> sgRulesMap = new HashMap<String, List<SecurityGroupCheckRule>>();
 	private List<RouteCheckRule> routeCheckRules = new ArrayList<RouteCheckRule>();
 	private List<NetworkAclCheckRule> networkAclCheckRules = new ArrayList<>();
@@ -51,9 +49,8 @@ public abstract class AbstractNetwork<T> {
 		
 		this.serviceRepository = serviceRepository;
 		this.resource = this.getResource(resourceId, serviceRepository);
-		this.securityGroupIds = this.getSecurityGroupIds();
 				                     
-		this.setSecurityGroupRules();
+		this.setSecurityGroupRules(this.getSecurityGroupIds());
 		List<String> subnetIds = this.getSubnetIds();
 		for(String subnetId : subnetIds) {
 			String routeTableId = this.setRoutes(subnetId);
@@ -70,113 +67,118 @@ public abstract class AbstractNetwork<T> {
 		return this.serviceRepository;
 	}
 	
-	private void setSecurityGroupRules() {
+	public List<SecurityGroupCheckRule> getSecurityGroupRules(SecurityGroup securityGroup) {
 		
-		for(String securityGroupId : this.securityGroupIds) {
-			SecurityGroup securityGroup = serviceRepository.getSecurityGroupMap().get(securityGroupId);
+		String securityGroupName = securityGroup.groupName();
+		
+		List<SecurityGroupCheckRule> checkRules = new ArrayList<>();
+		
+		List<IpPermission> inBoundIpPermissions = securityGroup.ipPermissions();
+		for (IpPermission inBoundIpPermission : inBoundIpPermissions) {				
 			
-			String securityGroupName = securityGroup.groupName();
-			
-			List<SecurityGroupCheckRule> checkRules = new ArrayList<>();
-			
-			List<IpPermission> inBoundIpPermissions = securityGroup.ipPermissions();
-			for (IpPermission inBoundIpPermission : inBoundIpPermissions) {				
-				
-				List<IpRange> ipRanges = inBoundIpPermission.ipRanges();
-				for(IpRange ipRange : ipRanges) {
-					SecurityGroupCheckRule checkRule = new SecurityGroupCheckRule(securityGroup.groupId(), securityGroupName, securityGroup);
-					checkRule.setDirectionType(DirectionType.INGRESS);
-					checkRule.setPrototol(inBoundIpPermission.ipProtocol());
-					checkRule.setFromPort(inBoundIpPermission.fromPort());
-					checkRule.setToPort(inBoundIpPermission.toPort());
-					checkRule.setCidr(ipRange.cidrIp());
-					checkRule.setCidr(true);
-					checkRules.add(checkRule);
-				}
-				List<Ipv6Range> ipv6Ranges = inBoundIpPermission.ipv6Ranges();
-				for(Ipv6Range ipv6Range : ipv6Ranges) {
-					SecurityGroupCheckRule checkRule = new SecurityGroupCheckRule(securityGroup.groupId(), securityGroupName, securityGroup);
-					checkRule.setDirectionType(DirectionType.INGRESS);
-					checkRule.setPrototol(inBoundIpPermission.ipProtocol());
-					checkRule.setFromPort(inBoundIpPermission.fromPort());
-					checkRule.setToPort(inBoundIpPermission.toPort());
-					checkRule.setCidr(ipv6Range.cidrIpv6());
-					checkRule.setCidr(true);
-					checkRules.add(checkRule);
-				}
-				List<PrefixListId> prefixListIds = inBoundIpPermission.prefixListIds();
-				for(PrefixListId prefixListId : prefixListIds) {
-					SecurityGroupCheckRule checkRule = new SecurityGroupCheckRule(securityGroup.groupId(), securityGroupName, securityGroup);
-					checkRule.setDirectionType(DirectionType.INGRESS);
-					checkRule.setPrototol(inBoundIpPermission.ipProtocol());
-					checkRule.setFromPort(inBoundIpPermission.fromPort());
-					checkRule.setToPort(inBoundIpPermission.toPort());
-					checkRule.setCidr(prefixListId.prefixListId());
-					checkRule.setCidr(false);
-					checkRules.add(checkRule);
-				}
-				List<UserIdGroupPair> userIdGroupPairs = inBoundIpPermission.userIdGroupPairs();
-				for(UserIdGroupPair userIdGroupPair : userIdGroupPairs) {
-					SecurityGroupCheckRule checkRule = new SecurityGroupCheckRule(securityGroup.groupId(), securityGroupName, securityGroup);
-					checkRule.setDirectionType(DirectionType.INGRESS);
-					checkRule.setPrototol(inBoundIpPermission.ipProtocol());
-					checkRule.setFromPort(inBoundIpPermission.fromPort());
-					checkRule.setToPort(inBoundIpPermission.toPort());
-					checkRule.setCidr(userIdGroupPair.groupId());
-					checkRule.setCidr(false);
-					checkRules.add(checkRule);
-				}
-				
+			List<IpRange> ipRanges = inBoundIpPermission.ipRanges();
+			for(IpRange ipRange : ipRanges) {
+				SecurityGroupCheckRule checkRule = new SecurityGroupCheckRule(securityGroup.groupId(), securityGroupName, securityGroup);
+				checkRule.setDirectionType(DirectionType.INGRESS);
+				checkRule.setPrototol(inBoundIpPermission.ipProtocol());
+				checkRule.setFromPort(inBoundIpPermission.fromPort());
+				checkRule.setToPort(inBoundIpPermission.toPort());
+				checkRule.setCidr(ipRange.cidrIp());
+				checkRule.setCidr(true);
+				checkRules.add(checkRule);
 			}
+			List<Ipv6Range> ipv6Ranges = inBoundIpPermission.ipv6Ranges();
+			for(Ipv6Range ipv6Range : ipv6Ranges) {
+				SecurityGroupCheckRule checkRule = new SecurityGroupCheckRule(securityGroup.groupId(), securityGroupName, securityGroup);
+				checkRule.setDirectionType(DirectionType.INGRESS);
+				checkRule.setPrototol(inBoundIpPermission.ipProtocol());
+				checkRule.setFromPort(inBoundIpPermission.fromPort());
+				checkRule.setToPort(inBoundIpPermission.toPort());
+				checkRule.setCidr(ipv6Range.cidrIpv6());
+				checkRule.setCidr(true);
+				checkRules.add(checkRule);
+			}
+			List<PrefixListId> prefixListIds = inBoundIpPermission.prefixListIds();
+			for(PrefixListId prefixListId : prefixListIds) {
+				SecurityGroupCheckRule checkRule = new SecurityGroupCheckRule(securityGroup.groupId(), securityGroupName, securityGroup);
+				checkRule.setDirectionType(DirectionType.INGRESS);
+				checkRule.setPrototol(inBoundIpPermission.ipProtocol());
+				checkRule.setFromPort(inBoundIpPermission.fromPort());
+				checkRule.setToPort(inBoundIpPermission.toPort());
+				checkRule.setCidr(prefixListId.prefixListId());
+				checkRule.setCidr(false);
+				checkRules.add(checkRule);
+			}
+			List<UserIdGroupPair> userIdGroupPairs = inBoundIpPermission.userIdGroupPairs();
+			for(UserIdGroupPair userIdGroupPair : userIdGroupPairs) {
+				SecurityGroupCheckRule checkRule = new SecurityGroupCheckRule(securityGroup.groupId(), securityGroupName, securityGroup);
+				checkRule.setDirectionType(DirectionType.INGRESS);
+				checkRule.setPrototol(inBoundIpPermission.ipProtocol());
+				checkRule.setFromPort(inBoundIpPermission.fromPort());
+				checkRule.setToPort(inBoundIpPermission.toPort());
+				checkRule.setCidr(userIdGroupPair.groupId());
+				checkRule.setCidr(false);
+				checkRules.add(checkRule);
+			}
+			
+		}
 
-			List<IpPermission> outBoundIpPermissions = securityGroup.ipPermissionsEgress();
-			for (IpPermission outBoundIpPermission : outBoundIpPermissions) {
-				List<IpRange> ipRanges = outBoundIpPermission.ipRanges();
-				for(IpRange ipRange : ipRanges) {
-					SecurityGroupCheckRule checkRule = new SecurityGroupCheckRule(securityGroup.groupId(), securityGroupName, securityGroup);
-					checkRule.setDirectionType(DirectionType.EGRESS);
-					checkRule.setPrototol(outBoundIpPermission.ipProtocol());
-					checkRule.setFromPort(outBoundIpPermission.fromPort());
-					checkRule.setToPort(outBoundIpPermission.toPort());
-					checkRule.setCidr(ipRange.cidrIp());
-					checkRule.setCidr(true);
-					checkRules.add(checkRule);
-				}
-				List<Ipv6Range> ipv6Ranges = outBoundIpPermission.ipv6Ranges();
-				for(Ipv6Range ipv6Range : ipv6Ranges) {
-					SecurityGroupCheckRule checkRule = new SecurityGroupCheckRule(securityGroup.groupId(), securityGroupName, securityGroup);
-					checkRule.setDirectionType(DirectionType.EGRESS);
-					checkRule.setPrototol(outBoundIpPermission.ipProtocol());
-					checkRule.setFromPort(outBoundIpPermission.fromPort());
-					checkRule.setToPort(outBoundIpPermission.toPort());
-					checkRule.setCidr(ipv6Range.cidrIpv6());
-					checkRule.setCidr(true);
-					checkRules.add(checkRule);
-				}
-				List<PrefixListId> prefixListIds = outBoundIpPermission.prefixListIds();
-				for(PrefixListId prefixListId : prefixListIds) {
-					SecurityGroupCheckRule checkRule = new SecurityGroupCheckRule(securityGroup.groupId(), securityGroupName, securityGroup);
-					checkRule.setDirectionType(DirectionType.EGRESS);
-					checkRule.setPrototol(outBoundIpPermission.ipProtocol());
-					checkRule.setFromPort(outBoundIpPermission.fromPort());
-					checkRule.setToPort(outBoundIpPermission.toPort());
-					checkRule.setCidr(prefixListId.prefixListId());
-					checkRule.setCidr(false);
-					checkRules.add(checkRule);
-				}
-				List<UserIdGroupPair> userIdGroupPairs = outBoundIpPermission.userIdGroupPairs();
-				for(UserIdGroupPair userIdGroupPair : userIdGroupPairs) {
-					SecurityGroupCheckRule checkRule = new SecurityGroupCheckRule(securityGroup.groupId(), securityGroupName, securityGroup);
-					checkRule.setDirectionType(DirectionType.EGRESS);
-					checkRule.setPrototol(outBoundIpPermission.ipProtocol());
-					checkRule.setFromPort(outBoundIpPermission.fromPort());
-					checkRule.setToPort(outBoundIpPermission.toPort());
-					checkRule.setCidr(userIdGroupPair.groupId());
-					checkRule.setCidr(false);
-					checkRules.add(checkRule);
-				}
+		List<IpPermission> outBoundIpPermissions = securityGroup.ipPermissionsEgress();
+		for (IpPermission outBoundIpPermission : outBoundIpPermissions) {
+			List<IpRange> ipRanges = outBoundIpPermission.ipRanges();
+			for(IpRange ipRange : ipRanges) {
+				SecurityGroupCheckRule checkRule = new SecurityGroupCheckRule(securityGroup.groupId(), securityGroupName, securityGroup);
+				checkRule.setDirectionType(DirectionType.EGRESS);
+				checkRule.setPrototol(outBoundIpPermission.ipProtocol());
+				checkRule.setFromPort(outBoundIpPermission.fromPort());
+				checkRule.setToPort(outBoundIpPermission.toPort());
+				checkRule.setCidr(ipRange.cidrIp());
+				checkRule.setCidr(true);
+				checkRules.add(checkRule);
 			}
-			this.sgRulesMap.put(securityGroupName, checkRules);
+			List<Ipv6Range> ipv6Ranges = outBoundIpPermission.ipv6Ranges();
+			for(Ipv6Range ipv6Range : ipv6Ranges) {
+				SecurityGroupCheckRule checkRule = new SecurityGroupCheckRule(securityGroup.groupId(), securityGroupName, securityGroup);
+				checkRule.setDirectionType(DirectionType.EGRESS);
+				checkRule.setPrototol(outBoundIpPermission.ipProtocol());
+				checkRule.setFromPort(outBoundIpPermission.fromPort());
+				checkRule.setToPort(outBoundIpPermission.toPort());
+				checkRule.setCidr(ipv6Range.cidrIpv6());
+				checkRule.setCidr(true);
+				checkRules.add(checkRule);
+			}
+			List<PrefixListId> prefixListIds = outBoundIpPermission.prefixListIds();
+			for(PrefixListId prefixListId : prefixListIds) {
+				SecurityGroupCheckRule checkRule = new SecurityGroupCheckRule(securityGroup.groupId(), securityGroupName, securityGroup);
+				checkRule.setDirectionType(DirectionType.EGRESS);
+				checkRule.setPrototol(outBoundIpPermission.ipProtocol());
+				checkRule.setFromPort(outBoundIpPermission.fromPort());
+				checkRule.setToPort(outBoundIpPermission.toPort());
+				checkRule.setCidr(prefixListId.prefixListId());
+				checkRule.setCidr(false);
+				checkRules.add(checkRule);
+			}
+			List<UserIdGroupPair> userIdGroupPairs = outBoundIpPermission.userIdGroupPairs();
+			for(UserIdGroupPair userIdGroupPair : userIdGroupPairs) {
+				SecurityGroupCheckRule checkRule = new SecurityGroupCheckRule(securityGroup.groupId(), securityGroupName, securityGroup);
+				checkRule.setDirectionType(DirectionType.EGRESS);
+				checkRule.setPrototol(outBoundIpPermission.ipProtocol());
+				checkRule.setFromPort(outBoundIpPermission.fromPort());
+				checkRule.setToPort(outBoundIpPermission.toPort());
+				checkRule.setCidr(userIdGroupPair.groupId());
+				checkRule.setCidr(false);
+				checkRules.add(checkRule);
+			}
+		}
+		
+		return checkRules;
+	}
+	
+	private void setSecurityGroupRules(List<String> securityGroupIds) {		
+		for(String securityGroupId : securityGroupIds) {
+			SecurityGroup securityGroup = serviceRepository.getSecurityGroupMap().get(securityGroupId);
+			String securityGroupName = securityGroup.groupName();
+			this.sgRulesMap.put(securityGroupName, this.getSecurityGroupRules(securityGroup));
 		}
 	}
 	
@@ -358,16 +360,16 @@ public abstract class AbstractNetwork<T> {
 		return checkResult;
 	}
 	
-	private CheckResult getAllSecurityGroup() {
+	public CheckResult getAllSecurityGroup(Map<String, List<SecurityGroupCheckRule>> sgRulesMap) {
 		
 		CheckResult checkResult = new CheckResult();		
 		List<CheckRule> allowRules = new ArrayList<>();		
 		
-		Set<String> keys = this.sgRulesMap.keySet();
+		Set<String> keys = sgRulesMap.keySet();
 		Iterator<String> iKeys = keys.iterator();
 		while(iKeys.hasNext()) {
 			String securityGroupName = iKeys.next();
-			List<SecurityGroupCheckRule> checkRules = this.sgRulesMap.get(securityGroupName);
+			List<SecurityGroupCheckRule> checkRules = sgRulesMap.get(securityGroupName);
 			for (SecurityGroupCheckRule checkRule : checkRules) {
 				if(checkRule.getDirectionType() == DirectionType.INGRESS) {
 					checkResult.setInSuccess(true);
@@ -381,30 +383,47 @@ public abstract class AbstractNetwork<T> {
 		checkResult.setAllowRules(allowRules);
 		return checkResult;
 	}
+	
+	private CheckResult getAllSecurityGroup() {
+		return this.getAllSecurityGroup(this.sgRulesMap);
+	}
 
-	private CheckResult checkSecurityGroup(String cidr) {
+	public CheckResult checkSecurityGroup(Map<String, List<SecurityGroupCheckRule>> sgRulesMap, String cidr) {
+		List<String> cidrs = new ArrayList<>();
+		cidrs.add(cidr);
+		return this.checkSecurityGroup(sgRulesMap, cidrs);
+	}
+	
+	public CheckResult checkSecurityGroup(Map<String, List<SecurityGroupCheckRule>> sgRulesMap, List<String> cidrs) {
 		
 		CheckResult checkResult = new CheckResult();
 		
 		List<CheckRule> allowRules = new ArrayList<>();
 		
-		IPAddress targetIp = new IPAddressString(cidr).getAddress();
+		List<IPAddress> targetIps = new ArrayList<>();
 		
-		Set<String> keys = this.sgRulesMap.keySet();
+		for(String cidr : cidrs) {
+			targetIps.add(new IPAddressString(cidr).getAddress());
+		}
+		
+		Set<String> keys = sgRulesMap.keySet();
 		Iterator<String> iKeys = keys.iterator();
 		while(iKeys.hasNext()) {
 			String securityGroupName = iKeys.next();
-			List<SecurityGroupCheckRule> checkRules = this.sgRulesMap.get(securityGroupName);
+			List<SecurityGroupCheckRule> checkRules = sgRulesMap.get(securityGroupName);
 			for (SecurityGroupCheckRule checkRule : checkRules) {
 				if(checkRule.isCidr()) {
 					IPAddress allowIp = new IPAddressString(checkRule.getCidr()).getAddress();
-					if(allowIp.contains(targetIp)) {
-						if(checkRule.getDirectionType() == DirectionType.INGRESS) {
-							checkResult.setInSuccess(true);
-						} else {
-							checkResult.setOutSuccess(true);
+					for(IPAddress targetIp : targetIps) {
+						if(allowIp.contains(targetIp)) {
+							if(checkRule.getDirectionType() == DirectionType.INGRESS) {
+								checkResult.setInSuccess(true);
+							} else {
+								checkResult.setOutSuccess(true);
+							}
+							allowRules.add(checkRule);
+							break;
 						}
-						allowRules.add(checkRule);
 					}
 				}
 			}
@@ -412,6 +431,10 @@ public abstract class AbstractNetwork<T> {
 
 		checkResult.setAllowRules(allowRules);
 		return checkResult;
+	}
+
+	private CheckResult checkSecurityGroup(String cidr) {
+		return this.checkSecurityGroup(this.sgRulesMap, cidr);
 	}
 	
 	private CheckResult getAllNetworkAcl() {

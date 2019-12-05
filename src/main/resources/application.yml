@@ -30,4 +30,5 @@ logging:
   register-shutdown-hook: true
   level:
     com.amazonaws: error
-    com.anthunt.aws.network: info
+    com.anthunt.aws.network: debug
+    org.springframework: info

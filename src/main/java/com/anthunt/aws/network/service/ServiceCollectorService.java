@@ -31,6 +31,9 @@ public class ServiceCollectorService {
 	
 	@Autowired
 	private LoadBalancerService loadBalancerService;
+
+	@Autowired
+	private RdsService rdsService;
 	
 	@Autowired
 	private DirectConnectService directConnectService;
@@ -46,9 +49,10 @@ public class ServiceCollectorService {
 		serviceRepository.setServiceRepositoryCollectListener(new ServiceRepositoryCollectListener(sseEmitter));
 		
 		int num = 0;
-		int total = !serviceName.isPresent() ? 23 
+		int total = !serviceName.isPresent() ? 25
 					: ServiceType.EC2.getName().equals(serviceName.get()) ? 16 
-					: ServiceType.ELB.getName().equals(serviceName.get()) ? 6 : 1;
+					: ServiceType.ELB.getName().equals(serviceName.get()) ? 6 
+					: ServiceType.RDS.getName().equals(serviceName.get()) ? 2 : 1;
 		
 		if(!serviceName.isPresent() || ServiceType.EC2.getName().equals(serviceName.get())) {
 			num = serviceRepository.ec2Sync(num, total, sessionProfile, ec2Service);		
@@ -56,6 +60,10 @@ public class ServiceCollectorService {
 		
 		if(!serviceName.isPresent() || ServiceType.ELB.getName().equals(serviceName.get())) {
 			num = serviceRepository.elbSync(num, total, sessionProfile, loadBalancerService);
+		}
+		
+		if(!serviceName.isPresent() || ServiceType.RDS.getName().equals(serviceName.get())) {
+			num = serviceRepository.rdsSync(num, total, sessionProfile, rdsService);
 		}
 		
 		if(!serviceName.isPresent() || ServiceType.DX.getName().equals(serviceName.get())) {

@@ -28,6 +28,8 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.LoadBalancer
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroup;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetHealthDescription;
+import software.amazon.awssdk.services.rds.model.DBCluster;
+import software.amazon.awssdk.services.rds.model.DBInstance;
 
 public class MemoryServiceRepositoryProvider extends ServiceRepositoryProvider {
 
@@ -150,6 +152,16 @@ public class MemoryServiceRepositoryProvider extends ServiceRepositoryProvider {
 	 * String transitGatewayId
 	 */
 	private ServiceMap<TransitGateway> transitGatewayMap;
+
+	/**
+	 * String dbClusterIdentifier
+	 */
+	private ServiceMap<DBCluster> rdsClusterMap;
+	
+	/**
+	 * String dbInstanceIdentifier
+	 */
+	private ServiceMap<DBInstance> rdsInstanceMap;
 	
 	public MemoryServiceRepositoryProvider() {
 		super();
@@ -397,6 +409,26 @@ public class MemoryServiceRepositoryProvider extends ServiceRepositoryProvider {
 	@Override
 	protected void setTransitGatewayMap(ServiceMap<TransitGateway> serviceMap) {
 		this.transitGatewayMap = serviceMap;
+	}
+
+	@Override
+	protected ServiceMap<DBInstance> getRdsInstanceMap() {
+		return this.rdsInstanceMap;
+	}
+
+	@Override
+	protected ServiceMap<DBCluster> getRdsClusterMap() {
+		return this.rdsClusterMap;
+	}
+
+	@Override
+	protected void setRdsInstanceMap(ServiceMap<DBInstance> serviceMap) {
+		this.rdsInstanceMap = serviceMap;
+	}
+
+	@Override
+	protected void setRdsClusterMap(ServiceMap<DBCluster> serviceMap) {
+		this.rdsClusterMap = serviceMap;
 	}
 	
 }

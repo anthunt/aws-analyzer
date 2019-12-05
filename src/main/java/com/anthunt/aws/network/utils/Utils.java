@@ -18,6 +18,19 @@ public class Utils {
 
 	public final static String DEFAULT_NAME = "Unknown";
 	
+	public static void sleep(long millis) {
+		try {
+			Thread.sleep(millis);
+		} catch (InterruptedException skip) {}
+	}
+	
+	public static String getNameTag(String name, String resourceId) {
+		if(Utils.DEFAULT_NAME.equals(name)) {
+			return resourceId;
+		}
+		return name;
+	}
+	
 	public static String getNameFromDXTags(List<software.amazon.awssdk.services.directconnect.model.Tag> tags) {
 		String name = DEFAULT_NAME;
 		for (software.amazon.awssdk.services.directconnect.model.Tag tag : tags) {

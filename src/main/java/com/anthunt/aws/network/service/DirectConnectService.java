@@ -10,19 +10,19 @@ import com.anthunt.aws.network.session.SessionProfile;
 
 import software.amazon.awssdk.auth.credentials.ProfileCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
-import software.amazon.awssdk.services.directconnect.DirectConnectClient;
+import software.amazon.awssdk.services.directconnect.DirectConnectAsyncClient;
 import software.amazon.awssdk.services.directconnect.model.VirtualInterface;
 import software.amazon.awssdk.services.directconnect.model.VirtualInterfaceState;
 
 @Service
 public class DirectConnectService {
 	
-	public DirectConnectClient getDirectConnectClient(SessionProfile sessionProfile) {
+	public DirectConnectAsyncClient getDirectConnectClient(SessionProfile sessionProfile) {
 		return this.getDirectConnectClient(sessionProfile.getProfileName(), sessionProfile.getRegionId());
 	}
 	
-	public DirectConnectClient getDirectConnectClient(String profileName, String regionId) {
-		return DirectConnectClient.builder()
+	public DirectConnectAsyncClient getDirectConnectClient(String profileName, String regionId) {
+		return DirectConnectAsyncClient.builder()
 				   .credentialsProvider(ProfileCredentialsProvider.create(profileName))
 				   .region(Region.of(regionId))
 				   .build();
@@ -30,9 +30,9 @@ public class DirectConnectService {
 
 	public ServiceMap<List<VirtualInterface>> getVirtualInterfaces(SessionProfile sessionProfile) {
 		ServiceMap<List<VirtualInterface>> virtualInterfaceMap = new ServiceMap<>();
-		DirectConnectClient directConnectClient = this.getDirectConnectClient(sessionProfile);
+		DirectConnectAsyncClient directConnectClient = this.getDirectConnectClient(sessionProfile);
 		int active = 0;
-		for(VirtualInterface virtualInterface : directConnectClient.describeVirtualInterfaces().virtualInterfaces()) {
+		for(VirtualInterface virtualInterface : directConnectClient.describeVirtualInterfaces().join().virtualInterfaces()) {
 			if(virtualInterfaceMap.containsKey(virtualInterface.virtualGatewayId())) {
 				virtualInterfaceMap.get(virtualInterface.virtualGatewayId()).add(virtualInterface);
 			} else {

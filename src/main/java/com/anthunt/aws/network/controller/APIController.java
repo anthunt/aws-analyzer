@@ -11,13 +11,11 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
-import com.anthunt.aws.network.controller.model.Request;
+import com.anthunt.aws.network.controller.model.ProfileContents;
 import com.anthunt.aws.network.controller.model.Response;
 import com.anthunt.aws.network.repository.model.ServiceStatistic;
 import com.anthunt.aws.network.service.Ec2Service;
@@ -104,12 +102,14 @@ public class APIController extends AbstractController {
 		return SessionProvider.getSessionServiceRepository(session).getServiceStatistic();		
 	}
 	
-	@PostMapping("/profiles/set/{type}")
-	public @ResponseBody Response setCredentials( @PathVariable("type") String type
-							  , @RequestBody Request profileRequest) throws IOException {
+	@PostMapping("/profiles/edit")
+	public Response editCredentials(HttpSession session
+												, ProfileContents profileContents) throws IOException {
 		
-		profileService.updateProfile(type, profileRequest.getData());
-		SessionProvider.loadProfiles();
+		SessionProvider.setSessionProfile(
+				session
+				, profileService.updateProfile(SessionProvider.getSessionProfile(session), profileContents)
+		);
 		
 		return new Response();
 	}

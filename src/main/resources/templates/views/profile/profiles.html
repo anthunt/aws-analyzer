@@ -11,7 +11,7 @@
 	<th:block layout:fragment="customScript">
 		<script>
 			$("#BtnAddProfile").click(function() {
-				location.href = "/profiles/set";
+				location.href = "/profiles/edit";
 			});
 		</script>
 	</th:block>
@@ -25,14 +25,24 @@
 					Edit profile
 				</button>
 				<div class="row">
-		            <div class="col-lg-3 col-md-4 col-sm-6" th:each="profileName : ${profileNames}">
+		            <div class="col-lg-3 col-md-4 col-sm-6" th:each="profile : ${profiles}">
 						<div class="card card-stats">
 							<div class="card-header card-header-icon">
 								<div class="card-icon" th:with="color=${T(com.anthunt.aws.network.utils.Utils).getColor()}" th:style="'box-shadow: 0 4px 20px 0 rgba(0,0,0,.14), 0 7px 10px -5px rgba(' + ${color.getR()} + ',' + ${color.getG()} + ',' + ${color.getB()} + ',' + ${color.getAlpha()} + '); background-color:' + ${color.getHex()}">
 									<i class="material-icons">account_box</i>
 								</div>
 								<p class="card-category">Profile</p>
-								<h3 class="card-title" th:text="${profileName}">default</h3>
+								<h3 class="card-title" th:text="${profile.key}">default</h3>
+							</div>
+							<div class="card-body">
+								<div class="card-text" style="text-align: left; background-color: #cfcfcf; padding: 5px;">
+									<p th:each="prop : ${profile.value.properties()}">
+								        <th:block th:if="${prop.key != 'aws_secret_access_key'}">
+								        <strong><span th:text="${prop.key}"></span></strong><br>
+								        <span th:text="${prop.value}"></span>
+								        </th:block>
+							        </p>
+							    </div>
 							</div>
 							<div class="card-footer">
 								<div class="dropdown">
@@ -41,7 +51,7 @@
 									</button>
 									<div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
 									<th:block th:each="region : ${regions}">
-										<a class="dropdown-item" th:href="'/setProfile/' + ${profileName} + '/' + ${region.id()}" th:text="${region.id()}">Action</a>
+										<a class="dropdown-item" th:href="'/profiles/set/' + ${profile.key} + '/' + ${region.id()}" th:text="${region.id()}">Action</a>
 									</th:block>
 									</div>
 								</div>

@@ -7,6 +7,8 @@ public enum ServiceType {
 	PRSB(ServiceCategory.NETWORK, "PRSB", "Private Subnet", "/img/VPC-subnet-private_dark-bg@4x.png"),
 	EC2(ServiceCategory.COMPUTE, "EC2", "EC2 Instance", "/img/Amazon-EC2_Instance_dark-bg@4x.png"),
 	ELB(ServiceCategory.NETWORK, "ELB", "Elastic Load Balancer", "/img/Elastic-Load-Balancing@4x.png"),
+	AURORA(ServiceCategory.DATABASE, "AURORA", "Aurora DB Cluster", "/img/Amazon-Aurora@4x.png"),
+	RDS(ServiceCategory.DATABASE, "RDS", "RDS DB Instance", "/img/Amazon-RDS@4x.png"),
 	CLB(ServiceCategory.NETWORK, "CLB", "Classic Load Balancer", "/img/Elastic-Load-Balancing_Classic-load-balancer_dark-bg@4x.png"),
 	ALB(ServiceCategory.NETWORK, "ALB", "Application Load Balancer", "/img/Elastic-Load-Balancing-ELB_Application-load-balancer_dark-bg@4x.png"),
 	NLB(ServiceCategory.NETWORK, "NLB", "Network Load Balancer", "/img/Elastic-Load-Balancing-ELB_Network-load-balancer_dark-bg@4x.png"),

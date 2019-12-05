@@ -9,8 +9,10 @@ import com.anthunt.aws.network.repository.model.ServiceStatistic;
 import com.anthunt.aws.network.service.DirectConnectService;
 import com.anthunt.aws.network.service.Ec2Service;
 import com.anthunt.aws.network.service.LoadBalancerService;
+import com.anthunt.aws.network.service.RdsService;
 import com.anthunt.aws.network.service.model.ServiceType;
 import com.anthunt.aws.network.session.SessionProfile;
+import com.anthunt.aws.network.utils.Utils;
 
 import software.amazon.awssdk.services.directconnect.model.VirtualInterface;
 import software.amazon.awssdk.services.ec2.model.CustomerGateway;
@@ -36,6 +38,8 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.LoadBalancer
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroup;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetHealthDescription;
+import software.amazon.awssdk.services.rds.model.DBCluster;
+import software.amazon.awssdk.services.rds.model.DBInstance;
 
 public abstract class ServiceRepositoryProvider {
 
@@ -92,7 +96,11 @@ public abstract class ServiceRepositoryProvider {
 	protected abstract ServiceMap<InternetGateway> getInternetGatewayMap();
 	
 	protected abstract ServiceMap<TransitGateway> getTransitGatewayMap();
+	
+	protected abstract ServiceMap<DBInstance> getRdsInstanceMap();
 
+	protected abstract ServiceMap<DBCluster> getRdsClusterMap();
+	
 	protected abstract void setVirtualInterfacesMap(ServiceMap<List<VirtualInterface>> serviceMap);
 
 	protected abstract void setTargetHealthDescriptionsMap(ServiceMap<List<TargetHealthDescription>> serviceMap);
@@ -141,6 +149,10 @@ public abstract class ServiceRepositoryProvider {
 	
 	protected abstract void setTransitGatewayMap(ServiceMap<TransitGateway> serviceMap);
 	
+	protected abstract void setRdsInstanceMap(ServiceMap<DBInstance> rdsInstances);
+
+	protected abstract void setRdsClusterMap(ServiceMap<DBCluster> rdsClusters);
+	
 	public void setServiceRepositoryCollectListener(ServiceRepositoryCollectListener serviceRepositoryCollectListener) {
 		this.serviceRepositoryCollectListener = serviceRepositoryCollectListener;
 	}
@@ -149,54 +161,71 @@ public abstract class ServiceRepositoryProvider {
 		this.setVpcMap(ec2Service.getVpcs(sessionProfile));
 		this.serviceRepositoryCollectListener.serviceLoaded(num, total, "Vpc data is loaded");
 		num++;
+		Utils.sleep(100);
 		this.setEc2InstanceMap(ec2Service.getInstances(sessionProfile));
 		this.serviceRepositoryCollectListener.serviceLoaded(num, total, "Ec2 instances data is loaded");
 		num++;
+		Utils.sleep(100);
 		this.setVolumeMap(ec2Service.getVolumes(sessionProfile));
 		this.serviceRepositoryCollectListener.serviceLoaded(num, total, "EBS volumes data is loaded");
 		num++;
+		Utils.sleep(100);
 		this.setNetworkInterfaceMap(ec2Service.getNetworkInterfaces(sessionProfile));
 		this.serviceRepositoryCollectListener.serviceLoaded(num, total, "Network Interfaces data is loaded");
 		num++;
+		Utils.sleep(100);
 		this.setSecurityGroupMap(ec2Service.getSecurityGroups(sessionProfile));
 		this.serviceRepositoryCollectListener.serviceLoaded(num, total, "Securitygroups data is loaded");
 		num++;
+		Utils.sleep(100);
 		ServiceMap<Subnet> subnetMap = this.setSubnetMap(ec2Service.getSubnets(sessionProfile));
 		this.serviceRepositoryCollectListener.serviceLoaded(num, total, "Subnets data is loaded");
 		num++;
+		Utils.sleep(100);
 		this.setRouteTablesMap(ec2Service.getRouteTables(sessionProfile, subnetMap.values()));
 		this.serviceRepositoryCollectListener.serviceLoaded(num, total, "Routes data is loaded");
 		num++;
+		Utils.sleep(100);
 		this.setInternetGatewayMap(ec2Service.getInternetGateways(sessionProfile));
 		this.serviceRepositoryCollectListener.serviceLoaded(num, total, "Internet Gateways data is loaded");
 		num++;
+		Utils.sleep(100);
 		this.setEgressInternetGatewayMap(ec2Service.getEgressInternetGateways(sessionProfile));
 		this.serviceRepositoryCollectListener.serviceLoaded(num, total, "Egress Internet Gateways data is loaded");
 		num++;
+		Utils.sleep(100);
 		this.setVpcEndpointMap(ec2Service.getVpcEndpoints(sessionProfile));
 		this.serviceRepositoryCollectListener.serviceLoaded(num, total, "Vpc Endpoints data is loaded");
 		num++;
+		Utils.sleep(100);
 		this.setVpcPeeringMap(ec2Service.getVpcPeerings(sessionProfile));
 		this.serviceRepositoryCollectListener.serviceLoaded(num, total, "Vpc Peering data is loaded");
 		num++;
+		Utils.sleep(100);
 		this.setTransitGatewayMap(ec2Service.getTransitGateways(sessionProfile));
 		this.serviceRepositoryCollectListener.serviceLoaded(num, total, "Trangit Gateways data is loaded");
 		num++;
+		Utils.sleep(100);
 		this.setPrefixListMap(ec2Service.getPrefixLists(sessionProfile));
 		this.serviceRepositoryCollectListener.serviceLoaded(num, total, "PrefixLists data is loaded");
 		num++;
+		Utils.sleep(100);
 		this.setNetworkAclsMap(ec2Service.getNetworkAcls(sessionProfile, subnetMap.values()));
 		this.serviceRepositoryCollectListener.serviceLoaded(num, total, "PrefixLists data is loaded");
 		num++;
+		Utils.sleep(100);
 		this.setCustomerGatewayMap(ec2Service.getCustomerGateways(sessionProfile));
 		this.serviceRepositoryCollectListener.serviceLoaded(num, total, "CustomerGateways data is loaded");
 		num++;
+		Utils.sleep(100);
 		this.setVpnGatewayMap(ec2Service.getVpnGateways(sessionProfile));
 		this.serviceRepositoryCollectListener.serviceLoaded(num, total, "VpnGateways data is loaded");
-		num++;			
+		num++;		
+		Utils.sleep(100);	
 		this.setVpnConnectionsMap(ec2Service.getVpnConnections(sessionProfile));
 		this.serviceRepositoryCollectListener.serviceLoaded(num, total, "VpnConnections data is loaded");
 		num++;
+		Utils.sleep(100);
 		return num;		
 	}
 
@@ -204,28 +233,48 @@ public abstract class ServiceRepositoryProvider {
 		this.setClassicLoadBalancerMap(loadBalancerService.getClassicLoadBalancers(sessionProfile));
 		this.serviceRepositoryCollectListener.serviceLoaded(num, total, "Classic loadbalancers data is loaded");
 		num++;
+		Utils.sleep(100);
 		ServiceMap<LoadBalancer> loadBalancerMap = this.setLoadBalancerMap(loadBalancerService.getLoadBalancers(sessionProfile));
 		this.serviceRepositoryCollectListener.serviceLoaded(num, total, "LoadBalancers data is loaded");
 		num++;
+		Utils.sleep(100);
 		ServiceMap<List<Listener>> listenersMap = this.setLoadBalancerListenersMap(loadBalancerService.getLoadBalancerListeners(sessionProfile, loadBalancerMap.values()));
 		this.serviceRepositoryCollectListener.serviceLoaded(num, total, "LoadBalancer listeners data is loaded");
 		num++;
+		Utils.sleep(100);
 		this.setLoadBalancerRulesMap(loadBalancerService.getLoadBalancerRules(sessionProfile, listenersMap.values()));
 		this.serviceRepositoryCollectListener.serviceLoaded(num, total, "LoadBalancer rules data is loaded");
 		num++;
+		Utils.sleep(100);
 		ServiceMap<TargetGroup> targetGroupMap = this.setTargetGroupMap(loadBalancerService.getTargetGroups(sessionProfile));
 		this.serviceRepositoryCollectListener.serviceLoaded(num, total, "LoadBalancer targetgroups data is loaded");
 		num++;
+		Utils.sleep(100);
 		this.setTargetHealthDescriptionsMap(loadBalancerService.getTargetHealthDescriptions(sessionProfile, targetGroupMap.values()));
 		this.serviceRepositoryCollectListener.serviceLoaded(num, total, "LoadBalancer target healths data is loaded");
 		num++;
+		Utils.sleep(100);
 		return num;
 	}
 	
+	public int rdsSync(int num, int total, SessionProfile sessionProfile, RdsService rdsService) throws IOException {
+		this.setRdsClusterMap(rdsService.getRdsClusters(sessionProfile));
+		this.serviceRepositoryCollectListener.serviceLoaded(num, total, "Classic loadbalancers data is loaded");
+		num++;
+		Utils.sleep(100);
+		
+		this.setRdsInstanceMap(rdsService.getRdsInstances(sessionProfile));
+		this.serviceRepositoryCollectListener.serviceLoaded(num, total, "Classic loadbalancers data is loaded");
+		num++;
+		Utils.sleep(100);
+		return num;
+	}
+
 	public int dxSync(int num, int total, SessionProfile sessionProfile, DirectConnectService directConnectService) throws IOException {
 		this.setVirtualInterfacesMap(directConnectService.getVirtualInterfaces(sessionProfile));
 		this.serviceRepositoryCollectListener.serviceLoaded(num, total, "Virtual Interfaces healths data is loaded");
 		num++;
+		Utils.sleep(100);
 		return num;
 	}
 
@@ -249,6 +298,8 @@ public abstract class ServiceRepositoryProvider {
 		serviceStatistics.add(this.getVolumeMap().getServiceStatistic(ServiceType.EBS));
 		serviceStatistics.add(this.getNetworkInterfaceMap().getServiceStatistic(ServiceType.ENI));
 		serviceStatistics.add(this.getLoadBalancerMap().getServiceStatistic(ServiceType.ELB));
+		serviceStatistics.add(this.getRdsClusterMap().getServiceStatistic(ServiceType.AURORA));
+		serviceStatistics.add(this.getRdsInstanceMap().getServiceStatistic(ServiceType.RDS));
 		return serviceStatistics;
 	}
 	

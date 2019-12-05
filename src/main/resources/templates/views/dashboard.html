@@ -33,13 +33,24 @@
 						
 			function callDashboard() {
 				Utils.async("/api/statistics", (data) => {
+					data = data.sort((a, b)=>{ return a.serviceCategory < b.serviceCategory ? -1 : a.serviceCategory > b.serviceCategory ? 1 : 0});
+					var serviceCategory = "";
 					data.forEach((data) => {
+						
 						var content = template;
+						
+						if(serviceCategory != data.serviceCategory) {
+							$("#statisticsRow").append(
+									"<div class=\"row\"><div class=\"col\"><strong>" + data.serviceCategory + "</strong></div></div><div class=\"row\" id=\"statistics_" + data.serviceCategory + "\"></div>"
+							);
+							serviceCategory = data.serviceCategory;
+						}
+						
 						content = content.replace("{icon}", data.icon);
 						content = content.replace("{ServiceType}", data.serviceDisplayName);
 						content = content.replace("{StatisticsMessage}", (data.serviceActive == data.serviceTotal ? data.serviceTotal + "ea" : data.serviceActive + "ea/" + data.serviceTotal + "ea"));
 						content = content.replace("{percent}", data.serviceTotal == 0 ? 0 : Math.round((data.serviceActive/data.serviceTotal)*100))
-						$("#statisticsRow").append(content);
+						$("#statistics_" + serviceCategory).append(content);
 						$(".knob").knob({
 							format : function (value) {
 			                	return value + '%';
@@ -64,11 +75,7 @@
 	<body>
 		
 		<div layout:fragment="content">
-			<div class="container-fluid">
-				<div id="statisticsRow" class="row">
-		            
-				</div>
-			</div>
+			<div class="container-fluid" id="statisticsRow"></div>
 		</div>
 	
 	</body>

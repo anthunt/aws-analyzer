@@ -1,9 +1,11 @@
 package com.anthunt.aws.network.repository.model;
 
+import com.anthunt.aws.network.service.model.ServiceCategory;
 import com.anthunt.aws.network.service.model.ServiceType;
 
 public class ServiceStatistic {
 
+	private ServiceCategory serviceCategory;
 	private String serviceName;
 	private String serviceDisplayName;
 	private int serviceActive;
@@ -11,11 +13,20 @@ public class ServiceStatistic {
 	private String icon;
 
 	public ServiceStatistic(ServiceType serviceType) {
+		this.setServiceCategory(serviceType.getServiceCategory());
 		this.setServiceName(serviceType.getName());
 		this.setServiceDisplayName(serviceType.getAlias());
 		this.setIcon(serviceType.getIcon());
 	}
 	
+	public ServiceCategory getServiceCategory() {
+		return serviceCategory;
+	}
+
+	private void setServiceCategory(ServiceCategory serviceCategory) {
+		this.serviceCategory = serviceCategory;
+	}
+
 	public String getServiceName() {
 		return serviceName;
 	}

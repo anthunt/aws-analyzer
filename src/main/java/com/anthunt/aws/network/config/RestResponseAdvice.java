@@ -39,6 +39,7 @@ public class RestResponseAdvice implements ResponseBodyAdvice<Object> {
 	@ResponseStatus(HttpStatus.OK)
     @ExceptionHandler(Exception.class)
     public RestResponse handle(Exception e) {
+		e.printStackTrace();
         return new RestResponse().setError(e.getMessage());
     }
     

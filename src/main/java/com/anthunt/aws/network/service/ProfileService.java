@@ -7,6 +7,8 @@ import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
+import com.anthunt.aws.network.controller.model.ProfileContents;
+import com.anthunt.aws.network.session.SessionProfile;
 import com.anthunt.aws.network.utils.Utils;
 
 import software.amazon.awssdk.profiles.ProfileFileLocation;
@@ -24,11 +26,21 @@ public class ProfileService {
 		return configFileMap;
 	}
 
-	public void updateProfile(String type, String data) throws IOException {
-		if("config".equals(type)) {
-			Utils.writeFile(ProfileFileLocation.configurationFilePath(), data, Charset.forName("utf-8"));
-		} else if("credentials".equals(type)) {
-			Utils.writeFile(ProfileFileLocation.credentialsFilePath(), data, Charset.forName("utf-8"));	
-		}
+	public SessionProfile updateProfile(SessionProfile sessionProfile, ProfileContents profileContents) throws IOException {
+		
+			Utils.writeFile(
+					ProfileFileLocation.configurationFilePath()
+					, profileContents.getConfig()
+					, Charset.forName("utf-8")
+			);
+			Utils.writeFile(
+					ProfileFileLocation.credentialsFilePath()
+					, profileContents.getCredentials()
+					, Charset.forName("utf-8")
+			);	
+			
+			sessionProfile.setProfileFile(profileContents);
+			
+			return sessionProfile;			
 	}
 }

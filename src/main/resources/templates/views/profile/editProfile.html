@@ -28,31 +28,20 @@
 		    configEditor.setTheme("ace/theme/monokai");
 		    configEditor.session.setMode("ace/mode/properties");
 		    
-		    $("#BtnSaveCredentials").click(function() {
-		    	fetch("/api/profiles/set/credentials", {
+		    $("#BtnSaveProfiles").click(function() {
+		    	fetch("/api/profiles/edit", {
 		    		method: "POST",
 		    		headers: {
 		                "Content-Type": "application/json; charset=utf-8"
 		            },
 		            credentials: "same-origin",
-		    		body: JSON.stringify({data: credentialsEditor.getValue()})
+		    		body: JSON.stringify({
+		    			credentials: credentialsEditor.getValue()
+		    			, config: configEditor.getValue()
+		    		})
 		    	}).then(e=>e.json()).then(function(data) {
 		    		console.log(data);
-		    		showAlert('success', "saved credentials successfully");
-		    	});
-		    });
-		    
-		    $("#BtnSaveConfig").click(function() {
-		    	fetch("/api/profiles/set/config", {
-		    		method: "POST",
-		    		headers: {
-		                "Content-Type": "application/json; charset=utf-8"
-		            },
-		            credentials: "same-origin",
-		    		body: JSON.stringify({data: configEditor.getValue()})
-		    	}).then(e=>e.json()).then(function(data) {
-		    		console.log(data);
-		    		showAlert('success', "saved config successfully");
+		    		showAlert('success', "saved profiles successfully");
 		    	});
 		    });
 		    
@@ -79,13 +68,16 @@
 				<div class="row">
 					<div class="col-lg-6 col-md-6 col-sm-12">
 						<h3>Edit credentials file</h3>
-						<div id="credentialsEditor" th:text="${profiles.get('credentials')}"></div>
-						<button type="button" id="BtnSaveCredentials" class="btn btn-primary">Apply</button>
+						<div id="credentialsEditor" th:text="${profiles.getCredentials()}"></div>
 					</div>
 					<div class="col-lg-6 col-md-6 col-sm-12">
 						<h3>Edit config file</h3>
-						<div id="configEditor" th:text="${profiles.get('config')}"></div>
-						<button type="button" id="BtnSaveConfig" class="btn btn-primary">Apply</button>
+						<div id="configEditor" th:text="${profiles.getConfig()}"></div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col">
+						<button type="button" id="BtnSaveProfiles" class="btn btn-primary">Apply</button>
 					</div>
 				</div>
 			</div>
