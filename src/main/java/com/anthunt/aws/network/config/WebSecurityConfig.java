@@ -1,21 +1,36 @@
 package com.anthunt.aws.network.config;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+
+import com.anthunt.aws.network.service.user.UserService;
 
 @Configuration
 @EnableWebSecurity
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
+	
+	@Autowired
+	private UserService userService;
+	
+	@Override
+	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+		super.configure(auth);
+		auth.userDetailsService(userService)
+			.passwordEncoder(passwordEncoder());
+	}
+
+	@Bean
+	public PasswordEncoder passwordEncoder() {
+		return new BCryptPasswordEncoder();
+	}
 	
 	@Override
     public void configure(WebSecurity web) {
@@ -47,31 +62,15 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 	    		.antMatchers("/css/**/*").permitAll()
 	    		.antMatchers("/js/**/*").permitAll()
 	    		.antMatchers("/img/**/*").permitAll()
+	    		.antMatchers("/user/join", "/user/join/set").permitAll()
 	    		.antMatchers("/").permitAll()
 				.anyRequest().hasRole("USER")
 				.and()
-			.sessionManagement()
-				.maximumSessions(1)
-				.maxSessionsPreventsLogin(true)
-				.expiredUrl("/")
+//			.sessionManagement()
+//				.maximumSessions(1)
+//				.maxSessionsPreventsLogin(true)
+//				.expiredUrl("/")
 			;
 	}
-	
-	@Bean
-	public PasswordEncoder passwordEncoder() {
-	  return new BCryptPasswordEncoder();
-	}
-	
-	@Bean
-    @Override
-    public UserDetailsService userDetailsService() {
-        UserDetails user =
-             User.withUsername("user")
-                .password(passwordEncoder().encode("password"))
-                .roles("USER")
-                .build();
-
-        return new InMemoryUserDetailsManager(user);
-    }
 	
 }

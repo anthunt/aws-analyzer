@@ -7,16 +7,19 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.slf4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import com.anthunt.aws.network.controller.model.RestResponse;
+import com.anthunt.aws.network.repository.user.model.UserDetails;
+import com.anthunt.aws.network.service.ProfileService;
+import com.anthunt.aws.network.session.SessionProfile;
 import com.anthunt.aws.network.session.SessionProvider;
 import com.anthunt.aws.network.utils.Logging;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -40,6 +43,9 @@ public class WebConfig  implements WebMvcConfigurer {
 		response.getWriter().write(objJson);
 	}
 	
+	@Autowired
+	private ProfileService profileService;
+	
 	@Override
 	public void addInterceptors(InterceptorRegistry registry) {
 		registry.addInterceptor(new HandlerInterceptor() {
@@ -53,22 +59,34 @@ public class WebConfig  implements WebMvcConfigurer {
 		        if(authentication != null) {
 		        	if(authentication.isAuthenticated()) {
 		        		
+		        		log.trace("Principal : {} : {}", authentication.getPrincipal(), request);
+		        		
 		        		if(authentication.getPrincipal() instanceof UserDetails) {
 				        	
 				        	HttpSession session = request.getSession();
+				        	UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 				        	
-				        	if((request.getRequestURI().startsWith("/profiles") || request.getRequestURI().startsWith("/setProfile"))) {
+				        	SessionProfile sessionProfile = SessionProvider.getSessionProfile(session);
+				        	if(sessionProfile == null) {
+				        		sessionProfile = SessionProvider.createSessionProfile(session, profileService.getProfileContents(userDetails.getUser().getUserid().toString()));
+				        	}
+				    		
+				        	if((request.getRequestURI().startsWith("/profiles") || request.getRequestURI().startsWith("/api/profiles/edit"))) {
+				        		log.trace("go to profiles something : {}", request);
 				        		return true;
-				        	} else if(!SessionProvider.hasSessionProfile(session)) {
+				        	} else if(!sessionProfile.isSelected()) {
 				        		if(request.getRequestURI().startsWith("/api")) {
+				        			log.trace("goto have no profile from api : {}", request);
 				        			sendResponseBody(response, new RestResponse().setError("have no session profile", "/profiles"));
 				        		} else {
+				        			log.trace("go to profiles from api : {}", request);
 				        			response.sendRedirect("/profiles");
 				        		}
 				        		return false;
 				        	} else if("/dashboard".equals(request.getRequestURI()) || request.getRequestURI().startsWith("/api/collect")) {
+				        		
 				        		return true;
-				        	} else if(!SessionProvider.hasSessionServiceRepository(session)) {
+				        	} else if(!sessionProfile.isSelected()) {
 				        		if(request.getRequestURI().startsWith("/api")) {
 				        			sendResponseBody(response, new RestResponse().setError("have no sync data", "/dashboard"));
 				        		} else {

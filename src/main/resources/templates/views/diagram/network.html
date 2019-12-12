@@ -68,6 +68,12 @@
 				NetworkLoad.load(url);
 			};
 
+			var searchElement = () => {
+				$("#ec2InstanceList>div>a>p>strong>abbr").each((index, abbr)=>{
+					
+				});
+			};
+			
 			document.getElementById("btnTrafficPlay").onclick = function(e) {
 				if(isTrafficEnable) {
 					isTrafficEnable = false;
@@ -77,19 +83,61 @@
 				}
 			};
 			
-			$('#ec2InstanceList a').on('click', function (e) {
-				e.preventDefault();
-				$(this).tab('show');
+			$("#searchElement").on('keypress', (e)=>{
+				if(e.keyCode == 13) {
+					var a;
+					
+					if($("#ec2InstanceList").hasClass("active")) {
+						a = $("#ec2InstanceList>div>a");
+					} else if($("#elbList").hasClass("active")) {
+						a = $("#elbList>div>a");
+					}
+					
+					var searchText = $("#searchElement").val();
+					
+					var searches = searchText.split(",");
+					
+					var patterns = [];
+					searches.forEach((search)=>{
+						patterns.push(new RegExp(search.trim(), "i"));
+					})
+				    
+				    a.each((index, item)=>{
+				    	
+				    	var isMatched = false;
+				    	patterns.some((pattern)=>{
+				    		if(item.innerText.match(pattern) != null) {
+								isMatched = true;
+								return isMatched;
+					        }	
+				    	});
+				    	
+				    	if(isMatched) {
+							$(item).show();
+				        } else {
+				        	$(item).hide();
+				        }
+				    });
+				}
 			});
 			
-			$('#elbList a').on('click', function (e) {
-				e.preventDefault();
-				$(this).tab('show');
+			$('#ec2InstanceList a').on('click', (e)=>{
+				try {
+					e.preventDefault();
+					$(this).tab('show');
+				} catch(skip) {}
+			});
+			
+			$('#elbList a').on('click', (e)=>{
+				try {
+					e.preventDefault();
+					$(this).tab('show');
+				} catch(skip) {}
 			});
 
 			NetworkLoad.initialize();
 			
-			window.addEventListener("resize", function() {
+			window.addEventListener("resize", ()=>{
 				NetworkLoad.diagram().fit();
 			});
 		</script>
@@ -112,6 +160,11 @@
 								    <input type="text" class="form-control" id="targetCidr" aria-describedby="targetCidrHelp" placeholder="Enter Target Cidr">
 								    <small id="targetCidrHelp" class="form-text text-muted">Enter Target Cidr</small>
 								  </div>
+								  <div class="form-group white">
+								    <label for="searchElement">Search Element</label>
+								    <input type="text" class="form-control" id="searchElement" aria-describedby="searchElementHelp" placeholder="Enter Search Name">
+								    <small id="searchElementHelp" class="form-text text-muted">Enter Search Name</small>
+								  </div>
 								</form>
 							</div>
 						</div>
@@ -130,7 +183,7 @@
 											    	<small class="mb-1" th:text="${instance.instanceId()}">List group item heading</small>
 											    	<small th:text="${instance.state().nameAsString()}">3 days ago</small>
 											    </div>
-											    <p class="mb-1"><strong><abbr th:title="${T(com.anthunt.aws.network.utils.Utils).getNameFromTags(instance.tags())}" th:text="${#strings.abbreviate(T(com.anthunt.aws.network.utils.Utils).getNameFromTags(instance.tags()), 30)}">210.0.0.0</abbr></strong></p>
+											    <p class="mb-1"><strong><abbr th:title="${T(com.anthunt.aws.network.utils.Utils).getNameFromTags(instance.tags())}" th:text="${T(com.anthunt.aws.network.utils.Utils).getNameFromTags(instance.tags())}">210.0.0.0</abbr></strong></p>
 											    <p class="mb-1"><strong>public ip :</strong><span th:text="${instance.publicIpAddress()}">210.0.0.0</span></p>
 											    <p class="mb-1"><strong>private ip :</strong><span th:text="${instance.privateIpAddress()}">10.0.0.0</span></p>
 											</a>
@@ -143,15 +196,13 @@
 												    <small class="mb-1" th:text="${loadbalancer.typeAsString()}">List group item heading</small>
 												    <small th:text="${loadbalancer.state().codeAsString()}">3 days ago</small>
 											    </div>
-											    <p class="mb-1"><strong><abbr th:title="${loadbalancer.loadBalancerName()}" th:text="${#strings.abbreviate(loadbalancer.loadBalancerName(), 30)}">210.0.0.0</abbr></strong></p>
+											    <p class="mb-1"><strong><abbr th:title="${loadbalancer.loadBalancerName()}" th:text="${loadbalancer.loadBalancerName()}">210.0.0.0</abbr></strong></p>
 											    <p class="mb-1"><span th:text="${loadbalancer.dnsName()}">210.0.0.0</span></p>
 											</a>
 										</div>
 									</div>
 									<div class="tab-pane" id="rdsList" role="tabpanel">
-										<div class="list-group">
-											
-										</div>
+										<div class="list-group"></div>
 									</div>
 								</div>
 							</div>

@@ -24,11 +24,19 @@ spring:
     max-size: 8
  jackson:    serialization:
      FAIL_ON_EMPTY_BEANS: false    visibility:
-     field: any            
+     field: any mongodb:    embedded:      storage:        database-dir: mongodb
+ data:
+  mongodb:
+   authentication-database: admin
+   database: test_db
+   port: 27017
+   host: localhost 
+      
 logging:
   exception-conversion-word: "%wEx"
   register-shutdown-hook: true
   level:
     com.amazonaws: error
-    com.anthunt.aws.network: debug
+    com.anthunt.aws.network: info
     org.springframework: info
+    org.springframework.boot.autoconfigure.mongo: error

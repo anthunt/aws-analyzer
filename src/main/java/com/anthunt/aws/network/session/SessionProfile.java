@@ -1,23 +1,39 @@
 package com.anthunt.aws.network.session;
 
-import java.io.ByteArrayInputStream;
+import java.util.HashMap;
 import java.util.Map;
 
-import com.anthunt.aws.network.controller.model.ProfileContents;
+import org.bson.types.ObjectId;
 
+import com.anthunt.aws.network.repository.profile.model.ProfileContents;
+import com.anthunt.aws.network.repository.user.model.UserDetails;
+
+import lombok.Data;
 import software.amazon.awssdk.auth.credentials.ProfileCredentialsProvider;
 import software.amazon.awssdk.profiles.Profile;
 import software.amazon.awssdk.profiles.ProfileFile;
+import software.amazon.awssdk.profiles.ProfileFile.Aggregator;
 import software.amazon.awssdk.regions.Region;
 
+@Data
 public class SessionProfile {
 
 	private ProfileFile profileFile;
 	private ProfileContents profileContents;
 	private String profileName;
 	private String regionId;
+	private UserDetails userDetails;
 	
-	public SessionProfile() {
+	public SessionProfile(UserDetails userDetails) {
+		this.setUserDetails(userDetails);
+	}
+	
+	public boolean isSelected() {
+		return this.getProfileName() != null;
+	}
+	
+	public ObjectId getUserid() {
+		return this.getUserDetails().getUser().getUserid();
 	}
 	
 	private ProfileFile getProfileFile() {
@@ -25,25 +41,23 @@ public class SessionProfile {
 	}
 	
 	public Map<String, Profile> getProfiles() {
-	    return this.profileFile.profiles();
+	    return this.profileFile == null ? new HashMap<>() : this.profileFile.profiles();
 	}
 	
 	public void setProfileFile(ProfileContents profileContents) {
 		this.profileContents = profileContents;
-		this.profileFile = ProfileFile.aggregator()
-				.addFile(
-						ProfileFile.builder()
-							.content(new ByteArrayInputStream(this.profileContents.getCredentialsBytes()))
-							.type(ProfileFile.Type.CREDENTIALS)
-							.build()
-				)
-				.addFile(
-						ProfileFile.builder()
-							.content(new ByteArrayInputStream(this.profileContents.getConfigBytes()))
-							.type(ProfileFile.Type.CONFIGURATION)
-							.build()
-				)
-				.build();
+		
+		Aggregator aggregator = ProfileFile.aggregator();
+		
+		if(this.profileContents.hasCredentials()) {
+			aggregator.addFile(this.profileContents.getCredentialsProfileFile());
+		}
+		
+		if(this.profileContents.hasConfig()) {
+			aggregator.addFile(this.profileContents.getConfigProfileFile());
+		}
+		
+		this.profileFile = aggregator.build();
 	}
 	
 	public ProfileCredentialsProvider getProfileCredentialsProvider() {
@@ -54,7 +68,7 @@ public class SessionProfile {
 	}
 	
 	public ProfileContents getProfileContents() {
-		return this.profileContents;
+		return this.profileContents == null ? new ProfileContents(this.getUserid()) : this.profileContents;
 	}
 	
 	public String getProfileName() {

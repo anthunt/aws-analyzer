@@ -6,10 +6,10 @@ import java.util.List;
 
 import com.anthunt.aws.network.repository.model.ServiceMap;
 import com.anthunt.aws.network.repository.model.ServiceStatistic;
-import com.anthunt.aws.network.service.DirectConnectService;
-import com.anthunt.aws.network.service.Ec2Service;
-import com.anthunt.aws.network.service.LoadBalancerService;
-import com.anthunt.aws.network.service.RdsService;
+import com.anthunt.aws.network.service.aws.DirectConnectService;
+import com.anthunt.aws.network.service.aws.Ec2Service;
+import com.anthunt.aws.network.service.aws.LoadBalancerService;
+import com.anthunt.aws.network.service.aws.RdsService;
 import com.anthunt.aws.network.session.SessionProfile;
 
 import software.amazon.awssdk.services.directconnect.model.VirtualInterface;

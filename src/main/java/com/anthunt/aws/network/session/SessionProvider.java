@@ -1,21 +1,19 @@
 package com.anthunt.aws.network.session;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.util.List;
+import java.util.Optional;
 
 import javax.servlet.http.HttpSession;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 
-import com.anthunt.aws.network.controller.model.ProfileContents;
 import com.anthunt.aws.network.repository.ServiceRepository;
-import com.anthunt.aws.network.utils.Utils;
+import com.anthunt.aws.network.repository.profile.model.ProfileContents;
+import com.anthunt.aws.network.repository.user.model.UserDetails;
 
-import software.amazon.awssdk.profiles.ProfileFileLocation;
 import software.amazon.awssdk.regions.Region;
 
 public class SessionProvider {
@@ -29,18 +27,20 @@ public class SessionProvider {
 	    REGIONS = Region.regions();
 	}
 	
-	public static SessionProfile getSessionProfile(HttpSession session) throws IOException {
+	public static SessionProfile createSessionProfile(HttpSession session, Optional<ProfileContents> profileContents) {
 		SessionProfile sessionProfile = (SessionProfile) session.getAttribute(SESSION_PROFILE_KEY);
 		if(sessionProfile == null) {
-			sessionProfile = new SessionProfile();
-			
-			ProfileContents profileContents = new ProfileContents();
-			profileContents.setConfig(Utils.readFile(ProfileFileLocation.configurationFilePath(), Charset.forName("utf-8")));
-			profileContents.setCredentials(Utils.readFile(ProfileFileLocation.credentialsFilePath(), Charset.forName("utf-8")));
-			
-			sessionProfile.setProfileFile(profileContents);
+			sessionProfile = new SessionProfile(SessionProvider.getUserDetails());
+			if(profileContents.isPresent()) {
+				sessionProfile.setProfileFile(profileContents.get());
+			}
 		}
+		session.setAttribute(SESSION_PROFILE_KEY, sessionProfile);
 		return sessionProfile;
+	}
+	
+	public static SessionProfile getSessionProfile(HttpSession session) throws IOException {
+		return (SessionProfile) session.getAttribute(SESSION_PROFILE_KEY);
 	}
 	
 	public static boolean hasSessionProfile(HttpSession session) {
@@ -65,14 +65,27 @@ public class SessionProvider {
 		session.setAttribute(SESSION_SERVICE_REPOSITORY, serviceRepository);
 	}
 	
+	public static UserDetails getUserDetails() {
+        SecurityContext securityContext = SecurityContextHolder.getContext();
+        Authentication authentication = securityContext.getAuthentication();
+        if (authentication != null) {
+        	if(authentication.getPrincipal() instanceof UserDetails) {
+                return (UserDetails) authentication.getPrincipal();
+        	}
+        }
+        return null;
+    }
+	
 	public static String getUserName() {
         SecurityContext securityContext = SecurityContextHolder.getContext();
         Authentication authentication = securityContext.getAuthentication();
         String userName = null;
         if (authentication != null) {
 
+        	if(authentication.getPrincipal() instanceof UserDetails) {
                 UserDetails userDetails = (UserDetails) authentication.getPrincipal();
                 userName = userDetails.getUsername();
+        	}
 
         }
         return userName;

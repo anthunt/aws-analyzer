@@ -1,6 +1,7 @@
-package com.anthunt.aws.network.controller;
+package com.anthunt.aws.network.controller.ui;
 
 import java.io.IOException;
+import java.util.Map;
 
 import javax.servlet.http.HttpSession;
 
@@ -12,11 +13,13 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.anthunt.aws.network.repository.ServiceRepository;
-import com.anthunt.aws.network.service.Ec2Service;
-import com.anthunt.aws.network.service.LoadBalancerService;
+import com.anthunt.aws.network.service.aws.Ec2Service;
+import com.anthunt.aws.network.service.aws.LoadBalancerService;
 import com.anthunt.aws.network.session.SessionProfile;
 import com.anthunt.aws.network.session.SessionProvider;
 import com.anthunt.aws.network.utils.Logging;
+
+import software.amazon.awssdk.profiles.Profile;
 
 @Controller
 @RequestMapping("/")
@@ -29,7 +32,7 @@ public class UIController extends AbstractController {
 	
 	@Autowired
 	private LoadBalancerService loadBalancerService;
-	
+		
 	@RequestMapping("")
 	public String main() {
 		return "redirect:/profiles";
@@ -42,11 +45,19 @@ public class UIController extends AbstractController {
 	
 	@RequestMapping("profiles")
 	public String getProfiles(HttpSession session, Model model) throws IOException {
-			    
-	    model.addAttribute("profiles", SessionProvider.getSessionProfile(session).getProfiles());
-	    model.addAttribute("regions", SessionProvider.REGIONS);
+		
+		String pagePath = "views/profile/profiles";
+		
+		Map<String, Profile> profiles = SessionProvider.getSessionProfile(session).getProfiles();
+		
+		if(profiles.size() > 0) {
+		    model.addAttribute("profiles", profiles);
+		    model.addAttribute("regions", SessionProvider.REGIONS);
+		} else {
+			pagePath = "redirect:/profiles/edit";
+		}
 	    
-		return "views/profile/profiles";
+		return pagePath;
 	}
 	
 	@RequestMapping("profiles/edit")

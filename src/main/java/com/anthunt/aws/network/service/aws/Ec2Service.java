@@ -1,4 +1,4 @@
-package com.anthunt.aws.network.service;
+package com.anthunt.aws.network.service.aws;
 
 import java.util.ArrayList;
 import java.util.Collection;

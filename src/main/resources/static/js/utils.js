@@ -75,5 +75,18 @@
 			
         };
         
+        _this.alert = (type, message) => {
+	    	$.notify({
+	    		message: message 
+	    	},{
+	    		type: type
+	    	    , delay: 2000
+	    	    , placement: {
+	    			from: "top",
+	    			align: "right"
+	    	    }
+	    	});
+	    };
+        
     }();
 }));

@@ -123,25 +123,18 @@ var NetworkLoad = function() {
     	priority: function( edge ){ return null; }
 	};
 	
-	this.diagram = function() {
-		return diagram;
-	};
+	_this.diagram = () => { return diagram; };
 	
-	function on() {
-		  document.getElementById("overlayLoading").style.display = "flex";
-	}
-
-	function off() {
-	  document.getElementById("overlayLoading").style.display = "none";
-	}
+	var on = () => { document.getElementById("overlayLoading").style.display = "flex"; };
+	var off = () => { document.getElementById("overlayLoading").style.display = "none"; };
 	
-	function destroy() {
+	var destroy = () => {
 		if(diagram != null) {
 			diagram.destroy();
 		}
-	}
+	};
 	
-	this.load = (jsonURL)=>{
+	_this.load = (jsonURL)=>{
 		on();
 		diagram.elements().forEach((ele) => { NetworkLoad.diagram().remove(ele); });
 		
@@ -181,7 +174,7 @@ var NetworkLoad = function() {
 		
 	};
 	
-	this.initialize = ()=>{
+	_this.initialize = ()=>{
 		
 		diagram = cytoscape({
 		  container: document.getElementById('cy'),
@@ -214,233 +207,9 @@ var NetworkLoad = function() {
 		  wheelSensitivity: 0.05,
 		  pixelRatio: 'auto',
 		  
-		  style: cytoscape.stylesheet()
-		    .selector('node')
-		      .css({
-		        'shape': 'rectangle',
-		        'height': 40,
-		        'width': 40,
-		        'background-fit': 'cover',
-		        'background-opacity': 0,
-		        "color": "#fff",
-		        "text-valign": "bottom",
-		        "label": "data(title)",
-		        'font-size': '10px',
-			    "text-wrap": "wrap",
-			    "text-overflow-wrap": "anywhere",
-		        "text-max-width": 100,
-		        "text-margin-y": 5
-		      })
-		    .selector(':parent')
-		      .css({
-			    "text-halign": "left",
-			    "text-valign": "top",
-			    "text-margin-x": 100,
-			    "text-margin-y": 50,
-			    "text-justification": "left",
-		    	'padding': '60px',
-		    	'background-fit': 'none',
-		    	'background-repeat': 'no-repeat',
-		    	'background-position-x': 0,
-		    	'background-position-y': 0,
-		    	'background-width': 40,
-		    	'background-height': 40,
-		    	'border-width': 1,
-		    	'border-style': 'solid',
-		    	'border-color': 'green'
-		      })
-		    .selector('edge')
-		      .css({
-		        'curve-style': 'bezier',
-		        "control-point-step-size": 80,
-		        'width': 1,
-		        'source-arrow-shape': "data(sourceArrowShape)",
-		        'target-arrow-shape': "data(targetArrowShape)",
-		        'line-color': "data(lineColor)",
-		        'source-arrow-color': '#ffaaaa',
-		        'target-arrow-color': '#ffaaaa',
-		        "color": "#fff",
-		        "label": "data(label)",
-		        "edge-text-rotation": "autorotate",
-		        'font-size': '10px',
-			    "text-wrap": "wrap",
-			    "text-overflow-wrap": "anywhere",
-		        "text-max-width": 100
-		      })
-		    .selector('edge:selected')
-              .css({
-            	    'width': 5,
-                    'line-color': 'white',
-                    'source-arrow-color': 'white',
-                    'target-arrow-color': 'white',
-	  		        'font-size': '14px',
-                    'color': 'orange',
-	  		        "text-max-width": 400                                 
-                })
-            .selector('node:selected')
-              .css({
-	            	'height': 60,
-	  		        'width': 60,
-	  		        'font-size': '14px',
-                    'color': 'orange',
-	  		        "text-max-width": 400
-              })
-		    .selector('.trafficAllow')
-		      .css({
-		    	'shape': 'rectangle',
-		        'height': 10,
-		        'width': 10,
-		        'background-opacity': 1,
-		        "background-color": "#28a745",
-		        "label": ""
-		      })
-		    .selector('.trafficDeny')
-		      .css({
-		    	'shape': 'rectangle',
-		        'height': 10,
-		        'width': 10,
-		        'background-opacity': 1,
-		        "background-color": "#dc3545",
-		        "label": ""
-		      })
-		    .selector('.local')
-		      .css({
-		    	  'background-image': '/img/Virtual-private-cloud-VPC_dark-bg@4x.png'
-		      })
-		    .selector('.aws')
-		      .css({
-		    	  'background-image': '/img/AWS-Cloud-alt_dark-bg@4x.png',
-		    	  'border-color': '#dadada'
-		      })
-		    .selector('.az')
-		      .css({
-		    	  'border-width': 1,
-		    	  'border-style': 'dashed',
-		    	  'border-color': 'skyblue'
-		      })
-		    .selector('.publicSubnet')
-		      .css({
-		    	  'background-image': '/img/VPC-subnet-public_dark-bg@4x.png'
-		      })
-		    .selector('.privateSubnet')
-		      .css({
-		    	  'background-image': '/img/VPC-subnet-private_dark-bg@4x.png'
-		      })
-		    .selector('.region')
-		      .css({
-		    	  'background-image': '/img/Region_dark-bg@4x.png'
-		      })
-		    .selector('.vpc')
-		      .css({
-		    	  'background-image': '/img/Virtual-private-cloud-VPC_dark-bg@4x.png',
-		      })
-		    .selector('.vpc:parent')
-		      .css({		    	  
-		    	  'border-color': 'green',
-		    	  "text-max-width": 200,
-				  "text-margin-x": 170,
-				  "text-margin-y": 20,
-		      })
-		    .selector('.ec2Instance')
-		      .css({
-		    	  'background-image': '/img/Amazon-EC2_Instance_dark-bg@4x.png'
-		      })
-		    .selector('.ebs')
-		      .css({
-		    	  'background-image': '/img/Amazon-Elastic-Block-Store-EBS_Volume_dark-bg@4x.png'
-		      })
-		    .selector('.iamRole')
-		      .css({
-		    	  'background-image' : '/img/AWS-Identity-and-Access-Management-IAM_Role_dark-bg@4x.png'
-		      })
-		    .selector('.internet')
-		      .css({
-		    	  'background-image': '/img/Internet-alt1_dark-bg@4x.png'
-		      })
-		    .selector('.lambda')
-		      .css({
-		    	  'background-image': '/img/AWS-Lambda_Lambda-Function_dark-bg@4x.png'
-		      })
-		    .selector('.classicLoadBalancer')
-		      .css({
-		    	  'background-image': '/img/Elastic-Load-Balancing_Classic-load-balancer_dark-bg@4x.png'
-		      })
-		    .selector('.applicationLoadBalancer')
-		      .css({
-		        'background-image': '/img/Elastic-Load-Balancing-ELB_Application-load-balancer_dark-bg@4x.png'
-		      })
-		    .selector('.networkLoadBalancer')
-		      .css({
-		        'background-image': '/img/Elastic-Load-Balancing-ELB_Network-load-balancer_dark-bg@4x.png'
-		      })
-		    .selector(".targetGroup")
-		      .css({
-		    	  "background-image": "/img/Elastic-Load-Balancing-TargetGroup_dark-bg@4x.png"
-		      })
-		    .selector(".routeTable")
-		      .css({
-		    	  "background-image": "/img/Amazon-Route-53_Route-Table_dark-bg@4x.png"
-		      })
-		    .selector(".transitGateway")
-		      .css({
-		    	  "background-image": "/img/AWS-Transit-Gateway@4x.png"
-		      })
-		    .selector(".internetGateway")
-		      .css({
-		    	  "background-image": "/img/Amazon-VPC_Internet-Gateway_dark-bg@4x.png"
-		      })
-		    .selector(".virtualGateway")
-		      .css({
-		    	  "background-image": "/img/Amazon-VPC_Virtual-Gateway_dark-bg@4x.png"
-		      })
-		    .selector(".natGateway")
-		      .css({
-		    	  "background-image": "/img/Amazon-VPC_NAT-Gateway_dark-bg@4x.png"
-		      })
-		    .selector(".vpnGateway")
-		      .css({
-		    	  "background-image": "/img/Amazon-VPC_VPN-Gateway_dark-bg@4x.png"
-		      })
-		    .selector(".vpnConnection")
-		      .css({
-		    	  "background-image": "/img/Amazon-VPC_VPN-Connection_dark-bg@4x.png"
-		      })
-		    .selector(".customerGateway")
-		      .css({
-		    	  "background-image": "/img/Amazon-VPC_Customer-Gateway_dark-bg@4x.png"
-		      })
-		    .selector(".corporateDataCenter")
-		      .css({
-		    	  "background-image": "/img/Corporate-data-center_dark-bg@4x.png"
-		      })
-		    .selector(".peering")
-		      .css({
-		    	  "background-image": "/img/Amazon-VPC_Peering_dark-bg@4x.png"
-		      })
-		    .selector(".vpcEndpoint")
-		      .css({
-		    	  "background-image": "/img/Amazon-VPC_Endpoints_dark-bg@4x.png"
-		      })
-		    .selector(".networkInterface")
-		      .css({
-		    	  "background-image": "/img/Amazon-VPC_Elastic-Network-Interface_dark-bg@4x.png"
-		      })
-		    .selector(".directConnect")
-		      .css({
-		    	  "background-image": "/img/AWS-Direct-Connect@4x.png"
-		      })
-		    .selector(".networkAcl")
-		      .css({
-		    	  "background-image": "/img/Amazon-VPC_Network-Access-Control-List_dark-bg@4x.png"
-		      })
-		    .selector(".securityGroup")
-		      .css({
-		    	  "background-image": "/img/SecurityGroup_dark-bg@4x.png"
-		      })
-		    .selector(".server")
-		      .css({
-		    	  "background-image": "/img/Traditional-server_dark-bg@4x.png"
-		      }),
+		  style: fetch('/css/cy-style.json').then(function(res){
+		      return res.json();
+		  }),
 		  layout: {
 			  name: 'preset'
 		  }

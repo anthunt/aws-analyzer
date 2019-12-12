@@ -1,0 +1,308 @@
+[
+	{
+		"selector": "node",
+		"style": {
+			"shape": "rectangle",
+	        "height": 40,
+	        "width": 40,
+	        "background-fit": "cover",
+	        "background-opacity": 0,
+	        "color": "#fff",
+	        "text-valign": "bottom",
+	        "label": "data(title)",
+	        "font-size": "10px",
+		    "text-wrap": "wrap",
+		    "text-overflow-wrap": "anywhere",
+	        "text-max-width": 100,
+	        "text-margin-y": 5
+		}
+	},
+	{
+		"selector": ":parent",
+		"style": {
+			"text-halign": "left",
+		    "text-valign": "top",
+		    "text-margin-x": 100,
+		    "text-margin-y": 50,
+		    "text-justification": "left",
+	    	"padding": "60px",
+	    	"background-fit": "none",
+	    	"background-repeat": "no-repeat",
+	    	"background-position-x": 0,
+	    	"background-position-y": 0,
+	    	"background-width": 40,
+	    	"background-height": 40,
+	    	"border-width": 1,
+	    	"border-style": "solid",
+	    	"border-color": "green"
+		}
+	},
+	{
+		"selector": "edge",
+		"style": {
+			"curve-style": "bezier",
+	        "control-point-step-size": 80,
+	        "width": 1,
+	        "source-arrow-shape": "data(sourceArrowShape)",
+	        "target-arrow-shape": "data(targetArrowShape)",
+	        "line-color": "data(lineColor)",
+	        "source-arrow-color": "#ffaaaa",
+	        "target-arrow-color": "#ffaaaa",
+	        "color": "#fff",
+	        "label": "data(label)",
+	        "edge-text-rotation": "autorotate",
+	        "font-size": "10px",
+		    "text-wrap": "wrap",
+		    "text-overflow-wrap": "anywhere",
+	        "text-max-width": 100
+		}
+	},
+	{
+		"selector": "edge:selected",
+		"style": {
+			"width": 5,
+            "line-color": "white",
+            "source-arrow-color": "white",
+            "target-arrow-color": "white",
+	        "font-size": "14px",
+            "color": "orange",
+	        "text-max-width": 400
+		}
+	},
+	{
+		"selector": "node:selected",
+		"style": {
+			"height": 60,
+	        "width": 60,
+	        "font-size": "14px",
+            "color": "orange",
+	        "text-max-width": 400
+		}
+	},
+	{
+		"selector": ".trafficAllow",
+		"style": {
+			"shape": "rectangle",
+	        "height": 10,
+	        "width": 10,
+	        "background-opacity": 1,
+	        "background-color": "#28a745",
+	        "label": ""
+		}
+	},
+	{
+		"selector": ".trafficDeny",
+		"style": {
+			"shape": "rectangle",
+	        "height": 10,
+	        "width": 10,
+	        "background-opacity": 1,
+	        "background-color": "#dc3545",
+	        "label": ""
+		}
+	},
+	{
+		"selector": ".local",
+		"style": {
+			"background-image": "/img/Virtual-private-cloud-VPC_dark-bg@4x.png"
+		}
+	},
+	{
+		"selector": ".aws",
+		"style": {
+			"background-image": "/img/AWS-Cloud-alt_dark-bg@4x.png",
+    		"border-color": "#dadada"
+		}
+	},
+	{
+		"selector": ".az",
+		"style": {
+			"border-width": 1,
+    	  	"border-style": "dashed",
+    	  	"border-color": "skyblue"
+		}
+	},
+	{
+		"selector": ".publicSubnet",
+		"style": {
+			"background-image": "/img/VPC-subnet-public_dark-bg@4x.png"
+		}
+	},
+	{
+		"selector": ".privateSubnet",
+		"style": {
+			"background-image": "/img/VPC-subnet-private_dark-bg@4x.png"
+		}
+	},
+	{
+		"selector": ".region",
+		"style": {
+			"background-image": "/img/Region_dark-bg@4x.png"
+		}
+	},
+	{
+		"selector": ".vpc",
+		"style": {
+			"background-image": "/img/Virtual-private-cloud-VPC_dark-bg@4x.png"
+		}
+	},
+	{
+		"selector": ".vpc:parent",
+		"style": {
+			"border-color": "green",
+			"text-max-width": 200,
+			"text-margin-x": 170,
+			"text-margin-y": 20
+		}
+	},
+	{
+		"selector": ".ec2Instance",
+		"style": {
+			"background-image": "/img/Amazon-EC2_Instance_dark-bg@4x.png"
+		}
+	},
+	{
+		"selector": ".ebs",
+		"style": {
+			"background-image": "/img/Amazon-Elastic-Block-Store-EBS_Volume_dark-bg@4x.png"
+		}
+	},
+	{
+		"selector": ".iamRole",
+		"style": {
+			"background-image" : "/img/AWS-Identity-and-Access-Management-IAM_Role_dark-bg@4x.png"
+		}
+	},
+	{
+		"selector": ".internet",
+		"style": {
+			"background-image": "/img/Internet-alt1_dark-bg@4x.png"
+		}
+	},
+	{
+		"selector": ".lambda",
+		"style": {
+			"background-image": "/img/AWS-Lambda_Lambda-Function_dark-bg@4x.png"
+		}
+	},
+	{
+		"selector": ".classicLoadBalancer",
+		"style": {
+			"background-image": "/img/Elastic-Load-Balancing_Classic-load-balancer_dark-bg@4x.png"
+		}
+	},
+	{
+		"selector": ".applicationLoadBalancer",
+		"style": {
+			"background-image": "/img/Elastic-Load-Balancing-ELB_Application-load-balancer_dark-bg@4x.png"
+		}
+	},
+	{
+		"selector": ".networkLoadBalancer",
+		"style": {
+			"background-image": "/img/Elastic-Load-Balancing-ELB_Network-load-balancer_dark-bg@4x.png"
+		}
+	},
+	{
+		"selector": ".targetGroup",
+		"style": {
+			"background-image": "/img/Elastic-Load-Balancing-TargetGroup_dark-bg@4x.png"
+		}
+	},
+	{
+		"selector": ".routeTable",
+		"style": {
+			"background-image": "/img/Amazon-Route-53_Route-Table_dark-bg@4x.png"
+		}
+	},
+	{
+		"selector": ".transitGateway",
+		"style": {
+			"background-image": "/img/AWS-Transit-Gateway@4x.png"
+		}
+	},
+	{
+		"selector": ".internetGateway",
+		"style": {
+			"background-image": "/img/Amazon-VPC_Internet-Gateway_dark-bg@4x.png"
+		}
+	},
+	{
+		"selector": ".virtualGateway",
+		"style": {
+			"background-image": "/img/Amazon-VPC_Virtual-Gateway_dark-bg@4x.png"
+		}
+	},
+	{
+		"selector": ".natGateway",
+		"style": {
+			"background-image": "/img/Amazon-VPC_NAT-Gateway_dark-bg@4x.png"
+		}
+	},
+	{
+		"selector": ".vpnGateway",
+		"style": {
+			"background-image": "/img/Amazon-VPC_VPN-Gateway_dark-bg@4x.png"
+		}
+	},
+	{
+		"selector": ".vpnConnection",
+		"style": {
+			"background-image": "/img/Amazon-VPC_VPN-Connection_dark-bg@4x.png"
+		}
+	},
+	{
+		"selector": ".customerGateway",
+		"style": {
+			"background-image": "/img/Amazon-VPC_Customer-Gateway_dark-bg@4x.png"
+		}
+	},
+	{
+		"selector": ".corporateDataCenter",
+		"style": {
+			"background-image": "/img/Corporate-data-center_dark-bg@4x.png"
+		}
+	},
+	{
+		"selector": ".peering",
+		"style": {
+			"background-image": "/img/Amazon-VPC_Peering_dark-bg@4x.png"
+		}
+	},
+	{
+		"selector": ".vpcEndpoint",
+		"style": {
+			"background-image": "/img/Amazon-VPC_Endpoints_dark-bg@4x.png"
+		}
+	},
+	{
+		"selector": ".networkInterface",
+		"style": {
+			"background-image": "/img/Amazon-VPC_Elastic-Network-Interface_dark-bg@4x.png"
+		}
+	},
+	{
+		"selector": ".directConnect",
+		"style": {
+			"background-image": "/img/AWS-Direct-Connect@4x.png"
+		}
+	},
+	{
+		"selector": ".networkAcl",
+		"style": {
+			"background-image": "/img/Amazon-VPC_Network-Access-Control-List_dark-bg@4x.png"
+		}
+	},
+	{
+		"selector": ".securityGroup",
+		"style": {
+			"background-image": "/img/SecurityGroup_dark-bg@4x.png"
+		}
+	},
+	{
+		"selector": ".server",
+		"style": {
+			"background-image": "/img/Traditional-server_dark-bg@4x.png"
+		}
+	}
+]

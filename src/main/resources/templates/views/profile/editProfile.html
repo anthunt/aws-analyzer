@@ -40,23 +40,13 @@
 		    			, config: configEditor.getValue()
 		    		})
 		    	}).then(e=>e.json()).then(function(data) {
-		    		console.log(data);
-		    		showAlert('success', "saved profiles successfully");
+		    		if(data.success) {
+		    			Utils.alert('success', "saved profiles successfully");
+		    		} else {
+		    			Utils.alert('danger', data.message);
+		    		}
 		    	});
 		    });
-		    
-		    function showAlert(type, message) {
-		    	$.notify({
-		    		message: message 
-		    	},{
-		    		type: type
-		    	    , delay: 2000
-		    	    , placement: {
-		    			from: "top",
-		    			align: "right"
-		    	    }
-		    	});
-		    }
 		</script>
 	</th:block>
 	

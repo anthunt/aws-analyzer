@@ -12,6 +12,8 @@ import java.util.Base64;
 import java.util.List;
 import java.util.Random;
 
+import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
+
 import software.amazon.awssdk.services.ec2.model.Tag;
 
 public class Utils {
@@ -139,6 +141,21 @@ public class Utils {
     
     public static void writeFile(Path path, String content, Charset encoding) throws IOException {
     	Files.write(path, content.getBytes(encoding));
+    }
+    
+    private static StandardPBEStringEncryptor getEncryptor(String password) {
+    	StandardPBEStringEncryptor encryptor = new StandardPBEStringEncryptor();
+    	encryptor.setAlgorithm("PBEWithMD5AndDES");
+    	encryptor.setPassword(password);
+    	return encryptor;
+    }
+    
+    public static String encrypt(String password, String plainText) {
+    	return getEncryptor(password).encrypt(plainText);
+    }
+    
+    public static String decrypt(String password, String encodedText) {
+    	return getEncryptor(password).decrypt(encodedText);
     }
     
 }

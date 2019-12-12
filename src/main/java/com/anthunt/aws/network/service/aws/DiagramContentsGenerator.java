@@ -1,4 +1,4 @@
-package com.anthunt.aws.network.service;
+package com.anthunt.aws.network.service.aws;
 
 import com.anthunt.aws.network.utils.Utils;
 

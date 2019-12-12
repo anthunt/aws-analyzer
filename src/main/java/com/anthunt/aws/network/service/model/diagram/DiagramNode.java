@@ -1,6 +1,6 @@
 package com.anthunt.aws.network.service.model.diagram;
 
-import com.anthunt.aws.network.service.DiagramContentsGenerator;
+import com.anthunt.aws.network.service.aws.DiagramContentsGenerator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
