@@ -1,433 +1,404 @@
 package com.anthunt.aws.network.repository;
 
-import java.util.List;
-
 import com.anthunt.aws.network.repository.model.ServiceMap;
-
-import software.amazon.awssdk.services.directconnect.model.VirtualInterface;
-import software.amazon.awssdk.services.ec2.model.CustomerGateway;
-import software.amazon.awssdk.services.ec2.model.EgressOnlyInternetGateway;
-import software.amazon.awssdk.services.ec2.model.Instance;
-import software.amazon.awssdk.services.ec2.model.InternetGateway;
-import software.amazon.awssdk.services.ec2.model.NetworkAcl;
-import software.amazon.awssdk.services.ec2.model.NetworkInterface;
-import software.amazon.awssdk.services.ec2.model.PrefixList;
-import software.amazon.awssdk.services.ec2.model.RouteTable;
-import software.amazon.awssdk.services.ec2.model.SecurityGroup;
-import software.amazon.awssdk.services.ec2.model.Subnet;
-import software.amazon.awssdk.services.ec2.model.TransitGateway;
-import software.amazon.awssdk.services.ec2.model.Volume;
-import software.amazon.awssdk.services.ec2.model.Vpc;
-import software.amazon.awssdk.services.ec2.model.VpcEndpoint;
-import software.amazon.awssdk.services.ec2.model.VpcPeeringConnection;
-import software.amazon.awssdk.services.ec2.model.VpnConnection;
-import software.amazon.awssdk.services.ec2.model.VpnGateway;
-import software.amazon.awssdk.services.elasticloadbalancing.model.LoadBalancerDescription;
-import software.amazon.awssdk.services.elasticloadbalancingv2.model.Listener;
-import software.amazon.awssdk.services.elasticloadbalancingv2.model.LoadBalancer;
-import software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule;
-import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroup;
-import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetHealthDescription;
-import software.amazon.awssdk.services.rds.model.DBCluster;
-import software.amazon.awssdk.services.rds.model.DBInstance;
 
 public class MemoryServiceRepositoryProvider extends ServiceRepositoryProvider {
 
 	/**
 	 * String vpcId
 	 */
-	private ServiceMap<Vpc> vpcMap;
+	private ServiceMap vpcMap;
 	
 	/**
 	 * String instanceId
 	 */
-	private ServiceMap<Instance> ec2InstanceMap;
+	private ServiceMap ec2InstanceMap;
 	
 	/**
 	 * String volumeId
 	 */
-	private ServiceMap<Volume> volumeMap;
+	private ServiceMap volumeMap;
 	
 	/**
 	 * String networkInterfaceId
 	 */
-	private ServiceMap<NetworkInterface> networkInterfaceMap;
+	private ServiceMap networkInterfaceMap;
 	
 	/**
 	 * String subnetId
 	 */
-	private ServiceMap<Subnet> subnetMap;
+	private ServiceMap subnetMap;
 	
 	/**
 	 * String vpcPeeringConnectionId
 	 */
-	private ServiceMap<VpcPeeringConnection> vpcPeeringConnectionMap;
+	private ServiceMap vpcPeeringConnectionMap;
 	
 	/**
 	 * String customerGatewayId
 	 */
-	private ServiceMap<CustomerGateway> customerGatewayMap;
+	private ServiceMap customerGatewayMap;
 	
 	/**
 	 * String loadBalancerArn
 	 */
-	private ServiceMap<LoadBalancer> loadBalancerMap;
+	private ServiceMap loadBalancerMap;
 	
 	/**
 	 * String loadBalancerArn
 	 */
-	private ServiceMap<List<Listener>> loadBalancerListenersMap;
+	private ServiceMap loadBalancerListenersMap;
 	
 	/**
 	 * String listenerArn
 	 */
-	private ServiceMap<List<Rule>> loadBalancerRulesMap;
+	private ServiceMap loadBalancerRulesMap;
 	
 	/**
 	 * String targetGroupArn
 	 */
-	private ServiceMap<TargetGroup> targetGroupMap;
+	private ServiceMap targetGroupMap;
 
 	/**
 	 * String targetGroupArn
 	 */
-	private ServiceMap<List<TargetHealthDescription>> targetHealthDescriptionsMap;
+	private ServiceMap targetHealthDescriptionsMap;
 	
 	/**
 	 * String loadBalancerName
 	 */
-	private ServiceMap<LoadBalancerDescription> classicLoadBalancerMap;
+	private ServiceMap classicLoadBalancerMap;
 	
 	/**
 	 * String securityGroupId
 	 */
-	private ServiceMap<SecurityGroup> securityGroupMap;
+	private ServiceMap securityGroupMap;
 	
 	/**
 	 * String subnetId
 	 */
-	private ServiceMap<List<RouteTable>> routeTablesMap;
+	private ServiceMap routeTablesMap;
 	
 	/**
 	 * String prefixListId
 	 */
-	private ServiceMap<PrefixList> prefixListMap;
+	private ServiceMap prefixListMap;
 	
 	/**
 	 * String virtualGatewayId
 	 */
-	private ServiceMap<VpnGateway> vpnGatewayMap;
+	private ServiceMap vpnGatewayMap;
 	
 	/**
 	 * String virtualGatewayId
 	 */
-	private ServiceMap<List<VpnConnection>> vpnConnectionsMap;
+	private ServiceMap vpnConnectionsMap;
 	
 	/**
 	 * String virtualGatewayId
 	 */
-	private ServiceMap<List<VirtualInterface>> virtualInterfacesMap;
+	private ServiceMap virtualInterfacesMap;
 	
 	/**
 	 * String subnetId
 	 */
-	private ServiceMap<List<NetworkAcl>> networkAclsMap;
+	private ServiceMap networkAclsMap;
 
 	/**
 	 * String vpcEndpointId
 	 */
-	private ServiceMap<VpcEndpoint> vpcEndpointMap;
+	private ServiceMap vpcEndpointMap;
 
 	/**
 	 * String EgressOnlyInternetGatewayId
 	 */
-	private ServiceMap<EgressOnlyInternetGateway> egressInternetGatewayMap;
+	private ServiceMap egressInternetGatewayMap;
 
 	/**
 	 * String InternetGatewayId
 	 */
-	private ServiceMap<InternetGateway> internetGatewayMap;
+	private ServiceMap internetGatewayMap;
 
 	/**
 	 * String transitGatewayId
 	 */
-	private ServiceMap<TransitGateway> transitGatewayMap;
+	private ServiceMap transitGatewayMap;
 
 	/**
 	 * String dbClusterIdentifier
 	 */
-	private ServiceMap<DBCluster> rdsClusterMap;
+	private ServiceMap rdsClusterMap;
 	
 	/**
 	 * String dbInstanceIdentifier
 	 */
-	private ServiceMap<DBInstance> rdsInstanceMap;
+	private ServiceMap rdsInstanceMap;
 	
 	public MemoryServiceRepositoryProvider() {
 		super();
 	}
 
 	@Override
-	protected ServiceMap<Vpc> getVpcMap() {
+	protected ServiceMap getVpcMap() {
 		return this.vpcMap;
 	}
 
 	@Override
-	protected ServiceMap<Instance> getEc2InstanceMap() {
+	protected ServiceMap getEc2InstanceMap() {
 		return this.ec2InstanceMap;
 	}
 
 	@Override
-	protected ServiceMap<Volume> getVolumeMap() {
+	protected ServiceMap getVolumeMap() {
 		return this.volumeMap;
 	}
 	
 	@Override
-	protected ServiceMap<NetworkInterface> getNetworkInterfaceMap() {
+	protected ServiceMap getNetworkInterfaceMap() {
 		return this.networkInterfaceMap;
 	}
 	
 	@Override
-	protected ServiceMap<Subnet> getSubnetMap() {
+	protected ServiceMap getSubnetMap() {
 		return this.subnetMap;
 	}
 	
 	@Override
-	protected ServiceMap<VpcPeeringConnection> getVpcPeeringMap() {
+	protected ServiceMap getVpcPeeringMap() {
 		return this.vpcPeeringConnectionMap;
 	}
 
 	@Override
-	protected ServiceMap<LoadBalancer> getLoadBalancerMap() {
+	protected ServiceMap getLoadBalancerMap() {
 		return this.loadBalancerMap;
 	}
 
 	@Override
-	protected ServiceMap<List<Listener>> getLoadBalancerListenersMap() {
+	protected ServiceMap getLoadBalancerListenersMap() {
 		return this.loadBalancerListenersMap;
 	}
 
 	@Override
-	protected ServiceMap<List<Rule>> getLoadBalancerRulesMap() {
+	protected ServiceMap getLoadBalancerRulesMap() {
 		return this.loadBalancerRulesMap;
 	}
 
 	@Override
-	protected ServiceMap<TargetGroup> getTargetGroupMap() {
+	protected ServiceMap getTargetGroupMap() {
 		return this.targetGroupMap;
 	}
 
 	@Override
-	protected ServiceMap<List<TargetHealthDescription>> getTargetHealthDescriptionsMap() {
+	protected ServiceMap getTargetHealthDescriptionsMap() {
 		return this.targetHealthDescriptionsMap;
 	}
 
 	@Override
-	protected ServiceMap<LoadBalancerDescription> getClassicLoadBalancerMap() {
+	protected ServiceMap getClassicLoadBalancerMap() {
 		return this.classicLoadBalancerMap;
 	}
 
 	@Override
-	protected ServiceMap<SecurityGroup> getSecurityGroupMap() {
+	protected ServiceMap getSecurityGroupMap() {
 		return this.securityGroupMap;
 	}
 
 	@Override
-	protected ServiceMap<List<RouteTable>> getRouteTablesMap() {
+	protected ServiceMap getRouteTablesMap() {
 		return this.routeTablesMap;
 	}
 
 	@Override
-	protected ServiceMap<PrefixList> getPrefixListMap() {
+	protected ServiceMap getPrefixListMap() {
 		return this.prefixListMap;
 	}
 	
 	@Override
-	protected ServiceMap<CustomerGateway> getCustomerGatewayMap() {
+	protected ServiceMap getCustomerGatewayMap() {
 		return this.customerGatewayMap;
 	}
 
 	@Override
-	protected ServiceMap<VpnGateway> getVpnGatewayMap() {
+	protected ServiceMap getVpnGatewayMap() {
 		return this.vpnGatewayMap;
 	}
 
 	@Override
-	protected ServiceMap<List<VpnConnection>> getVpnConnectionsMap() {
+	protected ServiceMap getVpnConnectionsMap() {
 		return this.vpnConnectionsMap;
 	}
 
 	@Override
-	protected ServiceMap<List<VirtualInterface>> getVirtualInterfacesMap() {
+	protected ServiceMap getVirtualInterfacesMap() {
 		return this.virtualInterfacesMap;
 	}
 
 	@Override
-	protected ServiceMap<List<NetworkAcl>> getNetworkAclsMap() {
+	protected ServiceMap getNetworkAclsMap() {
 		return this.networkAclsMap;
 	}
 
 	@Override
-	protected void setVpcPeeringMap(ServiceMap<VpcPeeringConnection> serviceMap) {
+	protected void setVpcPeeringMap(ServiceMap serviceMap) {
 		this.vpcPeeringConnectionMap = serviceMap;
 	}
 	
 	@Override
-	protected void setVirtualInterfacesMap(ServiceMap<List<VirtualInterface>> serviceMap) {
+	protected void setVirtualInterfacesMap(ServiceMap serviceMap) {
 		this.virtualInterfacesMap = serviceMap;
 	}
 
 	@Override
-	protected void setTargetHealthDescriptionsMap(ServiceMap<List<TargetHealthDescription>> serviceMap) {
+	protected void setTargetHealthDescriptionsMap(ServiceMap serviceMap) {
 		this.targetHealthDescriptionsMap = serviceMap;
 	}
 
 	@Override
-	protected ServiceMap<TargetGroup> setTargetGroupMap(ServiceMap<TargetGroup> serviceMap) {
+	protected ServiceMap setTargetGroupMap(ServiceMap serviceMap) {
 		this.targetGroupMap = serviceMap;
 		return this.getTargetGroupMap();
 	}
 
 	@Override
-	protected void setLoadBalancerRulesMap(ServiceMap<List<Rule>> serviceMap) {
+	protected void setLoadBalancerRulesMap(ServiceMap serviceMap) {
 		this.loadBalancerRulesMap = serviceMap;
 	}
 
 	@Override
-	protected ServiceMap<List<Listener>> setLoadBalancerListenersMap(ServiceMap<List<Listener>> serviceMap) {
+	protected ServiceMap setLoadBalancerListenersMap(ServiceMap serviceMap) {
 		this.loadBalancerListenersMap = serviceMap;
 		return this.getLoadBalancerListenersMap();
 	}
 
 	@Override
-	protected ServiceMap<LoadBalancer> setLoadBalancerMap(ServiceMap<LoadBalancer> serviceMap) {
+	protected ServiceMap setLoadBalancerMap(ServiceMap serviceMap) {
 		this.loadBalancerMap = serviceMap;
 		return this.getLoadBalancerMap();
 	}
 
 	@Override
-	protected void setClassicLoadBalancerMap(ServiceMap<LoadBalancerDescription> serviceMap) {
+	protected void setClassicLoadBalancerMap(ServiceMap serviceMap) {
 		this.classicLoadBalancerMap = serviceMap;
 	}
 
 	@Override
-	protected void setCustomerGatewayMap(ServiceMap<CustomerGateway> serviceMap) {
+	protected void setCustomerGatewayMap(ServiceMap serviceMap) {
 		this.customerGatewayMap = serviceMap;
 	}
 	
 	@Override
-	protected void setVpnConnectionsMap(ServiceMap<List<VpnConnection>> serviceMap) {
+	protected void setVpnConnectionsMap(ServiceMap serviceMap) {
 		this.vpnConnectionsMap = serviceMap;
 	}
 
 	@Override
-	protected void setVpnGatewayMap(ServiceMap<VpnGateway> serviceMap) {
+	protected void setVpnGatewayMap(ServiceMap serviceMap) {
 		this.vpnGatewayMap = serviceMap;
 	}
 
 	@Override
-	protected void setNetworkAclsMap(ServiceMap<List<NetworkAcl>> serviceMap) {
+	protected void setNetworkAclsMap(ServiceMap serviceMap) {
 		this.networkAclsMap = serviceMap;
 	}
 
 	@Override
-	protected void setPrefixListMap(ServiceMap<PrefixList> serviceMap) {
+	protected void setPrefixListMap(ServiceMap serviceMap) {
 		this.prefixListMap = serviceMap;
 	}
 
 	@Override
-	protected void setRouteTablesMap(ServiceMap<List<RouteTable>> serviceMap) {
+	protected void setRouteTablesMap(ServiceMap serviceMap) {
 		this.routeTablesMap = serviceMap;
 	}
 
 	@Override
-	protected ServiceMap<Subnet> setSubnetMap(ServiceMap<Subnet> serviceMap) {
+	protected ServiceMap setSubnetMap(ServiceMap serviceMap) {
 		this.subnetMap = serviceMap;
 		return this.getSubnetMap();
 	}
 
 	@Override
-	protected void setSecurityGroupMap(ServiceMap<SecurityGroup> serviceMap) {
+	protected void setSecurityGroupMap(ServiceMap serviceMap) {
 		this.securityGroupMap = serviceMap;
 	}
 
 	@Override
-	protected void setEc2InstanceMap(ServiceMap<Instance> serviceMap) {
+	protected void setEc2InstanceMap(ServiceMap serviceMap) {
 		this.ec2InstanceMap = serviceMap;
 	}
 	
 	@Override
-	protected void setVolumeMap(ServiceMap<Volume> serviceMap) {
+	protected void setVolumeMap(ServiceMap serviceMap) {
 		this.volumeMap = serviceMap;
 	}
 	
 	@Override
-	protected void setNetworkInterfaceMap(ServiceMap<NetworkInterface> serviceMap) {
+	protected void setNetworkInterfaceMap(ServiceMap serviceMap) {
 		this.networkInterfaceMap = serviceMap;
 	}
 
 	@Override
-	protected void setVpcMap(ServiceMap<Vpc> serviceMap) {
+	protected void setVpcMap(ServiceMap serviceMap) {
 		this.vpcMap = serviceMap;
 	}
 
 	@Override
-	protected ServiceMap<VpcEndpoint> getVpcEndpointMap() {
+	protected ServiceMap getVpcEndpointMap() {
 		return this.vpcEndpointMap;
 	}
 
 	@Override
-	protected ServiceMap<EgressOnlyInternetGateway> getEgressInternetGatewayMap() {
+	protected ServiceMap getEgressInternetGatewayMap() {
 		return this.egressInternetGatewayMap;
 	}
 
 	@Override
-	protected ServiceMap<InternetGateway> getInternetGatewayMap() {
+	protected ServiceMap getInternetGatewayMap() {
 		return this.internetGatewayMap;
 	}
 
 	@Override
-	protected ServiceMap<TransitGateway> getTransitGatewayMap() {
+	protected ServiceMap getTransitGatewayMap() {
 		return this.transitGatewayMap;
 	}
 
 	@Override
-	protected void setVpcEndpointMap(ServiceMap<VpcEndpoint> serviceMap) {
+	protected void setVpcEndpointMap(ServiceMap serviceMap) {
 		this.vpcEndpointMap = serviceMap;
 	}
 
 	@Override
-	protected void setEgressInternetGatewayMap(ServiceMap<EgressOnlyInternetGateway> serviceMap) {
+	protected void setEgressInternetGatewayMap(ServiceMap serviceMap) {
 		this.egressInternetGatewayMap = serviceMap;
 	}
 
 	@Override
-	protected void setInternetGatewayMap(ServiceMap<InternetGateway> serviceMap) {
+	protected void setInternetGatewayMap(ServiceMap serviceMap) {
 		this.internetGatewayMap = serviceMap;
 	}
 
 	@Override
-	protected void setTransitGatewayMap(ServiceMap<TransitGateway> serviceMap) {
+	protected void setTransitGatewayMap(ServiceMap serviceMap) {
 		this.transitGatewayMap = serviceMap;
 	}
 
 	@Override
-	protected ServiceMap<DBInstance> getRdsInstanceMap() {
+	protected ServiceMap getRdsInstanceMap() {
 		return this.rdsInstanceMap;
 	}
 
 	@Override
-	protected ServiceMap<DBCluster> getRdsClusterMap() {
+	protected ServiceMap getRdsClusterMap() {
 		return this.rdsClusterMap;
 	}
 
 	@Override
-	protected void setRdsInstanceMap(ServiceMap<DBInstance> serviceMap) {
+	protected void setRdsInstanceMap(ServiceMap serviceMap) {
 		this.rdsInstanceMap = serviceMap;
 	}
 
 	@Override
-	protected void setRdsClusterMap(ServiceMap<DBCluster> serviceMap) {
+	protected void setRdsClusterMap(ServiceMap serviceMap) {
 		this.rdsClusterMap = serviceMap;
 	}
 	

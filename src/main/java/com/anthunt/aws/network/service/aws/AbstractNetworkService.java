@@ -22,11 +22,17 @@ import com.anthunt.aws.network.utils.Logging;
 import software.amazon.awssdk.services.directconnect.model.VirtualInterface;
 import software.amazon.awssdk.services.directconnect.model.VirtualInterfaceState;
 import software.amazon.awssdk.services.ec2.model.CustomerGateway;
+import software.amazon.awssdk.services.ec2.model.EgressOnlyInternetGateway;
+import software.amazon.awssdk.services.ec2.model.InternetGateway;
+import software.amazon.awssdk.services.ec2.model.NetworkInterface;
 import software.amazon.awssdk.services.ec2.model.RouteState;
 import software.amazon.awssdk.services.ec2.model.RuleAction;
+import software.amazon.awssdk.services.ec2.model.TransitGateway;
+import software.amazon.awssdk.services.ec2.model.VpcEndpoint;
 import software.amazon.awssdk.services.ec2.model.VpcPeeringConnection;
 import software.amazon.awssdk.services.ec2.model.VpcPeeringConnectionVpcInfo;
 import software.amazon.awssdk.services.ec2.model.VpnConnection;
+import software.amazon.awssdk.services.ec2.model.VpnGateway;
 
 public abstract class AbstractNetworkService {
 
@@ -56,7 +62,7 @@ public abstract class AbstractNetworkService {
 				List<VpnConnection> vpnConnections = routeCheckRule.getVpnConnections();
 				
 				for(VpnConnection vpnConnection : vpnConnections) {
-					CustomerGateway customerGateway = serviceRepository.getCustomerGatewayMap().get(vpnConnection.customerGatewayId());
+					CustomerGateway customerGateway = serviceRepository.getCustomerGatewayMap().get(vpnConnection.customerGatewayId(), CustomerGateway.class).get().getData();
 					DiagramNode customerGatewayNode = diagramResult.addNode(
 							new DiagramData<DiagramNode>(
 									new DiagramNode(vpnConnection.customerGatewayId(), customerGateway)
@@ -163,19 +169,19 @@ public abstract class AbstractNetworkService {
 				
 				switch(routeCheckRule.getGatewayType()) {
 				case VIRTUAL_GATEWAY:
-					gateway = serviceRepository.getVpnGatewayMap().get(routeCheckRule.getGatewayId());
+					gateway = serviceRepository.getVpnGatewayMap().get(routeCheckRule.getGatewayId(), VpnGateway.class).get().getData();
 					break;
 				case LOCAL:
 					gateway = routeCheckRule.getGatewayId();
 					break;
 				case VPC_ENDPOINT:
-					gateway = serviceRepository.getVpcEndpointMap().get(routeCheckRule.getGatewayId());
+					gateway = serviceRepository.getVpcEndpointMap().get(routeCheckRule.getGatewayId(), VpcEndpoint.class).get().getData();
 					break;
 				case TRANSIT_GATEWAY:
-					gateway = serviceRepository.getTransitGatewayMap().get(routeCheckRule.getGatewayId());
+					gateway = serviceRepository.getTransitGatewayMap().get(routeCheckRule.getGatewayId(), TransitGateway.class).get().getData();
 					break;
 				case PEERING:
-					VpcPeeringConnection vpcPeeringConnection = serviceRepository.getVpcPeeringMap().get(routeCheckRule.getGatewayId());
+					VpcPeeringConnection vpcPeeringConnection = serviceRepository.getVpcPeeringMap().get(routeCheckRule.getGatewayId(), VpcPeeringConnection.class).get().getData();
 					VpcPeeringConnectionVpcInfo accepterVpcInfo = vpcPeeringConnection.accepterVpcInfo();
 					VpcPeeringConnectionVpcInfo requesterVpcInfo = vpcPeeringConnection.requesterVpcInfo();
 					
@@ -216,13 +222,13 @@ public abstract class AbstractNetworkService {
 					
 					break;
 				case INTERNET_GATEWAY:
-					gateway = serviceRepository.getInternetGatewayMap().get(routeCheckRule.getGatewayId());
+					gateway = serviceRepository.getInternetGatewayMap().get(routeCheckRule.getGatewayId(), InternetGateway.class).get().getData();
 					break;
 				case EGRESS_INTERNET_GATEWAY:
-					gateway = serviceRepository.getEgressInternetGatewayMap().get(routeCheckRule.getGatewayId());
+					gateway = serviceRepository.getEgressInternetGatewayMap().get(routeCheckRule.getGatewayId(), EgressOnlyInternetGateway.class).get().getData();
 					break;
 				case NETWORK_INTERFACE:
-					gateway = serviceRepository.getNetworkInterfaceMap().get(routeCheckRule.getGatewayId());
+					gateway = serviceRepository.getNetworkInterfaceMap().get(routeCheckRule.getGatewayId(), NetworkInterface.class).get().getData();
 					break;
 				default:
 					break;

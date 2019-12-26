@@ -13,6 +13,9 @@ import java.util.List;
 import java.util.Random;
 
 import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
+import org.springframework.context.ApplicationContext;
+
+import com.anthunt.aws.network.config.ApplicationContextProvider;
 
 import software.amazon.awssdk.services.ec2.model.Tag;
 
@@ -158,4 +161,9 @@ public class Utils {
     	return getEncryptor(password).decrypt(encodedText);
     }
     
+    public static Object getBean(Class<?> classType) {
+        ApplicationContext applicationContext = ApplicationContextProvider.getApplicationContext();
+        return applicationContext.getBean(classType);
+    }
+
 }

@@ -12,4 +12,7 @@ public class UserController extends AbstractAPIController {
 	
 	private static final Logger log = Logging.getLogger(UserController.class);
 
+	public void empty() {
+		log.trace("empty");
+	}
 }

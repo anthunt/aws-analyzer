@@ -6,8 +6,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import com.anthunt.aws.network.repository.ServiceRepository;
+import com.anthunt.aws.network.repository.aws.AwsData;
 import com.anthunt.aws.network.service.model.checker.CheckResult;
 import com.anthunt.aws.network.service.model.checker.CheckResults;
 import com.anthunt.aws.network.service.model.checker.CheckRule;
@@ -21,6 +23,7 @@ import com.anthunt.aws.network.utils.Utils;
 
 import inet.ipaddr.IPAddress;
 import inet.ipaddr.IPAddressString;
+import software.amazon.awssdk.services.directconnect.model.VirtualInterface;
 import software.amazon.awssdk.services.ec2.model.IpPermission;
 import software.amazon.awssdk.services.ec2.model.IpRange;
 import software.amazon.awssdk.services.ec2.model.Ipv6Range;
@@ -35,6 +38,7 @@ import software.amazon.awssdk.services.ec2.model.RuleAction;
 import software.amazon.awssdk.services.ec2.model.SecurityGroup;
 import software.amazon.awssdk.services.ec2.model.Tag;
 import software.amazon.awssdk.services.ec2.model.UserIdGroupPair;
+import software.amazon.awssdk.services.ec2.model.VpnConnection;
 import software.amazon.awssdk.services.ec2.model.VpnGateway;
 
 public abstract class AbstractNetwork<T> {
@@ -176,7 +180,7 @@ public abstract class AbstractNetwork<T> {
 	
 	private void setSecurityGroupRules(List<String> securityGroupIds) {		
 		for(String securityGroupId : securityGroupIds) {
-			SecurityGroup securityGroup = serviceRepository.getSecurityGroupMap().get(securityGroupId);
+			SecurityGroup securityGroup = serviceRepository.getSecurityGroupMap().get(securityGroupId, SecurityGroup.class).get().getData();
 			String securityGroupName = securityGroup.groupName();
 			this.sgRulesMap.put(securityGroupName, this.getSecurityGroupRules(securityGroup));
 		}
@@ -184,7 +188,7 @@ public abstract class AbstractNetwork<T> {
 	
 	private String setRoutes(String subnetId) {
 		String routeTableId = "";
-		List<RouteTable> routeTables = this.serviceRepository.getRouteTablesMap().get(subnetId);
+		List<RouteTable> routeTables = this.serviceRepository.getRouteTablesMap().get(subnetId, RouteTable.class).get().getDataList();
 		for(RouteTable routeTable : routeTables) {
 			routeTableId = routeTable.routeTableId();
 			String routeTableName = "Unknown Route Table";
@@ -211,7 +215,7 @@ public abstract class AbstractNetwork<T> {
 				}
 				
 				if(route.destinationPrefixListId() != null) {
-					PrefixList prefixList = this.serviceRepository.getPrefixListMap().get(route.destinationPrefixListId());
+					PrefixList prefixList = this.serviceRepository.getPrefixListMap().get(route.destinationPrefixListId(), PrefixList.class).get().getData();
 					routeCheckRule.setPrefixListId(prefixList.prefixListId());
 					routeCheckRule.setPrefixListName(prefixList.prefixListName());
 
@@ -245,23 +249,43 @@ public abstract class AbstractNetwork<T> {
 	}
 	
 	private void setVirtualGateway(RouteCheckRule routeCheckRule) {
-		
-		VpnGateway vpnGateway = this.serviceRepository.getVpnGatewayMap().get(routeCheckRule.getGatewayId());
-		routeCheckRule.setGatewayName(Utils.getNameFromTags(vpnGateway.tags()));		
+		this.serviceRepository.getVpnGatewayMap()
+			.get(routeCheckRule.getGatewayId(), VpnGateway.class)
+			.ifPresent(new Consumer<AwsData>() {
+				@Override
+				public void accept(AwsData awsData) {
+					VpnGateway vpnGateway = awsData.getData();
+					routeCheckRule.setGatewayName(Utils.getNameFromTags(vpnGateway.tags()));
+				}
+			});		
 		this.setVpn(routeCheckRule);
 		this.setDirectConnect(routeCheckRule);
 	}
 	
 	private void setVpn(RouteCheckRule routeCheckRule) {
-		routeCheckRule.setVpnConnections(this.serviceRepository.getVpnConnectionsMap().get(routeCheckRule.getGatewayId()));
+		this.serviceRepository.getVpnConnectionsMap()
+			.get(routeCheckRule.getGatewayId(), VpnConnection.class)
+			.ifPresent(new Consumer<AwsData>() {
+				@Override
+				public void accept(AwsData awsData) {
+					routeCheckRule.setVpnConnections(awsData.getData());	
+				}
+			});
 	}
 	
-	private void setDirectConnect(RouteCheckRule routeCheckRule) {		
-		routeCheckRule.setVirtualInterfaces(this.serviceRepository.getVirtualInterfacesMap().get(routeCheckRule.getGatewayId()));
+	private void setDirectConnect(RouteCheckRule routeCheckRule) {
+		this.serviceRepository.getVirtualInterfacesMap()
+			.get(routeCheckRule.getGatewayId(), VirtualInterface.class)
+			.ifPresent(new Consumer<AwsData>() {
+				@Override
+				public void accept(AwsData awsData) {
+					routeCheckRule.setVirtualInterfaces(awsData.getData());
+				}
+			});
 	}
 	
 	private void setNetworkAcl(String subnetId, String routeTableId) {
-		List<NetworkAcl> networkAcls = this.serviceRepository.getNetworkAclsMap().get(subnetId);
+		List<NetworkAcl> networkAcls = this.serviceRepository.getNetworkAclsMap().get(subnetId, NetworkAcl.class).get().getDataList();
 		for (NetworkAcl networkAcl : networkAcls) {
 			String networkAclName = "Unknown NetworkAcl";
 			List<Tag> tags = networkAcl.tags();

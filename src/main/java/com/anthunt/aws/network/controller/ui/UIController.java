@@ -6,33 +6,29 @@ import java.util.Map;
 import javax.servlet.http.HttpSession;
 
 import org.slf4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.anthunt.aws.network.repository.ServiceRepository;
-import com.anthunt.aws.network.service.aws.Ec2Service;
-import com.anthunt.aws.network.service.aws.LoadBalancerService;
 import com.anthunt.aws.network.session.SessionProfile;
-import com.anthunt.aws.network.session.SessionProvider;
+import com.anthunt.aws.network.session.SessionHandler;
 import com.anthunt.aws.network.utils.Logging;
 
 import software.amazon.awssdk.profiles.Profile;
+import software.amazon.awssdk.services.ec2.model.Instance;
+import software.amazon.awssdk.services.elasticloadbalancing.model.LoadBalancerDescription;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.LoadBalancer;
+import software.amazon.awssdk.services.rds.model.DBCluster;
+import software.amazon.awssdk.services.rds.model.DBInstance;
 
 @Controller
 @RequestMapping("/")
 public class UIController extends AbstractController {
 
 	private static final Logger log = Logging.getLogger(UIController.class);
-	
-	@Autowired
-	private Ec2Service ec2Service;
-	
-	@Autowired
-	private LoadBalancerService loadBalancerService;
-		
+			
 	@RequestMapping("")
 	public String main() {
 		return "redirect:/profiles";
@@ -48,11 +44,11 @@ public class UIController extends AbstractController {
 		
 		String pagePath = "views/profile/profiles";
 		
-		Map<String, Profile> profiles = SessionProvider.getSessionProfile(session).getProfiles();
+		Map<String, Profile> profiles = SessionHandler.getSessionProfile(session).getProfiles();
 		
 		if(profiles.size() > 0) {
 		    model.addAttribute("profiles", profiles);
-		    model.addAttribute("regions", SessionProvider.REGIONS);
+		    model.addAttribute("regions", SessionHandler.REGIONS);
 		} else {
 			pagePath = "redirect:/profiles/edit";
 		}
@@ -63,7 +59,7 @@ public class UIController extends AbstractController {
 	@RequestMapping("profiles/edit")
 	public String editProfile(HttpSession session, Model model) throws IOException {
 		
-		model.addAttribute("profiles", SessionProvider.getSessionProfile(session).getProfileContents());
+		model.addAttribute("profiles", SessionHandler.getSessionProfile(session).getProfileContents());
 		
 		return "views/profile/editProfile";
 	}
@@ -80,10 +76,10 @@ public class UIController extends AbstractController {
 						           , @PathVariable("profileName") String profileName
 						           , @PathVariable("regionId") String regionId) throws IOException {
 		
-		SessionProfile sessionProfile = SessionProvider.getSessionProfile(session);
+		SessionProfile sessionProfile = SessionHandler.getSessionProfile(session);
 		sessionProfile.setProfileName(profileName);
 		sessionProfile.setRegionId(regionId);
-		SessionProvider.setSessionProfile(session, sessionProfile);
+		SessionHandler.setSessionProfile(session, sessionProfile);
 		log.trace("called /profiles/set/{}/{}", profileName, regionId);
 		
 		return "redirect:/dashboard";
@@ -93,13 +89,13 @@ public class UIController extends AbstractController {
 	public String getDiagram( Model model
 			                , HttpSession session) {
 		
-		ServiceRepository serviceRepository = SessionProvider.getSessionServiceRepository(session);
+		ServiceRepository serviceRepository = SessionHandler.getSessionServiceRepository(session);
 		
-		model.addAttribute("instances", this.ec2Service.getInstances(serviceRepository));
-		model.addAttribute("classic-loadbalancers", this.loadBalancerService.getClassicLoadBalancers(serviceRepository));
-		model.addAttribute("loadbalancers", this.loadBalancerService.getLoadBalancers(serviceRepository));
-		model.addAttribute("dbClusters", serviceRepository.getRdsClusterMap().values());
-		model.addAttribute("dbInstances", serviceRepository.getRdsInstanceMap().values());
+		model.addAttribute("instances", serviceRepository.getEc2InstanceMap().allValues(Instance.class));
+		model.addAttribute("classic-loadbalancers", serviceRepository.getClassicLoadBalancerMap().allValues(LoadBalancerDescription.class));
+		model.addAttribute("loadbalancers", serviceRepository.getLoadBalancerMap().allValues(LoadBalancer.class));
+		model.addAttribute("dbClusters", serviceRepository.getRdsClusterMap().allValues(DBCluster.class));
+		model.addAttribute("dbInstances", serviceRepository.getRdsInstanceMap().allValues(DBInstance.class));
 		
 		return "views/diagram/network";
 	}

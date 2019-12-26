@@ -162,7 +162,7 @@ var NetworkLoad = function() {
 				        hideOnClick: false,
 				        multiple: true,
 				        sticky: true,
-				        delay: [500, 500]
+				        delay: [10, 10]
 				    });
 				    element.popup = popup;
 				    element.on('mouseover', () => popup.show());

@@ -3,7 +3,6 @@ package com.anthunt.aws.network;
 import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -16,19 +15,16 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.Block;
 import com.mongodb.ConnectionString;
 import com.mongodb.MongoClientSettings;
-import com.mongodb.MongoSocketOpenException;
 import com.mongodb.MongoTimeoutException;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.connection.ClusterSettings;
-import com.mongodb.connection.ConnectionPoolSettings;
 import com.mongodb.connection.SocketSettings;
 import com.mongodb.connection.SocketSettings.Builder;
 
 import de.flapdoodle.embed.mongo.Command;
 import de.flapdoodle.embed.mongo.MongodExecutable;
-import de.flapdoodle.embed.mongo.MongodProcess;
 import de.flapdoodle.embed.mongo.MongodStarter;
 import de.flapdoodle.embed.mongo.config.IMongoCmdOptions;
 import de.flapdoodle.embed.mongo.config.IMongodConfig;
@@ -75,7 +71,7 @@ public class MongoDBHandler implements DisposableBean {
         return mongodExecutable;        
 	}
 	
-	private MongoClient connectMongoClient(boolean isSecureMode) {
+	public static MongoClient connectMongoClient(boolean isSecureMode) {
 		String connectString = "mongodb://" + BIND_IP + ":" + BIND_PORT;
 		if(isSecureMode) {
 			connectString = "mongodb://root:root@" + BIND_IP + ":" + BIND_PORT;
@@ -103,6 +99,7 @@ public class MongoDBHandler implements DisposableBean {
         return MongoClients.create(clientSettings);		
 	}
 	
+	@SuppressWarnings("unchecked")
 	private void checkAuthSetting(MongoDatabase adminDatabase) {
 		BasicDBObject getUserInfoCommand = new BasicDBObject("usersInfo", new BasicDBObject("user", "root").append("db", "admin"));
 		
@@ -125,7 +122,7 @@ public class MongoDBHandler implements DisposableBean {
 	}
 	
 	void runMongoDB() throws Exception {
-		MongoClient mongoClient = this.connectMongoClient(true);
+		MongoClient mongoClient = connectMongoClient(true);
     	MongoDatabase adminDatabase = null;
     	MongodExecutable mongodExecutable = null;
     	
@@ -141,7 +138,7 @@ public class MongoDBHandler implements DisposableBean {
 				throw e1;
 			}
     		
-    		mongoClient = this.connectMongoClient(false);
+    		mongoClient = connectMongoClient(false);
     		adminDatabase = mongoClient.getDatabase("admin");
     		this.checkAuthSetting(adminDatabase);
     		
@@ -171,7 +168,7 @@ public class MongoDBHandler implements DisposableBean {
 	@Override
 	public void destroy() throws Exception {
 		log.info("MongoDB Stop start");
-		MongoClient mongoClient = this.connectMongoClient(true);
+		MongoClient mongoClient = connectMongoClient(true);
 		MongoDatabase adminDatabase = mongoClient.getDatabase("admin");
 		Document result = adminDatabase.runCommand(new BasicDBObject("shutdown", "1"));
 		log.info("Result : {}", result);

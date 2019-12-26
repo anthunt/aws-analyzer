@@ -27,12 +27,12 @@ public class RdsService extends AbstractNetworkService {
 					.build();
 	}
 	
-	public ServiceMap<DBCluster> getRdsClusters(SessionProfile sessionProfile) {
-		ServiceMap<DBCluster> dbClusterMap = new ServiceMap<>();
+	public ServiceMap getRdsClusters(SessionProfile sessionProfile) {
+		ServiceMap dbClusterMap = sessionProfile.serviceMap();
 		RdsAsyncClient rdsClient = this.getRdsClient(sessionProfile);
 		int active = 0;
 		for(DBCluster dbCluster : rdsClient.describeDBClusters().join().dbClusters()) {
-			dbClusterMap.put(dbCluster.dbClusterIdentifier(), dbCluster);
+			dbClusterMap.put(dbCluster.dbClusterIdentifier(), dbCluster, DBCluster.class);
 			if("available".equals(dbCluster.status())) {
 				active++;
 			}
@@ -41,12 +41,12 @@ public class RdsService extends AbstractNetworkService {
 		return dbClusterMap;
 	}
 	
-	public ServiceMap<DBInstance> getRdsInstances(SessionProfile sessionProfile) {
-		ServiceMap<DBInstance> dbInstanceMap = new ServiceMap<>();
+	public ServiceMap getRdsInstances(SessionProfile sessionProfile) {
+		ServiceMap dbInstanceMap = sessionProfile.serviceMap();
 		RdsAsyncClient rdsClient = this.getRdsClient(sessionProfile);
 		int active = 0;
 		for(DBInstance dbInstance : rdsClient.describeDBInstances().join().dbInstances()) {
-			dbInstanceMap.put(dbInstance.dbInstanceIdentifier(), dbInstance);
+			dbInstanceMap.put(dbInstance.dbInstanceIdentifier(), dbInstance, DBInstance.class);
 			if("available".equals(dbInstance.dbInstanceStatus())) {
 				active++;
 			}

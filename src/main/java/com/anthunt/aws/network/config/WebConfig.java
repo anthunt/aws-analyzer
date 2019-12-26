@@ -20,7 +20,7 @@ import com.anthunt.aws.network.controller.model.RestResponse;
 import com.anthunt.aws.network.repository.user.model.UserDetails;
 import com.anthunt.aws.network.service.ProfileService;
 import com.anthunt.aws.network.session.SessionProfile;
-import com.anthunt.aws.network.session.SessionProvider;
+import com.anthunt.aws.network.session.SessionHandler;
 import com.anthunt.aws.network.utils.Logging;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -66,9 +66,9 @@ public class WebConfig  implements WebMvcConfigurer {
 				        	HttpSession session = request.getSession();
 				        	UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 				        	
-				        	SessionProfile sessionProfile = SessionProvider.getSessionProfile(session);
+				        	SessionProfile sessionProfile = SessionHandler.getSessionProfile(session);
 				        	if(sessionProfile == null) {
-				        		sessionProfile = SessionProvider.createSessionProfile(session, profileService.getProfileContents(userDetails.getUser().getUserid().toString()));
+				        		sessionProfile = SessionHandler.createSessionProfile(session, profileService.getProfileContents(userDetails.getUser().getUserid().toString()));
 				        	}
 				    		
 				        	if((request.getRequestURI().startsWith("/profiles") || request.getRequestURI().startsWith("/api/profiles/edit"))) {

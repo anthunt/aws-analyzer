@@ -12,33 +12,6 @@ import com.anthunt.aws.network.service.aws.LoadBalancerService;
 import com.anthunt.aws.network.service.aws.RdsService;
 import com.anthunt.aws.network.session.SessionProfile;
 
-import software.amazon.awssdk.services.directconnect.model.VirtualInterface;
-import software.amazon.awssdk.services.ec2.model.CustomerGateway;
-import software.amazon.awssdk.services.ec2.model.EgressOnlyInternetGateway;
-import software.amazon.awssdk.services.ec2.model.Instance;
-import software.amazon.awssdk.services.ec2.model.InternetGateway;
-import software.amazon.awssdk.services.ec2.model.NetworkAcl;
-import software.amazon.awssdk.services.ec2.model.NetworkInterface;
-import software.amazon.awssdk.services.ec2.model.PrefixList;
-import software.amazon.awssdk.services.ec2.model.RouteTable;
-import software.amazon.awssdk.services.ec2.model.SecurityGroup;
-import software.amazon.awssdk.services.ec2.model.Subnet;
-import software.amazon.awssdk.services.ec2.model.TransitGateway;
-import software.amazon.awssdk.services.ec2.model.Volume;
-import software.amazon.awssdk.services.ec2.model.Vpc;
-import software.amazon.awssdk.services.ec2.model.VpcEndpoint;
-import software.amazon.awssdk.services.ec2.model.VpcPeeringConnection;
-import software.amazon.awssdk.services.ec2.model.VpnConnection;
-import software.amazon.awssdk.services.ec2.model.VpnGateway;
-import software.amazon.awssdk.services.elasticloadbalancing.model.LoadBalancerDescription;
-import software.amazon.awssdk.services.elasticloadbalancingv2.model.Listener;
-import software.amazon.awssdk.services.elasticloadbalancingv2.model.LoadBalancer;
-import software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule;
-import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroup;
-import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetHealthDescription;
-import software.amazon.awssdk.services.rds.model.DBCluster;
-import software.amazon.awssdk.services.rds.model.DBInstance;
-
 public class ServiceRepository {
 	
 	private List<ServiceStatistic> serviceStatistics;
@@ -54,107 +27,107 @@ public class ServiceRepository {
 		return new ServiceRepository(serviceRepositoryProvider);
 	}
 	
-	public ServiceMap<Vpc> getVpcMap() {
+	public ServiceMap getVpcMap() {
 		return this.serviceRepositoryProvider.getVpcMap();
 	}
 
-	public ServiceMap<Instance> getEc2InstanceMap() {
+	public ServiceMap getEc2InstanceMap() {
 		return this.serviceRepositoryProvider.getEc2InstanceMap();
 	}
 	
-	public ServiceMap<Volume> getVolumeMap() {
+	public ServiceMap getVolumeMap() {
 		return this.serviceRepositoryProvider.getVolumeMap();
 	}
 	
-	public ServiceMap<NetworkInterface> getNetworkInterfaceMap() {
+	public ServiceMap getNetworkInterfaceMap() {
 		return this.serviceRepositoryProvider.getNetworkInterfaceMap();
 	}
 
-	public ServiceMap<Subnet> getSubnetMap() {
+	public ServiceMap getSubnetMap() {
 		return this.serviceRepositoryProvider.getSubnetMap();
 	}
 
-	public ServiceMap<VpcPeeringConnection> getVpcPeeringMap() {
+	public ServiceMap getVpcPeeringMap() {
 		return this.serviceRepositoryProvider.getVpcPeeringMap();
 	}
 	
-	public ServiceMap<LoadBalancer> getLoadBalancerMap() {
+	public ServiceMap getLoadBalancerMap() {
 		return this.serviceRepositoryProvider.getLoadBalancerMap();
 	}
 
-	public ServiceMap<List<Listener>> getLoadBalancerListenersMap() {
+	public ServiceMap getLoadBalancerListenersMap() {
 		return this.serviceRepositoryProvider.getLoadBalancerListenersMap();
 	}
 
-	public ServiceMap<List<Rule>> getLoadBalancerRulesMap() {
+	public ServiceMap getLoadBalancerRulesMap() {
 		return this.serviceRepositoryProvider.getLoadBalancerRulesMap();
 	}
 
-	public ServiceMap<TargetGroup> getTargetGroupMap() {
+	public ServiceMap getTargetGroupMap() {
 		return this.serviceRepositoryProvider.getTargetGroupMap();
 	}
 
-	public ServiceMap<List<TargetHealthDescription>> getTargetHealthDescriptionsMap() {
+	public ServiceMap getTargetHealthDescriptionsMap() {
 		return this.serviceRepositoryProvider.getTargetHealthDescriptionsMap();
 	}
 
-	public ServiceMap<LoadBalancerDescription> getClassicLoadBalancerMap() {
+	public ServiceMap getClassicLoadBalancerMap() {
 		return this.serviceRepositoryProvider.getClassicLoadBalancerMap();
 	}
 
-	public ServiceMap<SecurityGroup> getSecurityGroupMap() {
+	public ServiceMap getSecurityGroupMap() {
 		return this.serviceRepositoryProvider.getSecurityGroupMap();
 	}
 
-	public ServiceMap<List<RouteTable>> getRouteTablesMap() {
+	public ServiceMap getRouteTablesMap() {
 		return this.serviceRepositoryProvider.getRouteTablesMap();
 	}
 
-	public ServiceMap<PrefixList> getPrefixListMap() {
+	public ServiceMap getPrefixListMap() {
 		return this.serviceRepositoryProvider.getPrefixListMap();
 	}
 
-	public ServiceMap<VpnGateway> getVpnGatewayMap() {
+	public ServiceMap getVpnGatewayMap() {
 		return this.serviceRepositoryProvider.getVpnGatewayMap();
 	}
 
-	public ServiceMap<List<VpnConnection>> getVpnConnectionsMap() {
+	public ServiceMap getVpnConnectionsMap() {
 		return this.serviceRepositoryProvider.getVpnConnectionsMap();
 	}
 
-	public ServiceMap<List<VirtualInterface>> getVirtualInterfacesMap() {
+	public ServiceMap getVirtualInterfacesMap() {
 		return this.serviceRepositoryProvider.getVirtualInterfacesMap();
 	}
 	
-	public ServiceMap<CustomerGateway> getCustomerGatewayMap() {
+	public ServiceMap getCustomerGatewayMap() {
 		return this.serviceRepositoryProvider.getCustomerGatewayMap();
 	}
 
-	public ServiceMap<List<NetworkAcl>> getNetworkAclsMap() {
+	public ServiceMap getNetworkAclsMap() {
 		return this.serviceRepositoryProvider.getNetworkAclsMap();
 	}
 
-	public ServiceMap<VpcEndpoint> getVpcEndpointMap() {
+	public ServiceMap getVpcEndpointMap() {
 		return this.serviceRepositoryProvider.getVpcEndpointMap();
 	}
 
-	public ServiceMap<EgressOnlyInternetGateway> getEgressInternetGatewayMap() {
+	public ServiceMap getEgressInternetGatewayMap() {
 		return this.serviceRepositoryProvider.getEgressInternetGatewayMap();
 	}
 
-	public ServiceMap<InternetGateway> getInternetGatewayMap() {
+	public ServiceMap getInternetGatewayMap() {
 		return this.serviceRepositoryProvider.getInternetGatewayMap();
 	}
 
-	public ServiceMap<TransitGateway> getTransitGatewayMap() {
+	public ServiceMap getTransitGatewayMap() {
 		return this.serviceRepositoryProvider.getTransitGatewayMap();
 	}
 	
-	public ServiceMap<DBCluster> getRdsClusterMap() {
+	public ServiceMap getRdsClusterMap() {
 		return this.serviceRepositoryProvider.getRdsClusterMap();
 	}
 	
-	public ServiceMap<DBInstance> getRdsInstanceMap() {
+	public ServiceMap getRdsInstanceMap() {
 		return this.serviceRepositoryProvider.getRdsInstanceMap();
 	}
 	

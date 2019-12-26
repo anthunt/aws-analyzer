@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.anthunt.aws.network.service.aws.Ec2Service;
 import com.anthunt.aws.network.service.aws.LoadBalancerService;
 import com.anthunt.aws.network.service.model.diagram.DiagramResult;
-import com.anthunt.aws.network.session.SessionProvider;
+import com.anthunt.aws.network.session.SessionHandler;
 import com.anthunt.aws.network.utils.Logging;
 import com.anthunt.aws.network.utils.Utils;
 
@@ -41,7 +41,7 @@ public class NetworkController extends AbstractAPIController {
 		}
 		log.trace("called /network/ec2/{}/{}", instanceId, target);
 		
-		return this.ec2Service.getNetwork(SessionProvider.getSessionServiceRepository(session), Utils.decodeB64URL(instanceId), target);
+		return this.ec2Service.getNetwork(SessionHandler.getSessionServiceRepository(session), Utils.decodeB64URL(instanceId), target);
 	}
 
 	@RequestMapping(value= {"loadBalancer/{loadBalancerArn}", "loadBalancer/{loadBalancerArn}/{targetIp}"})
@@ -55,7 +55,7 @@ public class NetworkController extends AbstractAPIController {
 		}
 		log.trace("called /network/loadBalancer/{}/{}", loadBalancerArn, target);
 		
-		return this.loadBalancerService.getNetwork(SessionProvider.getSessionServiceRepository(session), Utils.decodeB64URL(loadBalancerArn), target);
+		return this.loadBalancerService.getNetwork(SessionHandler.getSessionServiceRepository(session), Utils.decodeB64URL(loadBalancerArn), target);
 	}
 	
 	@RequestMapping("detail/{className}/{resourceId}")
@@ -67,7 +67,7 @@ public class NetworkController extends AbstractAPIController {
 		
 		switch(className) {
 		case "ec2Instance" :
-			diagramResult = ec2Service.getInstanceNetwork(SessionProvider.getSessionServiceRepository(session), diagramResult, resourceId);
+			diagramResult = ec2Service.getInstanceNetwork(SessionHandler.getSessionServiceRepository(session), diagramResult, resourceId);
 		}
 		
 		return diagramResult;

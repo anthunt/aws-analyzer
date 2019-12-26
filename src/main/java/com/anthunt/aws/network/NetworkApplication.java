@@ -17,6 +17,7 @@ public class NetworkApplication {
 //		MongoDBHandler mongoDBHandler = new MongoDBHandler();
 //    	mongoDBHandler.runMongoDB();
 //    	log.info("MongoDB Started");
+		log.trace("Start");
         SpringApplication.run(NetworkApplication.class, args);
     }
 	

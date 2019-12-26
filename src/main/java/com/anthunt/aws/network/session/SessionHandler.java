@@ -11,12 +11,13 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import com.anthunt.aws.network.repository.ServiceRepository;
+import com.anthunt.aws.network.repository.model.ServiceMapType;
 import com.anthunt.aws.network.repository.profile.model.ProfileContents;
 import com.anthunt.aws.network.repository.user.model.UserDetails;
 
 import software.amazon.awssdk.regions.Region;
 
-public class SessionProvider {
+public class SessionHandler {
 
 	public static final String SESSION_PROFILE_KEY = "profile";
 	public static final String SESSION_SERVICE_REPOSITORY = "serviceRepository";
@@ -30,7 +31,7 @@ public class SessionProvider {
 	public static SessionProfile createSessionProfile(HttpSession session, Optional<ProfileContents> profileContents) {
 		SessionProfile sessionProfile = (SessionProfile) session.getAttribute(SESSION_PROFILE_KEY);
 		if(sessionProfile == null) {
-			sessionProfile = new SessionProfile(SessionProvider.getUserDetails());
+			sessionProfile = new SessionProfile(SessionHandler.getUserDetails(), ServiceMapType.MONGODB);
 			if(profileContents.isPresent()) {
 				sessionProfile.setProfileFile(profileContents.get());
 			}

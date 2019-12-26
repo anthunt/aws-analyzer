@@ -16,7 +16,7 @@ import com.anthunt.aws.network.controller.model.Response;
 import com.anthunt.aws.network.repository.profile.model.ProfileContents;
 import com.anthunt.aws.network.service.ProfileService;
 import com.anthunt.aws.network.session.SessionProfile;
-import com.anthunt.aws.network.session.SessionProvider;
+import com.anthunt.aws.network.session.SessionHandler;
 import com.anthunt.aws.network.utils.Logging;
 
 @RestController
@@ -34,7 +34,7 @@ public class ProfilesController extends AbstractAPIController {
 								   , @RequestBody ProfileStrings profileStrings) throws IOException {
 		
 		log.trace("ProfileStrings : {}", profileStrings);
-		SessionProfile sessionProfile = SessionProvider.getSessionProfile(session);
+		SessionProfile sessionProfile = SessionHandler.getSessionProfile(session);
 		ProfileContents profileContents = new ProfileContents(sessionProfile.getUserid());
 		profileContents.setConfig(profileStrings.getConfig());
 		profileContents.setCredentials(profileStrings.getCredentials());
@@ -43,7 +43,7 @@ public class ProfilesController extends AbstractAPIController {
 		
 		sessionProfile.setProfileFile(profileService.updateProfile(profileContents));
 		
-		SessionProvider.setSessionProfile(session, sessionProfile);
+		SessionHandler.setSessionProfile(session, sessionProfile);
 		
 		return new Response();
 	}

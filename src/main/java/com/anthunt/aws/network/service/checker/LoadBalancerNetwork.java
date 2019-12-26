@@ -2,8 +2,10 @@ package com.anthunt.aws.network.service.checker;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 import com.anthunt.aws.network.repository.ServiceRepository;
+import com.anthunt.aws.network.repository.aws.AwsData;
 import com.anthunt.aws.network.service.model.checker.CheckResults;
 
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.AvailabilityZone;
@@ -24,8 +26,15 @@ public class LoadBalancerNetwork extends AbstractNetwork<LoadBalancer> {
 	}
 
 	@Override
-	protected LoadBalancer getResource(String loadBalancerArn, ServiceRepository serviceRepository) {		
-		this.loadBalancer = serviceRepository.getLoadBalancerMap().get(loadBalancerArn);
+	protected LoadBalancer getResource(String loadBalancerArn, ServiceRepository serviceRepository) {
+		serviceRepository.getLoadBalancerMap()
+			.get(loadBalancerArn, LoadBalancer.class)
+			.ifPresent(new Consumer<AwsData>() {
+				@Override
+				public void accept(AwsData awsData) {
+					loadBalancer = awsData.getData();	
+				}
+			});
 		return this.loadBalancer;
 	}
 

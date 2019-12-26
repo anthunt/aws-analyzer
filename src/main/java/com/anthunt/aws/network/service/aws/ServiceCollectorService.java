@@ -19,7 +19,7 @@ import com.anthunt.aws.network.repository.ServiceRepositoryCollectListener;
 import com.anthunt.aws.network.repository.model.ServiceResult;
 import com.anthunt.aws.network.service.model.ServiceType;
 import com.anthunt.aws.network.session.SessionProfile;
-import com.anthunt.aws.network.session.SessionProvider;
+import com.anthunt.aws.network.session.SessionHandler;
 
 @Service
 public class ServiceCollectorService {
@@ -41,7 +41,7 @@ public class ServiceCollectorService {
 	@Async
 	public void collectServices(HttpSession session, SseEmitter sseEmitter, SessionProfile sessionProfile, Optional<String> serviceName) throws IOException {
 
-		ServiceRepository serviceRepository = SessionProvider.getSessionServiceRepository(session);
+		ServiceRepository serviceRepository = SessionHandler.getSessionServiceRepository(session);
 		if(serviceRepository == null) {
 			serviceRepository = ServiceRepository.build(new MemoryServiceRepositoryProvider());
 		}
@@ -72,7 +72,7 @@ public class ServiceCollectorService {
 		
 		serviceRepository.collect();
 		
-		SessionProvider.setServiceRepository(session, serviceRepository);
+		SessionHandler.setServiceRepository(session, serviceRepository);
 		
 		sseEmitter.send(SseEmitter.event()
 			      .id(UUID.randomUUID().toString())

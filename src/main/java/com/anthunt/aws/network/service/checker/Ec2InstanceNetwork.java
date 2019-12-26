@@ -1,8 +1,10 @@
 package com.anthunt.aws.network.service.checker;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 import com.anthunt.aws.network.repository.ServiceRepository;
+import com.anthunt.aws.network.repository.aws.AwsData;
 
 import software.amazon.awssdk.services.ec2.model.GroupIdentifier;
 import software.amazon.awssdk.services.ec2.model.Instance;
@@ -16,8 +18,15 @@ public class Ec2InstanceNetwork extends AbstractNetwork<Instance> {
 	}
 
 	@Override
-	protected Instance getResource(String instanceId, ServiceRepository serviceRepository) {		
-		this.instance = serviceRepository.getEc2InstanceMap().get(instanceId);
+	protected Instance getResource(String instanceId, ServiceRepository serviceRepository) {
+		serviceRepository.getEc2InstanceMap()
+			.get(instanceId, Instance.class)
+			.ifPresent(new Consumer<AwsData>() {
+				@Override
+				public void accept(AwsData awsData) {
+					instance = awsData.getData();	
+				}
+			});
 		return this.instance;
 	}
 

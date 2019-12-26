@@ -14,32 +14,10 @@ import com.anthunt.aws.network.service.model.ServiceType;
 import com.anthunt.aws.network.session.SessionProfile;
 import com.anthunt.aws.network.utils.Utils;
 
-import software.amazon.awssdk.services.directconnect.model.VirtualInterface;
-import software.amazon.awssdk.services.ec2.model.CustomerGateway;
-import software.amazon.awssdk.services.ec2.model.EgressOnlyInternetGateway;
-import software.amazon.awssdk.services.ec2.model.Instance;
-import software.amazon.awssdk.services.ec2.model.InternetGateway;
-import software.amazon.awssdk.services.ec2.model.NetworkAcl;
-import software.amazon.awssdk.services.ec2.model.NetworkInterface;
-import software.amazon.awssdk.services.ec2.model.PrefixList;
-import software.amazon.awssdk.services.ec2.model.RouteTable;
-import software.amazon.awssdk.services.ec2.model.SecurityGroup;
 import software.amazon.awssdk.services.ec2.model.Subnet;
-import software.amazon.awssdk.services.ec2.model.TransitGateway;
-import software.amazon.awssdk.services.ec2.model.Volume;
-import software.amazon.awssdk.services.ec2.model.Vpc;
-import software.amazon.awssdk.services.ec2.model.VpcEndpoint;
-import software.amazon.awssdk.services.ec2.model.VpcPeeringConnection;
-import software.amazon.awssdk.services.ec2.model.VpnConnection;
-import software.amazon.awssdk.services.ec2.model.VpnGateway;
-import software.amazon.awssdk.services.elasticloadbalancing.model.LoadBalancerDescription;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Listener;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.LoadBalancer;
-import software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroup;
-import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetHealthDescription;
-import software.amazon.awssdk.services.rds.model.DBCluster;
-import software.amazon.awssdk.services.rds.model.DBInstance;
 
 public abstract class ServiceRepositoryProvider {
 
@@ -49,109 +27,109 @@ public abstract class ServiceRepositoryProvider {
 		
 	}
 	
-	protected abstract ServiceMap<Vpc> getVpcMap();
+	protected abstract ServiceMap getVpcMap();
 
-	protected abstract ServiceMap<Instance> getEc2InstanceMap();
+	protected abstract ServiceMap getEc2InstanceMap();
 
-	protected abstract ServiceMap<Volume> getVolumeMap();
+	protected abstract ServiceMap getVolumeMap();
 	
-	protected abstract ServiceMap<NetworkInterface> getNetworkInterfaceMap();
+	protected abstract ServiceMap getNetworkInterfaceMap();
 	
-	protected abstract ServiceMap<Subnet> getSubnetMap();
+	protected abstract ServiceMap getSubnetMap();
 
-	protected abstract ServiceMap<VpcPeeringConnection> getVpcPeeringMap();
+	protected abstract ServiceMap getVpcPeeringMap();
 	
-	protected abstract ServiceMap<LoadBalancer> getLoadBalancerMap();
+	protected abstract ServiceMap getLoadBalancerMap();
 
-	protected abstract ServiceMap<List<Listener>> getLoadBalancerListenersMap();
+	protected abstract ServiceMap getLoadBalancerListenersMap();
 
-	protected abstract ServiceMap<List<Rule>> getLoadBalancerRulesMap();
+	protected abstract ServiceMap getLoadBalancerRulesMap();
 
-	protected abstract ServiceMap<TargetGroup> getTargetGroupMap();
+	protected abstract ServiceMap getTargetGroupMap();
 
-	protected abstract ServiceMap<List<TargetHealthDescription>> getTargetHealthDescriptionsMap();
+	protected abstract ServiceMap getTargetHealthDescriptionsMap();
 
-	protected abstract ServiceMap<LoadBalancerDescription> getClassicLoadBalancerMap();
+	protected abstract ServiceMap getClassicLoadBalancerMap();
 
-	protected abstract ServiceMap<SecurityGroup> getSecurityGroupMap();
+	protected abstract ServiceMap getSecurityGroupMap();
 
-	protected abstract ServiceMap<List<RouteTable>> getRouteTablesMap();
+	protected abstract ServiceMap getRouteTablesMap();
 
-	protected abstract ServiceMap<PrefixList> getPrefixListMap();
+	protected abstract ServiceMap getPrefixListMap();
 
-	protected abstract ServiceMap<CustomerGateway> getCustomerGatewayMap();
+	protected abstract ServiceMap getCustomerGatewayMap();
 	
-	protected abstract ServiceMap<VpnGateway> getVpnGatewayMap();
+	protected abstract ServiceMap getVpnGatewayMap();
 
-	protected abstract ServiceMap<List<VpnConnection>> getVpnConnectionsMap();
+	protected abstract ServiceMap getVpnConnectionsMap();
 
-	protected abstract ServiceMap<List<VirtualInterface>> getVirtualInterfacesMap();
+	protected abstract ServiceMap getVirtualInterfacesMap();
 
-	protected abstract ServiceMap<List<NetworkAcl>> getNetworkAclsMap();
+	protected abstract ServiceMap getNetworkAclsMap();
 	
-	protected abstract ServiceMap<VpcEndpoint> getVpcEndpointMap();
+	protected abstract ServiceMap getVpcEndpointMap();
 	
-	protected abstract ServiceMap<EgressOnlyInternetGateway> getEgressInternetGatewayMap();
+	protected abstract ServiceMap getEgressInternetGatewayMap();
 	
-	protected abstract ServiceMap<InternetGateway> getInternetGatewayMap();
+	protected abstract ServiceMap getInternetGatewayMap();
 	
-	protected abstract ServiceMap<TransitGateway> getTransitGatewayMap();
+	protected abstract ServiceMap getTransitGatewayMap();
 	
-	protected abstract ServiceMap<DBInstance> getRdsInstanceMap();
+	protected abstract ServiceMap getRdsInstanceMap();
 
-	protected abstract ServiceMap<DBCluster> getRdsClusterMap();
+	protected abstract ServiceMap getRdsClusterMap();
 	
-	protected abstract void setVirtualInterfacesMap(ServiceMap<List<VirtualInterface>> serviceMap);
+	protected abstract void setVirtualInterfacesMap(ServiceMap serviceMap);
 
-	protected abstract void setTargetHealthDescriptionsMap(ServiceMap<List<TargetHealthDescription>> serviceMap);
+	protected abstract void setTargetHealthDescriptionsMap(ServiceMap serviceMap);
 
-	protected abstract ServiceMap<TargetGroup> setTargetGroupMap(ServiceMap<TargetGroup> serviceMap);
+	protected abstract ServiceMap setTargetGroupMap(ServiceMap serviceMap);
 
-	protected abstract void setLoadBalancerRulesMap(ServiceMap<List<Rule>> serviceMap);
+	protected abstract void setLoadBalancerRulesMap(ServiceMap serviceMap);
 
-	protected abstract ServiceMap<List<Listener>> setLoadBalancerListenersMap(ServiceMap<List<Listener>> serviceMap);
+	protected abstract ServiceMap setLoadBalancerListenersMap(ServiceMap serviceMap);
 
-	protected abstract ServiceMap<LoadBalancer> setLoadBalancerMap(ServiceMap<LoadBalancer> serviceMap);
+	protected abstract ServiceMap setLoadBalancerMap(ServiceMap serviceMap);
 
-	protected abstract void setClassicLoadBalancerMap(ServiceMap<LoadBalancerDescription> serviceMap);
+	protected abstract void setClassicLoadBalancerMap(ServiceMap serviceMap);
 
-	protected abstract void setVpnConnectionsMap(ServiceMap<List<VpnConnection>> serviceMap);
+	protected abstract void setVpnConnectionsMap(ServiceMap serviceMap);
 
-	protected abstract void setVpnGatewayMap(ServiceMap<VpnGateway> serviceMap);
+	protected abstract void setVpnGatewayMap(ServiceMap serviceMap);
 
-	protected abstract void setNetworkAclsMap(ServiceMap<List<NetworkAcl>> serviceMap);
+	protected abstract void setNetworkAclsMap(ServiceMap serviceMap);
 
-	protected abstract void setPrefixListMap(ServiceMap<PrefixList> serviceMap);
+	protected abstract void setPrefixListMap(ServiceMap serviceMap);
 
-	protected abstract void setRouteTablesMap(ServiceMap<List<RouteTable>> serviceMap);
+	protected abstract void setRouteTablesMap(ServiceMap serviceMap);
 
-	protected abstract void setVpcPeeringMap(ServiceMap<VpcPeeringConnection> serviceMap);
+	protected abstract void setVpcPeeringMap(ServiceMap serviceMap);
 	
-	protected abstract void setCustomerGatewayMap(ServiceMap<CustomerGateway> serviceMap);
+	protected abstract void setCustomerGatewayMap(ServiceMap serviceMap);
 	
-	protected abstract ServiceMap<Subnet> setSubnetMap(ServiceMap<Subnet> serviceMap);
+	protected abstract ServiceMap setSubnetMap(ServiceMap serviceMap);
 
-	protected abstract void setSecurityGroupMap(ServiceMap<SecurityGroup> serviceMap);
+	protected abstract void setSecurityGroupMap(ServiceMap serviceMap);
 
-	protected abstract void setEc2InstanceMap(ServiceMap<Instance> serviceMap);
+	protected abstract void setEc2InstanceMap(ServiceMap serviceMap);
 	
-	protected abstract void setVolumeMap(ServiceMap<Volume> serviceMap);
+	protected abstract void setVolumeMap(ServiceMap serviceMap);
 	
-	protected abstract void setNetworkInterfaceMap(ServiceMap<NetworkInterface> serviceMap);
+	protected abstract void setNetworkInterfaceMap(ServiceMap serviceMap);
 	
-	protected abstract void setVpcMap(ServiceMap<Vpc> serviceMap);
+	protected abstract void setVpcMap(ServiceMap serviceMap);
 	
-	protected abstract void setVpcEndpointMap(ServiceMap<VpcEndpoint> serviceMap);
+	protected abstract void setVpcEndpointMap(ServiceMap serviceMap);
 
-	protected abstract void setEgressInternetGatewayMap(ServiceMap<EgressOnlyInternetGateway> serviceMap);
+	protected abstract void setEgressInternetGatewayMap(ServiceMap serviceMap);
 
-	protected abstract void setInternetGatewayMap(ServiceMap<InternetGateway> serviceMap);
+	protected abstract void setInternetGatewayMap(ServiceMap serviceMap);
 	
-	protected abstract void setTransitGatewayMap(ServiceMap<TransitGateway> serviceMap);
+	protected abstract void setTransitGatewayMap(ServiceMap serviceMap);
 	
-	protected abstract void setRdsInstanceMap(ServiceMap<DBInstance> rdsInstances);
+	protected abstract void setRdsInstanceMap(ServiceMap rdsInstances);
 
-	protected abstract void setRdsClusterMap(ServiceMap<DBCluster> rdsClusters);
+	protected abstract void setRdsClusterMap(ServiceMap rdsClusters);
 	
 	public void setServiceRepositoryCollectListener(ServiceRepositoryCollectListener serviceRepositoryCollectListener) {
 		this.serviceRepositoryCollectListener = serviceRepositoryCollectListener;
@@ -178,11 +156,11 @@ public abstract class ServiceRepositoryProvider {
 		this.serviceRepositoryCollectListener.serviceLoaded(num, total, "Securitygroups data is loaded");
 		num++;
 		Utils.sleep(100);
-		ServiceMap<Subnet> subnetMap = this.setSubnetMap(ec2Service.getSubnets(sessionProfile));
+		ServiceMap subnetMap = this.setSubnetMap(ec2Service.getSubnets(sessionProfile));
 		this.serviceRepositoryCollectListener.serviceLoaded(num, total, "Subnets data is loaded");
 		num++;
 		Utils.sleep(100);
-		this.setRouteTablesMap(ec2Service.getRouteTables(sessionProfile, subnetMap.values()));
+		this.setRouteTablesMap(ec2Service.getRouteTables(sessionProfile, subnetMap.values(Subnet.class)));
 		this.serviceRepositoryCollectListener.serviceLoaded(num, total, "Routes data is loaded");
 		num++;
 		Utils.sleep(100);
@@ -210,7 +188,7 @@ public abstract class ServiceRepositoryProvider {
 		this.serviceRepositoryCollectListener.serviceLoaded(num, total, "PrefixLists data is loaded");
 		num++;
 		Utils.sleep(100);
-		this.setNetworkAclsMap(ec2Service.getNetworkAcls(sessionProfile, subnetMap.values()));
+		this.setNetworkAclsMap(ec2Service.getNetworkAcls(sessionProfile, subnetMap.values(Subnet.class)));
 		this.serviceRepositoryCollectListener.serviceLoaded(num, total, "PrefixLists data is loaded");
 		num++;
 		Utils.sleep(100);
@@ -234,23 +212,23 @@ public abstract class ServiceRepositoryProvider {
 		this.serviceRepositoryCollectListener.serviceLoaded(num, total, "Classic loadbalancers data is loaded");
 		num++;
 		Utils.sleep(100);
-		ServiceMap<LoadBalancer> loadBalancerMap = this.setLoadBalancerMap(loadBalancerService.getLoadBalancers(sessionProfile));
+		ServiceMap loadBalancerMap = this.setLoadBalancerMap(loadBalancerService.getLoadBalancers(sessionProfile));
 		this.serviceRepositoryCollectListener.serviceLoaded(num, total, "LoadBalancers data is loaded");
 		num++;
 		Utils.sleep(100);
-		ServiceMap<List<Listener>> listenersMap = this.setLoadBalancerListenersMap(loadBalancerService.getLoadBalancerListeners(sessionProfile, loadBalancerMap.values()));
+		ServiceMap listenersMap = this.setLoadBalancerListenersMap(loadBalancerService.getLoadBalancerListeners(sessionProfile, loadBalancerMap.values(LoadBalancer.class)));
 		this.serviceRepositoryCollectListener.serviceLoaded(num, total, "LoadBalancer listeners data is loaded");
 		num++;
 		Utils.sleep(100);
-		this.setLoadBalancerRulesMap(loadBalancerService.getLoadBalancerRules(sessionProfile, listenersMap.values()));
+		this.setLoadBalancerRulesMap(loadBalancerService.getLoadBalancerRules(sessionProfile, listenersMap.values(Listener.class)));
 		this.serviceRepositoryCollectListener.serviceLoaded(num, total, "LoadBalancer rules data is loaded");
 		num++;
 		Utils.sleep(100);
-		ServiceMap<TargetGroup> targetGroupMap = this.setTargetGroupMap(loadBalancerService.getTargetGroups(sessionProfile));
+		ServiceMap targetGroupMap = this.setTargetGroupMap(loadBalancerService.getTargetGroups(sessionProfile));
 		this.serviceRepositoryCollectListener.serviceLoaded(num, total, "LoadBalancer targetgroups data is loaded");
 		num++;
 		Utils.sleep(100);
-		this.setTargetHealthDescriptionsMap(loadBalancerService.getTargetHealthDescriptions(sessionProfile, targetGroupMap.values()));
+		this.setTargetHealthDescriptionsMap(loadBalancerService.getTargetHealthDescriptions(sessionProfile, targetGroupMap.values(TargetGroup.class)));
 		this.serviceRepositoryCollectListener.serviceLoaded(num, total, "LoadBalancer target healths data is loaded");
 		num++;
 		Utils.sleep(100);

@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import com.anthunt.aws.network.service.aws.ServiceCollectorService;
-import com.anthunt.aws.network.session.SessionProvider;
+import com.anthunt.aws.network.session.SessionHandler;
 
 @RestController
 @RequestMapping("/api/collect")
@@ -26,7 +26,7 @@ public class CollectController extends AbstractAPIController {
 			                         , @PathVariable("serviceName") Optional<String> serviceName) throws IOException {
 		
 		SseEmitter sseEmitter = new SseEmitter(180000L);
-		serviceCollectorService.collectServices(session, sseEmitter, SessionProvider.getSessionProfile(session), serviceName);
+		serviceCollectorService.collectServices(session, sseEmitter, SessionHandler.getSessionProfile(session), serviceName);
 		return sseEmitter;
 	}
 	

@@ -3,7 +3,6 @@ package com.anthunt.aws.network.service.aws;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,6 +11,7 @@ import org.slf4j.Logger;
 import org.springframework.stereotype.Service;
 
 import com.anthunt.aws.network.repository.ServiceRepository;
+import com.anthunt.aws.network.repository.aws.AwsData;
 import com.anthunt.aws.network.repository.model.ServiceMap;
 import com.anthunt.aws.network.service.checker.LoadBalancerNetwork;
 import com.anthunt.aws.network.service.model.checker.CheckResult;
@@ -74,96 +74,100 @@ public class LoadBalancerService extends AbstractNetworkService {
 				   .build();
 	}
 	
-	public ServiceMap<LoadBalancerDescription> getClassicLoadBalancers(SessionProfile sessionProfile) {
-		ServiceMap<LoadBalancerDescription> classicLoadBalancerMap = new ServiceMap<>();
+	public ServiceMap getClassicLoadBalancers(SessionProfile sessionProfile) {
+		ServiceMap classicLoadBalancerMap = sessionProfile.serviceMap();
 		ElasticLoadBalancingAsyncClient elasticLoadBalancingClient = this.getElasticLoadBalancingClient(sessionProfile);
 		for(LoadBalancerDescription loadBalancerDescription : elasticLoadBalancingClient.describeLoadBalancers().join().loadBalancerDescriptions()) {
-			classicLoadBalancerMap.put(loadBalancerDescription.loadBalancerName(), loadBalancerDescription);
+			classicLoadBalancerMap.put(loadBalancerDescription.loadBalancerName(), loadBalancerDescription, LoadBalancerDescription.class);
 		}
 		return classicLoadBalancerMap;
 	}
 	
-	public ServiceMap<LoadBalancer> getLoadBalancers(SessionProfile sessionProfile) {
-		ServiceMap<LoadBalancer> loadBalancerMap = new ServiceMap<>();
+	public ServiceMap getLoadBalancers(SessionProfile sessionProfile) {
+		ServiceMap loadBalancerMap = sessionProfile.serviceMap();
 		ElasticLoadBalancingV2AsyncClient elasticLoadBalancingV2Client = this.getElasticLoadBalancingV2Client(sessionProfile);
 		for(LoadBalancer loadBalancer : elasticLoadBalancingV2Client.describeLoadBalancers().join().loadBalancers()) {
-			loadBalancerMap.put(loadBalancer.loadBalancerArn(), loadBalancer);
+			loadBalancerMap.put(loadBalancer.loadBalancerArn(), loadBalancer, LoadBalancer.class);
 		}
 		return loadBalancerMap;
 	}
 	
-	public ServiceMap<List<Listener>> getLoadBalancerListeners(SessionProfile sessionProfile, Collection<LoadBalancer> loadBalancers) {
-		ServiceMap<List<Listener>> loadBalancerListenerMap = new ServiceMap<>();
+	public ServiceMap getLoadBalancerListeners(SessionProfile sessionProfile, List<AwsData> loadBalancers) {
+		ServiceMap loadBalancerListenerMap = sessionProfile.serviceMap(true);
 		ElasticLoadBalancingV2AsyncClient elasticLoadBalancingV2Client = this.getElasticLoadBalancingV2Client(sessionProfile);
-		for(LoadBalancer loadBalancer : loadBalancers) {
+		for(AwsData awsData : loadBalancers) {
+			LoadBalancer loadBalancer = awsData.getData();
 			DescribeListenersResponse describeListenersResponse = elasticLoadBalancingV2Client.describeListeners(
 					DescribeListenersRequest.builder()
 						.loadBalancerArn(loadBalancer.loadBalancerArn())
 						.build()
 			).join();
-			loadBalancerListenerMap.put(loadBalancer.loadBalancerArn(), describeListenersResponse.listeners());
+			loadBalancerListenerMap.put(loadBalancer.loadBalancerArn(), describeListenersResponse.listeners(), Listener.class);
 			Utils.sleep(100);
 		}
 		
 		return loadBalancerListenerMap;
 	}
 	
-	public ServiceMap<List<Rule>> getLoadBalancerRules(SessionProfile sessionProfile, Collection<List<Listener>> listenerss) {
-		ServiceMap<List<Rule>> loadBalancerRuleMap = new ServiceMap<>();
+	public ServiceMap getLoadBalancerRules(SessionProfile sessionProfile, List<AwsData> listenerss) {
+		ServiceMap loadBalancerRuleMap = sessionProfile.serviceMap(true);
 		ElasticLoadBalancingV2AsyncClient elasticLoadBalancingV2Client = this.getElasticLoadBalancingV2Client(sessionProfile);		
-		for(List<Listener> listeners : listenerss) {
+		for(AwsData awsData : listenerss) {
+			List<Listener> listeners = awsData.getDataList();
 			for(Listener listener : listeners) {
 				DescribeRulesResponse describeRulesResponse = elasticLoadBalancingV2Client.describeRules(
 						DescribeRulesRequest.builder()
 											.listenerArn(listener.listenerArn())
 											.build()
 				).join();
-				loadBalancerRuleMap.put(listener.listenerArn(), describeRulesResponse.rules());
+				loadBalancerRuleMap.put(listener.listenerArn(), describeRulesResponse.rules(), Rule.class);
 				Utils.sleep(100);
 			}
 		}
 		return loadBalancerRuleMap;
 	}
 	
-	public ServiceMap<TargetGroup> getTargetGroups(SessionProfile sessionProfile) {
-		ServiceMap<TargetGroup> targetGroupMap = new ServiceMap<>();
+	public ServiceMap getTargetGroups(SessionProfile sessionProfile) {
+		ServiceMap targetGroupMap = sessionProfile.serviceMap();
 		ElasticLoadBalancingV2AsyncClient elasticLoadBalancingV2Client = this.getElasticLoadBalancingV2Client(sessionProfile);
 		for(TargetGroup targetGroup : elasticLoadBalancingV2Client.describeTargetGroups().join().targetGroups()) {
-			targetGroupMap.put(targetGroup.targetGroupArn(), targetGroup);
+			targetGroupMap.put(targetGroup.targetGroupArn(), targetGroup, TargetGroup.class);
 		}
 		return targetGroupMap;
 	}
 	
-	public ServiceMap<List<TargetHealthDescription>> getTargetHealthDescriptions(SessionProfile sessionProfile, Collection<TargetGroup> targetGroups) {
-		ServiceMap<List<TargetHealthDescription>> targetHealthDescriptionsMap = new ServiceMap<>();
+	public ServiceMap getTargetHealthDescriptions(SessionProfile sessionProfile, List<AwsData> targetGroups) {
+		ServiceMap targetHealthDescriptionsMap = sessionProfile.serviceMap(true);
 		ElasticLoadBalancingV2AsyncClient elasticLoadBalancingV2Client = this.getElasticLoadBalancingV2Client(sessionProfile);		
-		for(TargetGroup targetGroup : targetGroups) {
+		for(AwsData awsData : targetGroups) {
+			TargetGroup targetGroup = awsData.getData();
 			DescribeTargetHealthResponse describeTargetHealthResponse = elasticLoadBalancingV2Client.describeTargetHealth(
 					DescribeTargetHealthRequest.builder()
 						.targetGroupArn(targetGroup.targetGroupArn())
 						.build()
 			).join();
-			targetHealthDescriptionsMap.put(targetGroup.targetGroupArn(), describeTargetHealthResponse.targetHealthDescriptions());
+			targetHealthDescriptionsMap.put(targetGroup.targetGroupArn(), describeTargetHealthResponse.targetHealthDescriptions(), TargetHealthDescription.class);
 			Utils.sleep(100);
 		}
 		return targetHealthDescriptionsMap;
 	}
 	
-	public Collection<LoadBalancerDescription> getClassicLoadBalancers(ServiceRepository serviceRepository) {		
-		return serviceRepository.getClassicLoadBalancerMap().values();
+	public List<AwsData> getClassicLoadBalancers(ServiceRepository serviceRepository) {		
+		return serviceRepository.getClassicLoadBalancerMap().values(LoadBalancerDescription.class);
 	}
 	
-	public Collection<LoadBalancer> getLoadBalancers(ServiceRepository serviceRepository) {
-		return serviceRepository.getLoadBalancerMap().values();
+	public List<AwsData> getLoadBalancers(ServiceRepository serviceRepository) {
+		return serviceRepository.getLoadBalancerMap().values(LoadBalancer.class);
 	}
 
 	public DiagramResult getNetwork(ServiceRepository serviceRepository, String loadBalancerArn, String targetIp) {
 				
+		log.trace(loadBalancerArn);
 		LoadBalancerNetwork loadBalancerNetwork = new LoadBalancerNetwork(loadBalancerArn, serviceRepository);
 		CheckResults<LoadBalancer> checkResults = loadBalancerNetwork.checkCommunication(targetIp);
 		LoadBalancer loadBalancer = checkResults.getResource();
 		
-		Vpc vpc = serviceRepository.getVpcMap().get(loadBalancer.vpcId());
+		Vpc vpc = serviceRepository.getVpcMap().get(loadBalancer.vpcId(), Vpc.class).get().getData();
 		
 		DiagramResult diagramResult = new DiagramResult(vpc.vpcId(), targetIp == null);
 		
@@ -265,10 +269,10 @@ public class LoadBalancerService extends AbstractNetworkService {
 
 	private void setLoadBalancer(ServiceRepository serviceRepository, String targetIp, LoadBalancerNetwork loadBalancerNetwork, LoadBalancer loadBalancer, DiagramResult diagramResult) {
 
-		List<Listener> listeners = serviceRepository.getLoadBalancerListenersMap().get(loadBalancer.loadBalancerArn());
+		List<Listener> listeners = serviceRepository.getLoadBalancerListenersMap().get(loadBalancer.loadBalancerArn(), Listener.class).get().getData();
 		for (Listener listener : listeners) {
 			
-			List<Rule> rules = serviceRepository.getLoadBalancerRulesMap().get(listener.listenerArn());
+			List<Rule> rules = serviceRepository.getLoadBalancerRulesMap().get(listener.listenerArn(), Rule.class).get().getDataList();
 			for (Rule rule : rules) {
 				
 				List<Action> actions = rule.actions();
@@ -300,7 +304,7 @@ public class LoadBalancerService extends AbstractNetworkService {
 					
 					switch(action.type()) {
 					case FORWARD :
-						TargetGroup targetGroup = serviceRepository.getTargetGroupMap().get(action.targetGroupArn());
+						TargetGroup targetGroup = serviceRepository.getTargetGroupMap().get(action.targetGroupArn(), TargetGroup.class).get().getData();
 						
 						diagramResult.addNode(
 								new DiagramData<DiagramNode>(
@@ -319,7 +323,7 @@ public class LoadBalancerService extends AbstractNetworkService {
 										   .setBoth(true)
 						));
 						
-						List<TargetHealthDescription> targetHealthDescriptions = serviceRepository.getTargetHealthDescriptionsMap().get(targetGroup.targetGroupArn());
+						List<TargetHealthDescription> targetHealthDescriptions = serviceRepository.getTargetHealthDescriptionsMap().get(targetGroup.targetGroupArn(), TargetHealthDescription.class).get().getDataList();
 						
 						for (TargetHealthDescription targetHealthDescription : targetHealthDescriptions) {
 							TargetDescription targetDescription = targetHealthDescription.target();
@@ -419,7 +423,7 @@ public class LoadBalancerService extends AbstractNetworkService {
 	}
 	
 	private void setTargetInstance(ServiceRepository serviceRepository, String targetIp, LoadBalancerNetwork loadBalancerNetwork, LoadBalancer loadBalancer, Listener listener, TargetGroup targetGroup, TargetDescription targetDescription, TargetHealthDescription targetHealthDescription, DiagramResult diagramResult) {
-		Instance instance = serviceRepository.getEc2InstanceMap().get(targetDescription.id());
+		Instance instance = serviceRepository.getEc2InstanceMap().get(targetDescription.id(), Instance.class).get().getData();
 		
 		if(instance == null) {
 			/* Target Instance가 존재하지 않을 경우 표시 제외 처리 SDK 버그인가?
@@ -441,7 +445,7 @@ public class LoadBalancerService extends AbstractNetworkService {
 		
 		Map<String, List<SecurityGroupCheckRule>> sgRulesMap = new HashMap<>();		
 		for(GroupIdentifier groupIdentifier : instance.securityGroups()) {
-			SecurityGroup securityGroup = serviceRepository.getSecurityGroupMap().get(groupIdentifier.groupId());
+			SecurityGroup securityGroup = serviceRepository.getSecurityGroupMap().get(groupIdentifier.groupId(), SecurityGroup.class).get().getData();
 			sgRulesMap.put(securityGroup.groupName(), loadBalancerNetwork.getSecurityGroupRules(securityGroup));
 		}
 		

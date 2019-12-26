@@ -8,8 +8,8 @@ public class ServiceStatistic {
 	private ServiceCategory serviceCategory;
 	private String serviceName;
 	private String serviceDisplayName;
-	private int serviceActive;
-	private int serviceTotal;
+	private Integer serviceActive;
+	private Integer serviceTotal;
 	private String icon;
 
 	public ServiceStatistic(ServiceType serviceType) {
@@ -43,15 +43,15 @@ public class ServiceStatistic {
 		this.serviceDisplayName = serviceDisplayName;
 	}
 
-	public int getServiceActive() {
-		return serviceActive;
+	public Integer getServiceActive() {
+		return serviceActive == null ? 0 : serviceActive;
 	}
 	
-	public void setServiceActive(int serviceActive) {
+	public void setServiceActive(Integer serviceActive) {
 		this.serviceActive = serviceActive;
 	}
 	
-	public int getServiceTotal() {
+	public Integer getServiceTotal() {
 		return serviceTotal;
 	}
 	

@@ -5,6 +5,8 @@ import java.util.Map;
 
 import org.bson.types.ObjectId;
 
+import com.anthunt.aws.network.repository.model.ServiceMap;
+import com.anthunt.aws.network.repository.model.ServiceMapType;
 import com.anthunt.aws.network.repository.profile.model.ProfileContents;
 import com.anthunt.aws.network.repository.user.model.UserDetails;
 
@@ -23,9 +25,19 @@ public class SessionProfile {
 	private String profileName;
 	private String regionId;
 	private UserDetails userDetails;
+	private ServiceMapType serviceMapType;
 	
-	public SessionProfile(UserDetails userDetails) {
+	public SessionProfile(UserDetails userDetails, ServiceMapType serviceMapType) {
 		this.setUserDetails(userDetails);
+		this.setServiceMapType(serviceMapType);
+	}
+	
+	public ServiceMap serviceMap(boolean hasList) {
+		return this.getServiceMapType().serviceMap(hasList);
+	}
+	
+	public ServiceMap serviceMap() {
+		return this.getServiceMapType().serviceMap();
 	}
 	
 	public boolean isSelected() {
