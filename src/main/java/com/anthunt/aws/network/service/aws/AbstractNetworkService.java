@@ -3,6 +3,7 @@ package com.anthunt.aws.network.service.aws;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.anthunt.aws.network.session.SessionProfile;
 import org.slf4j.Logger;
 
 import com.anthunt.aws.network.repository.ServiceRepository;
@@ -34,19 +35,21 @@ import software.amazon.awssdk.services.ec2.model.VpcPeeringConnectionVpcInfo;
 import software.amazon.awssdk.services.ec2.model.VpnConnection;
 import software.amazon.awssdk.services.ec2.model.VpnGateway;
 
+import javax.websocket.Session;
+
 public abstract class AbstractNetworkService {
 
 	private static final Logger log = Logging.getLogger(AbstractNetworkService.class);
 	
 	public static final String AWS = "aws";
 	
-	public DiagramResult getNetworkDiagram(ServiceRepository serviceRepository, String instanceId, String targetIp) {
-		return this.getNetwork(serviceRepository, instanceId, targetIp);
+	public DiagramResult getNetworkDiagram(SessionProfile sessionProfile, ServiceRepository serviceRepository, String instanceId, String targetIp) {
+		return this.getNetwork(sessionProfile, serviceRepository, instanceId, targetIp);
 	}
 	
-	protected abstract DiagramResult getNetwork(ServiceRepository serviceRepository, String instanceId, String targetIp);
+	protected abstract DiagramResult getNetwork(SessionProfile sessionProfile, ServiceRepository serviceRepository, String instanceId, String targetIp);
 	
-	protected List<String> setRouteTable(ServiceRepository serviceRepository, String serverId, CheckResult routeCheckResult, DiagramResult diagramResult) {
+	protected List<String> setRouteTable(SessionProfile sessionProfile, ServiceRepository serviceRepository, String serverId, CheckResult routeCheckResult, DiagramResult diagramResult) {
 
 		log.trace("set route table - {serverId: {}}", serverId);
 		
@@ -62,7 +65,7 @@ public abstract class AbstractNetworkService {
 				List<VpnConnection> vpnConnections = routeCheckRule.getVpnConnections();
 				
 				for(VpnConnection vpnConnection : vpnConnections) {
-					CustomerGateway customerGateway = serviceRepository.getCustomerGatewayMap().get(vpnConnection.customerGatewayId(), CustomerGateway.class).get().getData();
+					CustomerGateway customerGateway = serviceRepository.getCustomerGatewayMap().get(sessionProfile, vpnConnection.customerGatewayId(), CustomerGateway.class).get().getData();
 					DiagramNode customerGatewayNode = diagramResult.addNode(
 							new DiagramData<DiagramNode>(
 									new DiagramNode(vpnConnection.customerGatewayId(), customerGateway)
@@ -169,19 +172,19 @@ public abstract class AbstractNetworkService {
 				
 				switch(routeCheckRule.getGatewayType()) {
 				case VIRTUAL_GATEWAY:
-					gateway = serviceRepository.getVpnGatewayMap().get(routeCheckRule.getGatewayId(), VpnGateway.class).get().getData();
+					gateway = serviceRepository.getVpnGatewayMap().get(sessionProfile, routeCheckRule.getGatewayId(), VpnGateway.class).get().getData();
 					break;
 				case LOCAL:
 					gateway = routeCheckRule.getGatewayId();
 					break;
 				case VPC_ENDPOINT:
-					gateway = serviceRepository.getVpcEndpointMap().get(routeCheckRule.getGatewayId(), VpcEndpoint.class).get().getData();
+					gateway = serviceRepository.getVpcEndpointMap().get(sessionProfile, routeCheckRule.getGatewayId(), VpcEndpoint.class).get().getData();
 					break;
 				case TRANSIT_GATEWAY:
-					gateway = serviceRepository.getTransitGatewayMap().get(routeCheckRule.getGatewayId(), TransitGateway.class).get().getData();
+					gateway = serviceRepository.getTransitGatewayMap().get(sessionProfile, routeCheckRule.getGatewayId(), TransitGateway.class).get().getData();
 					break;
 				case PEERING:
-					VpcPeeringConnection vpcPeeringConnection = serviceRepository.getVpcPeeringMap().get(routeCheckRule.getGatewayId(), VpcPeeringConnection.class).get().getData();
+					VpcPeeringConnection vpcPeeringConnection = serviceRepository.getVpcPeeringMap().get(sessionProfile, routeCheckRule.getGatewayId(), VpcPeeringConnection.class).get().getData();
 					VpcPeeringConnectionVpcInfo accepterVpcInfo = vpcPeeringConnection.accepterVpcInfo();
 					VpcPeeringConnectionVpcInfo requesterVpcInfo = vpcPeeringConnection.requesterVpcInfo();
 					
@@ -222,13 +225,13 @@ public abstract class AbstractNetworkService {
 					
 					break;
 				case INTERNET_GATEWAY:
-					gateway = serviceRepository.getInternetGatewayMap().get(routeCheckRule.getGatewayId(), InternetGateway.class).get().getData();
+					gateway = serviceRepository.getInternetGatewayMap().get(sessionProfile, routeCheckRule.getGatewayId(), InternetGateway.class).get().getData();
 					break;
 				case EGRESS_INTERNET_GATEWAY:
-					gateway = serviceRepository.getEgressInternetGatewayMap().get(routeCheckRule.getGatewayId(), EgressOnlyInternetGateway.class).get().getData();
+					gateway = serviceRepository.getEgressInternetGatewayMap().get(sessionProfile, routeCheckRule.getGatewayId(), EgressOnlyInternetGateway.class).get().getData();
 					break;
 				case NETWORK_INTERFACE:
-					gateway = serviceRepository.getNetworkInterfaceMap().get(routeCheckRule.getGatewayId(), NetworkInterface.class).get().getData();
+					gateway = serviceRepository.getNetworkInterfaceMap().get(sessionProfile, routeCheckRule.getGatewayId(), NetworkInterface.class).get().getData();
 					break;
 				default:
 					break;

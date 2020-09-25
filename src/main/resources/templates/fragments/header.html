@@ -34,8 +34,8 @@
 								<p class="d-lg-none d-md-block" th:text="${session.profile.getProfileName()}">Select Region</p>
 							</a>
 							<div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownMenuLink">
-								<th:block th:each="profiles : ${session.profile.getProfiles()}">
-								<a class="dropdown-item" th:if="${session.profile.getProfileName() != profiles.key}" th:href="'/profiles/set/profile' + ${profiles.key}" th:text="${profiles.key}">Action</a>
+								<th:block th:each="profile : ${session.profile.getProfiles()}">
+								<a class="dropdown-item" th:if="${session.profile.getProfileName() != profile.key}" th:href="'/profiles/set/' + ${profile.key} + '/' + ${session.profile.getRegionId()}" th:text="${profile.key}">Action</a>
 								</th:block>
 							</div>
 						</li>
@@ -46,8 +46,8 @@
 								<p class="d-lg-none d-md-block" th:text="${session.profile.getRegionId()}">Select Region</p>
 							</a>
 							<div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownMenuLink">
-								<th:block th:each="region : ${T(com.anthunt.aws.network.session.SessionProvider).REGIONS}">
-								<a class="dropdown-item" th:if="${session.profile.getRegionId() != region.id()}" th:href="'/profiles/set/region' + ${region.id()}" th:text="${region.id()}">Action</a>
+								<th:block th:each="region : ${T(com.anthunt.aws.network.session.SessionHandler).REGIONS}">
+								<a class="dropdown-item" th:if="${session.profile.getRegionId() != region.id()}" th:href="'/profiles/set/' + ${session.profile.getProfileName()} + '/' + ${region.id()}" th:text="${region.id()}">Action</a>
 								</th:block>
 							</div>
 						</li>

@@ -32,7 +32,7 @@ public class RdsService extends AbstractNetworkService {
 		RdsAsyncClient rdsClient = this.getRdsClient(sessionProfile);
 		int active = 0;
 		for(DBCluster dbCluster : rdsClient.describeDBClusters().join().dbClusters()) {
-			dbClusterMap.put(dbCluster.dbClusterIdentifier(), dbCluster, DBCluster.class);
+			dbClusterMap.put(sessionProfile.getUserid(), sessionProfile.getProfileName(), sessionProfile.getRegion(), dbCluster.dbClusterIdentifier(), dbCluster, DBCluster.class);
 			if("available".equals(dbCluster.status())) {
 				active++;
 			}
@@ -46,7 +46,7 @@ public class RdsService extends AbstractNetworkService {
 		RdsAsyncClient rdsClient = this.getRdsClient(sessionProfile);
 		int active = 0;
 		for(DBInstance dbInstance : rdsClient.describeDBInstances().join().dbInstances()) {
-			dbInstanceMap.put(dbInstance.dbInstanceIdentifier(), dbInstance, DBInstance.class);
+			dbInstanceMap.put(sessionProfile.getUserid(), sessionProfile.getProfileName(), sessionProfile.getRegion(), dbInstance.dbInstanceIdentifier(), dbInstance, DBInstance.class);
 			if("available".equals(dbInstance.dbInstanceStatus())) {
 				active++;
 			}
@@ -56,7 +56,7 @@ public class RdsService extends AbstractNetworkService {
 	}
 	
 	@Override
-	protected DiagramResult getNetwork(ServiceRepository serviceRepository, String instanceId, String targetIp) {
+	protected DiagramResult getNetwork(SessionProfile sessionProfile, ServiceRepository serviceRepository, String instanceId, String targetIp) {
 		// TODO Auto-generated method stub
 		return null;
 	}

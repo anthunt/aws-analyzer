@@ -70,7 +70,7 @@ public class ServiceCollectorService {
 			num = serviceRepository.dxSync(num, total, sessionProfile, directConnectService);
 		}
 		
-		serviceRepository.collect();
+		serviceRepository.collect(sessionProfile);
 		
 		SessionHandler.setServiceRepository(session, serviceRepository);
 		

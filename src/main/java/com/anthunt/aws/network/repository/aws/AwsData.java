@@ -7,6 +7,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import lombok.Data;
+import software.amazon.awssdk.regions.Region;
 
 @Document
 @Data
@@ -14,15 +15,21 @@ public class AwsData {
 
 	@Id
 	private ObjectId id;
+	private ObjectId userId;
+	private String profileName;
+	private String regionId;
 	private String dataId;
 	private Object data;
 	
-	public AwsData(String dataId, Object object) {	
-		this(null, dataId, object);
+	public AwsData(ObjectId userId, String profileName, Region region, String dataId, Object object) {
+		this(userId, profileName, region, null, dataId, object);
 	}
 	
-	public AwsData(ObjectId id, String dataId, Object object) {
+	public AwsData(ObjectId userId, String profileName, Region region, ObjectId id, String dataId, Object object) {
 		this.setId(id);
+		this.setUserId(userId);
+		this.setProfileName(profileName);
+		this.setRegionId(region.id());
 		this.setDataId(dataId);
 		this.setData(object);
 	}

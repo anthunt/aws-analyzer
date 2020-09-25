@@ -5,22 +5,19 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import lombok.extern.slf4j.Slf4j;
 import org.bson.Document;
-import org.slf4j.Logger;
 import org.springframework.core.convert.converter.Converter;
-
-import com.anthunt.aws.network.utils.Logging;
 
 import software.amazon.awssdk.core.SdkField;
 import software.amazon.awssdk.core.SdkPojo;
 import software.amazon.awssdk.core.protocol.MarshallingType;
 import software.amazon.awssdk.core.traits.ListTrait;
+import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.utils.builder.Buildable;
 
+@Slf4j
 public class AwsConverter implements Converter<Document, AwsData> {
-
-	
-	private static final Logger log = Logging.getLogger(AwsConverter.class);
 
 	@Override
 	public AwsData convert(Document source) {
@@ -45,7 +42,10 @@ public class AwsConverter implements Converter<Document, AwsData> {
 		}
 		
 		awsData = new AwsData(
-				source.getObjectId("_id")
+				source.getObjectId("userId")
+				, source.getString("profileName")
+				, Region.of(source.getString("regionId"))
+				, source.getObjectId("_id")
 				, source.getString("dataId")
 				, unmarshalled
 		);
@@ -71,6 +71,10 @@ public class AwsConverter implements Converter<Document, AwsData> {
 		
 		if("TagSet".equalsIgnoreCase(unmarshallLocationName)) {
 			unmarshallLocationName = "tags";
+		} else if("RouteSet".equalsIgnoreCase(unmarshallLocationName)) {
+			unmarshallLocationName = "routes";
+		} else if("GroupSet".equalsIgnoreCase(unmarshallLocationName)) {
+			unmarshallLocationName = "securityGroups";
 		} else {
 			StringBuilder location = new StringBuilder()
 					.append(unmarshallLocationName.substring(0,1).toLowerCase())

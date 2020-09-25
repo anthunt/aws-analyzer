@@ -33,12 +33,12 @@ public class DirectConnectService {
 		DirectConnectAsyncClient directConnectClient = this.getDirectConnectClient(sessionProfile);
 		int active = 0;
 		for(VirtualInterface virtualInterface : directConnectClient.describeVirtualInterfaces().join().virtualInterfaces()) {
-			if(virtualInterfaceMap.containsKey(virtualInterface.virtualGatewayId(), VirtualInterface.class)) {
-				virtualInterfaceMap.get(virtualInterface.virtualGatewayId(), VirtualInterface.class).get().getDataList().add(virtualInterface);
+			if(virtualInterfaceMap.containsKey(sessionProfile, virtualInterface.virtualGatewayId(), VirtualInterface.class)) {
+				virtualInterfaceMap.get(sessionProfile, virtualInterface.virtualGatewayId(), VirtualInterface.class).get().getDataList().add(virtualInterface);
 			} else {
 				List<VirtualInterface> virtualInterfaces = new ArrayList<>();
 				virtualInterfaces.add(virtualInterface);
-				virtualInterfaceMap.put(virtualInterface.virtualGatewayId(), virtualInterfaces, VirtualInterface.class);
+				virtualInterfaceMap.put(sessionProfile.getUserid(), sessionProfile.getProfileName(), sessionProfile.getRegion(), virtualInterface.virtualGatewayId(), virtualInterfaces, VirtualInterface.class);
 			}
 			if(virtualInterface.virtualInterfaceState() == VirtualInterfaceState.AVAILABLE) active++;
 		}

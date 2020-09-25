@@ -1,5 +1,6 @@
 package com.anthunt.aws.network.controller.api;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Optional;
 
@@ -34,40 +35,40 @@ public class NetworkController extends AbstractAPIController {
 	public DiagramResult ec2Network( HttpSession session
 			                       , @PathVariable("instanceId") String instanceId
 			                       , @PathVariable("targetIp") Optional<String> targetIp
-			                       ) throws UnsupportedEncodingException {
+			                       ) throws IOException {
 		String target = null;
 		if(targetIp.isPresent()) {
 			target = Utils.decodeB64URL(targetIp.get());
 		}
 		log.trace("called /network/ec2/{}/{}", instanceId, target);
 		
-		return this.ec2Service.getNetwork(SessionHandler.getSessionServiceRepository(session), Utils.decodeB64URL(instanceId), target);
+		return this.ec2Service.getNetwork(SessionHandler.getSessionProfile(session), SessionHandler.getSessionServiceRepository(session), Utils.decodeB64URL(instanceId), target);
 	}
 
 	@RequestMapping(value= {"loadBalancer/{loadBalancerArn}", "loadBalancer/{loadBalancerArn}/{targetIp}"})
 	public DiagramResult loadBalancerNetwork( HttpSession session
 								            , @PathVariable("loadBalancerArn") String loadBalancerArn
 								            , @PathVariable("targetIp") Optional<String> targetIp
-								            ) throws UnsupportedEncodingException {
+								            ) throws IOException {
 		String target = null;
 		if(targetIp.isPresent()) {
 			target = Utils.decodeB64URL(targetIp.get());
 		}
 		log.trace("called /network/loadBalancer/{}/{}", loadBalancerArn, target);
 		
-		return this.loadBalancerService.getNetwork(SessionHandler.getSessionServiceRepository(session), Utils.decodeB64URL(loadBalancerArn), target);
+		return this.loadBalancerService.getNetwork(SessionHandler.getSessionProfile(session), SessionHandler.getSessionServiceRepository(session), Utils.decodeB64URL(loadBalancerArn), target);
 	}
 	
 	@RequestMapping("detail/{className}/{resourceId}")
 	public DiagramResult loadResourceDetail(HttpSession session
 			                               , @PathVariable("className") String className
-			                               , @PathVariable("resourceId") String resourceId) {
+			                               , @PathVariable("resourceId") String resourceId) throws IOException {
 		
 		DiagramResult diagramResult = new DiagramResult();
 		
 		switch(className) {
 		case "ec2Instance" :
-			diagramResult = ec2Service.getInstanceNetwork(SessionHandler.getSessionServiceRepository(session), diagramResult, resourceId);
+			diagramResult = ec2Service.getInstanceNetwork(SessionHandler.getSessionProfile(session), SessionHandler.getSessionServiceRepository(session), diagramResult, resourceId);
 		}
 		
 		return diagramResult;

@@ -2,11 +2,15 @@ package com.anthunt.aws.network.repository.user.model;
 
 import java.io.Serializable;
 
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 
 import lombok.Data;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class UserRole implements GrantedAuthority, Serializable {
 
 	private static final long serialVersionUID = 7800004785542155781L;

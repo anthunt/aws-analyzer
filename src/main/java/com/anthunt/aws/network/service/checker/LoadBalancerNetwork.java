@@ -8,6 +8,7 @@ import com.anthunt.aws.network.repository.ServiceRepository;
 import com.anthunt.aws.network.repository.aws.AwsData;
 import com.anthunt.aws.network.service.model.checker.CheckResults;
 
+import com.anthunt.aws.network.session.SessionProfile;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.AvailabilityZone;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.LoadBalancer;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.LoadBalancerTypeEnum;
@@ -16,8 +17,8 @@ public class LoadBalancerNetwork extends AbstractNetwork<LoadBalancer> {
 
 	private LoadBalancer loadBalancer; 
 	
-	public LoadBalancerNetwork(String loadBalncerArn, ServiceRepository serviceRepository) {
-		super(loadBalncerArn, serviceRepository);
+	public LoadBalancerNetwork(SessionProfile sessionProfile, String loadBalncerArn, ServiceRepository serviceRepository) {
+		super(sessionProfile, loadBalncerArn, serviceRepository);
 	}
 
 	@Override
@@ -26,9 +27,9 @@ public class LoadBalancerNetwork extends AbstractNetwork<LoadBalancer> {
 	}
 
 	@Override
-	protected LoadBalancer getResource(String loadBalancerArn, ServiceRepository serviceRepository) {
+	protected LoadBalancer getResource(SessionProfile sessionProfile, String loadBalancerArn, ServiceRepository serviceRepository) {
 		serviceRepository.getLoadBalancerMap()
-			.get(loadBalancerArn, LoadBalancer.class)
+			.get(sessionProfile, loadBalancerArn, LoadBalancer.class)
 			.ifPresent(new Consumer<AwsData>() {
 				@Override
 				public void accept(AwsData awsData) {

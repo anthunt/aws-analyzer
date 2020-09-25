@@ -1,7 +1,7 @@
 server:
   error:
     whitelabel:
-      enabled: false
+      enabled: true
 spring:
  devtools:
   livereload:
@@ -22,21 +22,28 @@ spring:
    pool:
     core-size: 8
     max-size: 8
- jackson:    serialization:
-     FAIL_ON_EMPTY_BEANS: false    visibility:
-     field: any mongodb:    embedded:      storage:        database-dir: mongodb
+ jackson:
+    serialization:
+     FAIL_ON_EMPTY_BEANS: false
+    visibility:
+     field: any
+ mongodb:
+    embedded:
+      storage:
+        database-dir: mongodb
  data:
   mongodb:
    authentication-database: admin
    database: test_db
    port: 27017
-   host: localhost 
-      
+   host: localhost
+
+      
 logging:
   exception-conversion-word: "%wEx"
   register-shutdown-hook: true
   level:
     com.amazonaws: error
-    com.anthunt.aws.network: debug
+    com.anthunt.aws.network: trace
     org.springframework: info
-    org.springframework.boot.autoconfigure.mongo: error
+    org.springframework.boot.autoconfigure.mongo: debug

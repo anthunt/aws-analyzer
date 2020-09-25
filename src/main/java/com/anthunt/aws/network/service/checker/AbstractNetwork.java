@@ -19,6 +19,7 @@ import com.anthunt.aws.network.service.model.checker.NetworkAclCheckRule;
 import com.anthunt.aws.network.service.model.checker.RouteCheckRule;
 import com.anthunt.aws.network.service.model.checker.SecurityGroupCheckRule;
 import com.anthunt.aws.network.service.model.diagram.NodeType;
+import com.anthunt.aws.network.session.SessionProfile;
 import com.anthunt.aws.network.utils.Utils;
 
 import inet.ipaddr.IPAddress;
@@ -49,20 +50,20 @@ public abstract class AbstractNetwork<T> {
 	private List<RouteCheckRule> routeCheckRules = new ArrayList<RouteCheckRule>();
 	private List<NetworkAclCheckRule> networkAclCheckRules = new ArrayList<>();
 	
-	protected AbstractNetwork(String resourceId, ServiceRepository serviceRepository) {
+	protected AbstractNetwork(SessionProfile sessionProfile, String resourceId, ServiceRepository serviceRepository) {
 		
 		this.serviceRepository = serviceRepository;
-		this.resource = this.getResource(resourceId, serviceRepository);
+		this.resource = this.getResource(sessionProfile, resourceId, serviceRepository);
 				                     
-		this.setSecurityGroupRules(this.getSecurityGroupIds());
+		this.setSecurityGroupRules(sessionProfile, this.getSecurityGroupIds());
 		List<String> subnetIds = this.getSubnetIds();
 		for(String subnetId : subnetIds) {
-			String routeTableId = this.setRoutes(subnetId);
-			this.setNetworkAcl(subnetId, routeTableId);
+			String routeTableId = this.setRoutes(sessionProfile, subnetId);
+			this.setNetworkAcl(sessionProfile, subnetId, routeTableId);
 		}
 	}
 	
-	protected abstract T getResource(String resourceId, ServiceRepository serviceRepository);
+	protected abstract T getResource(SessionProfile sessionProfile, String resourceId, ServiceRepository serviceRepository);
 	protected abstract String getVpcId();
 	protected abstract List<String> getSubnetIds();
 	protected abstract List<String> getSecurityGroupIds();
@@ -178,17 +179,17 @@ public abstract class AbstractNetwork<T> {
 		return checkRules;
 	}
 	
-	private void setSecurityGroupRules(List<String> securityGroupIds) {		
+	private void setSecurityGroupRules(SessionProfile sessionProfile, List<String> securityGroupIds) {
 		for(String securityGroupId : securityGroupIds) {
-			SecurityGroup securityGroup = serviceRepository.getSecurityGroupMap().get(securityGroupId, SecurityGroup.class).get().getData();
+			SecurityGroup securityGroup = serviceRepository.getSecurityGroupMap().get(sessionProfile, securityGroupId, SecurityGroup.class).get().getData();
 			String securityGroupName = securityGroup.groupName();
 			this.sgRulesMap.put(securityGroupName, this.getSecurityGroupRules(securityGroup));
 		}
 	}
 	
-	private String setRoutes(String subnetId) {
+	private String setRoutes(SessionProfile sessionProfile, String subnetId) {
 		String routeTableId = "";
-		List<RouteTable> routeTables = this.serviceRepository.getRouteTablesMap().get(subnetId, RouteTable.class).get().getDataList();
+		List<RouteTable> routeTables = this.serviceRepository.getRouteTablesMap().get(sessionProfile, subnetId, RouteTable.class).get().getDataList();
 		for(RouteTable routeTable : routeTables) {
 			routeTableId = routeTable.routeTableId();
 			String routeTableName = "Unknown Route Table";
@@ -215,7 +216,7 @@ public abstract class AbstractNetwork<T> {
 				}
 				
 				if(route.destinationPrefixListId() != null) {
-					PrefixList prefixList = this.serviceRepository.getPrefixListMap().get(route.destinationPrefixListId(), PrefixList.class).get().getData();
+					PrefixList prefixList = this.serviceRepository.getPrefixListMap().get(sessionProfile, route.destinationPrefixListId(), PrefixList.class).get().getData();
 					routeCheckRule.setPrefixListId(prefixList.prefixListId());
 					routeCheckRule.setPrefixListName(prefixList.prefixListName());
 
@@ -230,7 +231,7 @@ public abstract class AbstractNetwork<T> {
 					NodeType gatewayType = NodeType.getGatewayType(route.gatewayId());
 					routeCheckRule.setGateway(gatewayType, route.gatewayId());
 					if(routeCheckRule.getGatewayType() == NodeType.VIRTUAL_GATEWAY) {
-						this.setVirtualGateway(routeCheckRule);
+						this.setVirtualGateway(sessionProfile, routeCheckRule);
 					}
 					
 				}
@@ -248,9 +249,9 @@ public abstract class AbstractNetwork<T> {
 		return routeTableId;
 	}
 	
-	private void setVirtualGateway(RouteCheckRule routeCheckRule) {
+	private void setVirtualGateway(SessionProfile sessionProfile, RouteCheckRule routeCheckRule) {
 		this.serviceRepository.getVpnGatewayMap()
-			.get(routeCheckRule.getGatewayId(), VpnGateway.class)
+			.get(sessionProfile, routeCheckRule.getGatewayId(), VpnGateway.class)
 			.ifPresent(new Consumer<AwsData>() {
 				@Override
 				public void accept(AwsData awsData) {
@@ -258,13 +259,13 @@ public abstract class AbstractNetwork<T> {
 					routeCheckRule.setGatewayName(Utils.getNameFromTags(vpnGateway.tags()));
 				}
 			});		
-		this.setVpn(routeCheckRule);
-		this.setDirectConnect(routeCheckRule);
+		this.setVpn(sessionProfile, routeCheckRule);
+		this.setDirectConnect(sessionProfile, routeCheckRule);
 	}
 	
-	private void setVpn(RouteCheckRule routeCheckRule) {
+	private void setVpn(SessionProfile sessionProfile, RouteCheckRule routeCheckRule) {
 		this.serviceRepository.getVpnConnectionsMap()
-			.get(routeCheckRule.getGatewayId(), VpnConnection.class)
+			.get(sessionProfile, routeCheckRule.getGatewayId(), VpnConnection.class)
 			.ifPresent(new Consumer<AwsData>() {
 				@Override
 				public void accept(AwsData awsData) {
@@ -273,9 +274,9 @@ public abstract class AbstractNetwork<T> {
 			});
 	}
 	
-	private void setDirectConnect(RouteCheckRule routeCheckRule) {
+	private void setDirectConnect(SessionProfile sessionProfile, RouteCheckRule routeCheckRule) {
 		this.serviceRepository.getVirtualInterfacesMap()
-			.get(routeCheckRule.getGatewayId(), VirtualInterface.class)
+			.get(sessionProfile, routeCheckRule.getGatewayId(), VirtualInterface.class)
 			.ifPresent(new Consumer<AwsData>() {
 				@Override
 				public void accept(AwsData awsData) {
@@ -284,8 +285,8 @@ public abstract class AbstractNetwork<T> {
 			});
 	}
 	
-	private void setNetworkAcl(String subnetId, String routeTableId) {
-		List<NetworkAcl> networkAcls = this.serviceRepository.getNetworkAclsMap().get(subnetId, NetworkAcl.class).get().getDataList();
+	private void setNetworkAcl(SessionProfile sessionProfile, String subnetId, String routeTableId) {
+		List<NetworkAcl> networkAcls = this.serviceRepository.getNetworkAclsMap().get(sessionProfile, subnetId, NetworkAcl.class).get().getDataList();
 		for (NetworkAcl networkAcl : networkAcls) {
 			String networkAclName = "Unknown NetworkAcl";
 			List<Tag> tags = networkAcl.tags();

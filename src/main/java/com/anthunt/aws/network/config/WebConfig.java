@@ -55,7 +55,7 @@ public class WebConfig  implements WebMvcConfigurer {
 					throws Exception {
 				SecurityContext securityContext = SecurityContextHolder.getContext();
 		        Authentication authentication = securityContext.getAuthentication();
-		        
+
 		        if(authentication != null) {
 		        	if(authentication.isAuthenticated()) {
 		        		

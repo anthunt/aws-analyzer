@@ -151,9 +151,9 @@ public class ServiceRepository {
 		return this.serviceRepositoryProvider.dxSync(num, total, sessionProfile, directConnectService);
 	}
 	
-	public void collect() {
+	public void collect(SessionProfile sessionProfile) {
 		if(this.serviceStatistics.size() > 0) this.serviceStatistics.clear();
-		this.serviceStatistics.addAll(this.serviceRepositoryProvider.collect());
+		this.serviceStatistics.addAll(this.serviceRepositoryProvider.collect(sessionProfile));
 	}
 
 	public void setServiceRepositoryCollectListener(ServiceRepositoryCollectListener serviceRepositoryCollectListener) {

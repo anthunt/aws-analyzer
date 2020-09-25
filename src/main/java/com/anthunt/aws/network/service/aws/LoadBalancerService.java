@@ -78,7 +78,7 @@ public class LoadBalancerService extends AbstractNetworkService {
 		ServiceMap classicLoadBalancerMap = sessionProfile.serviceMap();
 		ElasticLoadBalancingAsyncClient elasticLoadBalancingClient = this.getElasticLoadBalancingClient(sessionProfile);
 		for(LoadBalancerDescription loadBalancerDescription : elasticLoadBalancingClient.describeLoadBalancers().join().loadBalancerDescriptions()) {
-			classicLoadBalancerMap.put(loadBalancerDescription.loadBalancerName(), loadBalancerDescription, LoadBalancerDescription.class);
+			classicLoadBalancerMap.put(sessionProfile.getUserid(), sessionProfile.getProfileName(), sessionProfile.getRegion(), loadBalancerDescription.loadBalancerName(), loadBalancerDescription, LoadBalancerDescription.class);
 		}
 		return classicLoadBalancerMap;
 	}
@@ -87,7 +87,7 @@ public class LoadBalancerService extends AbstractNetworkService {
 		ServiceMap loadBalancerMap = sessionProfile.serviceMap();
 		ElasticLoadBalancingV2AsyncClient elasticLoadBalancingV2Client = this.getElasticLoadBalancingV2Client(sessionProfile);
 		for(LoadBalancer loadBalancer : elasticLoadBalancingV2Client.describeLoadBalancers().join().loadBalancers()) {
-			loadBalancerMap.put(loadBalancer.loadBalancerArn(), loadBalancer, LoadBalancer.class);
+			loadBalancerMap.put(sessionProfile.getUserid(), sessionProfile.getProfileName(), sessionProfile.getRegion(), loadBalancer.loadBalancerArn(), loadBalancer, LoadBalancer.class);
 		}
 		return loadBalancerMap;
 	}
@@ -102,7 +102,7 @@ public class LoadBalancerService extends AbstractNetworkService {
 						.loadBalancerArn(loadBalancer.loadBalancerArn())
 						.build()
 			).join();
-			loadBalancerListenerMap.put(loadBalancer.loadBalancerArn(), describeListenersResponse.listeners(), Listener.class);
+			loadBalancerListenerMap.put(sessionProfile.getUserid(), sessionProfile.getProfileName(), sessionProfile.getRegion(), loadBalancer.loadBalancerArn(), describeListenersResponse.listeners(), Listener.class);
 			Utils.sleep(100);
 		}
 		
@@ -120,7 +120,7 @@ public class LoadBalancerService extends AbstractNetworkService {
 											.listenerArn(listener.listenerArn())
 											.build()
 				).join();
-				loadBalancerRuleMap.put(listener.listenerArn(), describeRulesResponse.rules(), Rule.class);
+				loadBalancerRuleMap.put(sessionProfile.getUserid(), sessionProfile.getProfileName(), sessionProfile.getRegion(), listener.listenerArn(), describeRulesResponse.rules(), Rule.class);
 				Utils.sleep(100);
 			}
 		}
@@ -131,7 +131,7 @@ public class LoadBalancerService extends AbstractNetworkService {
 		ServiceMap targetGroupMap = sessionProfile.serviceMap();
 		ElasticLoadBalancingV2AsyncClient elasticLoadBalancingV2Client = this.getElasticLoadBalancingV2Client(sessionProfile);
 		for(TargetGroup targetGroup : elasticLoadBalancingV2Client.describeTargetGroups().join().targetGroups()) {
-			targetGroupMap.put(targetGroup.targetGroupArn(), targetGroup, TargetGroup.class);
+			targetGroupMap.put(sessionProfile.getUserid(), sessionProfile.getProfileName(), sessionProfile.getRegion(), targetGroup.targetGroupArn(), targetGroup, TargetGroup.class);
 		}
 		return targetGroupMap;
 	}
@@ -146,28 +146,28 @@ public class LoadBalancerService extends AbstractNetworkService {
 						.targetGroupArn(targetGroup.targetGroupArn())
 						.build()
 			).join();
-			targetHealthDescriptionsMap.put(targetGroup.targetGroupArn(), describeTargetHealthResponse.targetHealthDescriptions(), TargetHealthDescription.class);
+			targetHealthDescriptionsMap.put(sessionProfile.getUserid(), sessionProfile.getProfileName(), sessionProfile.getRegion(), targetGroup.targetGroupArn(), describeTargetHealthResponse.targetHealthDescriptions(), TargetHealthDescription.class);
 			Utils.sleep(100);
 		}
 		return targetHealthDescriptionsMap;
 	}
 	
-	public List<AwsData> getClassicLoadBalancers(ServiceRepository serviceRepository) {		
-		return serviceRepository.getClassicLoadBalancerMap().values(LoadBalancerDescription.class);
+	public List<AwsData> getClassicLoadBalancers(SessionProfile sessionProfile, ServiceRepository serviceRepository) {
+		return serviceRepository.getClassicLoadBalancerMap().values(sessionProfile, LoadBalancerDescription.class);
 	}
 	
-	public List<AwsData> getLoadBalancers(ServiceRepository serviceRepository) {
-		return serviceRepository.getLoadBalancerMap().values(LoadBalancer.class);
+	public List<AwsData> getLoadBalancers(SessionProfile sessionProfile, ServiceRepository serviceRepository) {
+		return serviceRepository.getLoadBalancerMap().values(sessionProfile, LoadBalancer.class);
 	}
 
-	public DiagramResult getNetwork(ServiceRepository serviceRepository, String loadBalancerArn, String targetIp) {
+	public DiagramResult getNetwork(SessionProfile sessionProfile, ServiceRepository serviceRepository, String loadBalancerArn, String targetIp) {
 				
 		log.trace(loadBalancerArn);
-		LoadBalancerNetwork loadBalancerNetwork = new LoadBalancerNetwork(loadBalancerArn, serviceRepository);
+		LoadBalancerNetwork loadBalancerNetwork = new LoadBalancerNetwork(sessionProfile, loadBalancerArn, serviceRepository);
 		CheckResults<LoadBalancer> checkResults = loadBalancerNetwork.checkCommunication(targetIp);
 		LoadBalancer loadBalancer = checkResults.getResource();
 		
-		Vpc vpc = serviceRepository.getVpcMap().get(loadBalancer.vpcId(), Vpc.class).get().getData();
+		Vpc vpc = serviceRepository.getVpcMap().get(sessionProfile, loadBalancer.vpcId(), Vpc.class).get().getData();
 		
 		DiagramResult diagramResult = new DiagramResult(vpc.vpcId(), targetIp == null);
 		
@@ -188,7 +188,7 @@ public class LoadBalancerService extends AbstractNetworkService {
 			diagramResult.addNode(new DiagramData<DiagramNode>(new DiagramNode(serverId, serverId)).addClass(NodeType.SERVER));
 		}
 		
-		List<String> routeTableIds = this.setRouteTable(serviceRepository, serverId, checkResults.get(CheckType.ROUTE_TABLE), diagramResult);
+		List<String> routeTableIds = this.setRouteTable(sessionProfile, serviceRepository, serverId, checkResults.get(CheckType.ROUTE_TABLE), diagramResult);
 		for(String routeTableId : routeTableIds) {
 			String networkAclId = this.setNetworkAcl(routeTableId, checkResults.get(CheckType.NETWORK_ACL), diagramResult);
 			this.setSecurityGroup(networkAclId, loadBalancer, checkResults.get(CheckType.SECURITY_GROUP), diagramResult);
@@ -200,7 +200,7 @@ public class LoadBalancerService extends AbstractNetworkService {
 				).addClass(NodeType.getLoadBalancerType(loadBalancer.type()))
 		);
 		
-		this.setLoadBalancer(serviceRepository, targetIp, loadBalancerNetwork, loadBalancer, diagramResult);
+		this.setLoadBalancer(sessionProfile, serviceRepository, targetIp, loadBalancerNetwork, loadBalancer, diagramResult);
 		
 		return diagramResult;
 	}
@@ -267,12 +267,12 @@ public class LoadBalancerService extends AbstractNetworkService {
 		
 	}
 
-	private void setLoadBalancer(ServiceRepository serviceRepository, String targetIp, LoadBalancerNetwork loadBalancerNetwork, LoadBalancer loadBalancer, DiagramResult diagramResult) {
+	private void setLoadBalancer(SessionProfile sessionProfile, ServiceRepository serviceRepository, String targetIp, LoadBalancerNetwork loadBalancerNetwork, LoadBalancer loadBalancer, DiagramResult diagramResult) {
 
-		List<Listener> listeners = serviceRepository.getLoadBalancerListenersMap().get(loadBalancer.loadBalancerArn(), Listener.class).get().getData();
+		List<Listener> listeners = serviceRepository.getLoadBalancerListenersMap().get(sessionProfile, loadBalancer.loadBalancerArn(), Listener.class).get().getData();
 		for (Listener listener : listeners) {
 			
-			List<Rule> rules = serviceRepository.getLoadBalancerRulesMap().get(listener.listenerArn(), Rule.class).get().getDataList();
+			List<Rule> rules = serviceRepository.getLoadBalancerRulesMap().get(sessionProfile, listener.listenerArn(), Rule.class).get().getDataList();
 			for (Rule rule : rules) {
 				
 				List<Action> actions = rule.actions();
@@ -304,7 +304,7 @@ public class LoadBalancerService extends AbstractNetworkService {
 					
 					switch(action.type()) {
 					case FORWARD :
-						TargetGroup targetGroup = serviceRepository.getTargetGroupMap().get(action.targetGroupArn(), TargetGroup.class).get().getData();
+						TargetGroup targetGroup = serviceRepository.getTargetGroupMap().get(sessionProfile, action.targetGroupArn(), TargetGroup.class).get().getData();
 						
 						diagramResult.addNode(
 								new DiagramData<DiagramNode>(
@@ -323,14 +323,14 @@ public class LoadBalancerService extends AbstractNetworkService {
 										   .setBoth(true)
 						));
 						
-						List<TargetHealthDescription> targetHealthDescriptions = serviceRepository.getTargetHealthDescriptionsMap().get(targetGroup.targetGroupArn(), TargetHealthDescription.class).get().getDataList();
+						List<TargetHealthDescription> targetHealthDescriptions = serviceRepository.getTargetHealthDescriptionsMap().get(sessionProfile, targetGroup.targetGroupArn(), TargetHealthDescription.class).get().getDataList();
 						
 						for (TargetHealthDescription targetHealthDescription : targetHealthDescriptions) {
 							TargetDescription targetDescription = targetHealthDescription.target();
 
 							switch(targetGroup.targetType()) {
 							case INSTANCE :
-								this.setTargetInstance(serviceRepository, targetIp, loadBalancerNetwork, loadBalancer, listener, targetGroup, targetDescription, targetHealthDescription, diagramResult);
+								this.setTargetInstance(sessionProfile, serviceRepository, targetIp, loadBalancerNetwork, loadBalancer, listener, targetGroup, targetDescription, targetHealthDescription, diagramResult);
 								break;
 							case IP :
 								diagramResult.addNode(
@@ -422,30 +422,18 @@ public class LoadBalancerService extends AbstractNetworkService {
 		}
 	}
 	
-	private void setTargetInstance(ServiceRepository serviceRepository, String targetIp, LoadBalancerNetwork loadBalancerNetwork, LoadBalancer loadBalancer, Listener listener, TargetGroup targetGroup, TargetDescription targetDescription, TargetHealthDescription targetHealthDescription, DiagramResult diagramResult) {
-		Instance instance = serviceRepository.getEc2InstanceMap().get(targetDescription.id(), Instance.class).get().getData();
-		
-		if(instance == null) {
-			/* Target Instance가 존재하지 않을 경우 표시 제외 처리 SDK 버그인가?
-			diagramResult.addNode(
-					new DiagramData<DiagramNode>(
-							new DiagramNode(targetDescription.id(), targetDescription.id() + "\nUnknown Instance")
-					).addClass(NodeType.EC2_INSTANCE)
-			);
-			diagramResult.addEdge(new DiagramData<DiagramEdge>(
-					DiagramEdge.make(targetGroup.targetGroupArn(), targetDescription.id())
-							   .setLabel(listener.protocolAsString() + ":" + listener.port() + " port")
-							   .setBoth(targetHealthDescription.targetHealth().state() == TargetHealthStateEnum.HEALTHY)
-			));
-			*/
-			return;
-		}
-		
+	private void setTargetInstance(SessionProfile sessionProfile, ServiceRepository serviceRepository, String targetIp, LoadBalancerNetwork loadBalancerNetwork, LoadBalancer loadBalancer, Listener listener, TargetGroup targetGroup, TargetDescription targetDescription, TargetHealthDescription targetHealthDescription, DiagramResult diagramResult) {
+		serviceRepository
+				.getEc2InstanceMap().get(sessionProfile, targetDescription.id(), Instance.class)
+				.ifPresent(o -> this.setTargetInstance(sessionProfile, serviceRepository, targetIp, loadBalancerNetwork, loadBalancer, listener, targetGroup, targetDescription, targetHealthDescription, diagramResult, o.getData()));
+	}
+
+	private void setTargetInstance(SessionProfile sessionProfile, ServiceRepository serviceRepository, String targetIp, LoadBalancerNetwork loadBalancerNetwork, LoadBalancer loadBalancer, Listener listener, TargetGroup targetGroup, TargetDescription targetDescription, TargetHealthDescription targetHealthDescription, DiagramResult diagramResult, Instance instance) {
 		String targetPortId = targetDescription.id() + "." + targetDescription.port();
 		
 		Map<String, List<SecurityGroupCheckRule>> sgRulesMap = new HashMap<>();		
 		for(GroupIdentifier groupIdentifier : instance.securityGroups()) {
-			SecurityGroup securityGroup = serviceRepository.getSecurityGroupMap().get(groupIdentifier.groupId(), SecurityGroup.class).get().getData();
+			SecurityGroup securityGroup = serviceRepository.getSecurityGroupMap().get(sessionProfile, groupIdentifier.groupId(), SecurityGroup.class).get().getData();
 			sgRulesMap.put(securityGroup.groupName(), loadBalancerNetwork.getSecurityGroupRules(securityGroup));
 		}
 		

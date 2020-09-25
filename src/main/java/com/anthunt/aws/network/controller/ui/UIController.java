@@ -87,15 +87,16 @@ public class UIController extends AbstractController {
 	
 	@RequestMapping("diagram/network")
 	public String getDiagram( Model model
-			                , HttpSession session) {
+			                , HttpSession session) throws IOException {
 		
 		ServiceRepository serviceRepository = SessionHandler.getSessionServiceRepository(session);
-		
-		model.addAttribute("instances", serviceRepository.getEc2InstanceMap().allValues(Instance.class));
-		model.addAttribute("classic-loadbalancers", serviceRepository.getClassicLoadBalancerMap().allValues(LoadBalancerDescription.class));
-		model.addAttribute("loadbalancers", serviceRepository.getLoadBalancerMap().allValues(LoadBalancer.class));
-		model.addAttribute("dbClusters", serviceRepository.getRdsClusterMap().allValues(DBCluster.class));
-		model.addAttribute("dbInstances", serviceRepository.getRdsInstanceMap().allValues(DBInstance.class));
+		SessionProfile sessionProfile = SessionHandler.getSessionProfile(session);
+
+		model.addAttribute("instances", serviceRepository.getEc2InstanceMap().allValues(sessionProfile, Instance.class));
+		model.addAttribute("classic-loadbalancers", serviceRepository.getClassicLoadBalancerMap().allValues(sessionProfile, LoadBalancerDescription.class));
+		model.addAttribute("loadbalancers", serviceRepository.getLoadBalancerMap().allValues(sessionProfile, LoadBalancer.class));
+		model.addAttribute("dbClusters", serviceRepository.getRdsClusterMap().allValues(sessionProfile, DBCluster.class));
+		model.addAttribute("dbInstances", serviceRepository.getRdsInstanceMap().allValues(sessionProfile, DBInstance.class));
 		
 		return "views/diagram/network";
 	}

@@ -7,6 +7,9 @@ import java.util.function.Consumer;
 
 import com.anthunt.aws.network.repository.aws.AwsData;
 import com.anthunt.aws.network.service.model.ServiceType;
+import com.anthunt.aws.network.session.SessionProfile;
+import org.bson.types.ObjectId;
+import software.amazon.awssdk.regions.Region;
 
 public abstract class ServiceMap {
 
@@ -26,13 +29,13 @@ public abstract class ServiceMap {
 		return this.hasList;
 	}
 	
-	public <T> AwsData put(String id, Object object, Class<T> clazz) {
-		return this.put(new AwsData(id, object), clazz);
+	public <T> AwsData put(ObjectId userId, String profileName, Region region, String id, Object object, Class<T> clazz) {
+		return this.put(new AwsData(userId, profileName, region, id, object), clazz);
 	}
 	
-	public <T> List<T> allValues(Class<T> clazz) {
+	public <T> List<T> allValues(SessionProfile sessionProfile, Class<T> clazz) {
 		List<T> list = new ArrayList<>();
-		List<AwsData> awsDatas = this.values(clazz);
+		List<AwsData> awsDatas = this.values(sessionProfile, clazz);
 		awsDatas.forEach(new Consumer<AwsData>() {
 
 			@Override
@@ -48,9 +51,10 @@ public abstract class ServiceMap {
 		return list;
 	}
 	
-	public abstract <T> List<AwsData> values(Class<T> clazz);
-	public abstract <T> Optional<AwsData> get(String id, Class<T> clazz);
-	public abstract <T> boolean containsKey(String id, Class<T> clazz);
+	public abstract <T> List<AwsData> values(SessionProfile sessionProfile, Class<T> clazz);
+	public abstract <T> Optional<AwsData> get(SessionProfile sessionProfile, String id, Class<T> clazz);
+	public abstract <T> boolean containsKey(SessionProfile sessionProfile, String id, Class<T> clazz);
+	public abstract <T> void clear(SessionProfile sessionProfile, Class<T> clazz);
 	protected abstract <T> AwsData put(AwsData awsData, Class<T> clazz);
 
 	public Integer getActive() {
@@ -60,12 +64,12 @@ public abstract class ServiceMap {
 		this.active = active;
 	}
 
-	public ServiceStatistic getServiceStatistic(ServiceType serviceType) {
+	public ServiceStatistic getServiceStatistic(SessionProfile sessionProfile, ServiceType serviceType) {
 		ServiceStatistic serviceStatistic = new ServiceStatistic(serviceType);
 		
 		int total = 0;
 		
-		List<AwsData> lists = this.values(serviceType.getClazz());
+		List<AwsData> lists = this.values(sessionProfile, serviceType.getClazz());
 		
 		if(lists.size() > 0) {
 			if(this.hasList) {
