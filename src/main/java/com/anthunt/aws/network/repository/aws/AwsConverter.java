@@ -75,6 +75,12 @@ public class AwsConverter implements Converter<Document, AwsData> {
 			unmarshallLocationName = "routes";
 		} else if("GroupSet".equalsIgnoreCase(unmarshallLocationName)) {
 			unmarshallLocationName = "securityGroups";
+		} else if("id".equalsIgnoreCase(unmarshallLocationName)) {
+			unmarshallLocationName = "_id";
+		} else if("InstanceState".equalsIgnoreCase(unmarshallLocationName)) {
+			unmarshallLocationName = "state";
+		} else if("DNSName".equalsIgnoreCase(unmarshallLocationName)) {
+			unmarshallLocationName = "dnsName";
 		} else {
 			StringBuilder location = new StringBuilder()
 					.append(unmarshallLocationName.substring(0,1).toLowerCase())
@@ -135,11 +141,14 @@ public class AwsConverter implements Converter<Document, AwsData> {
 		return list;
 	}
 	
-	public static SdkPojo getSdkPojo(String _class) throws Exception {
-		Class<?> clazz = Class.forName(_class);
-		Method method = clazz.getMethod("builder", new Class<?>[0]);
-		Object obj = method.invoke(null, new Object[0]);
-		return SdkPojo.class.cast(obj);
+	public static SdkPojo getSdkPojo(String _class) {
+		try {
+			Class<?> clazz = Class.forName(_class);
+			Method method = clazz.getMethod("builder", new Class<?>[0]);
+			Object obj = method.invoke(null, new Object[0]);
+			return SdkPojo.class.cast(obj);
+		} catch(Exception skip) {}
+		return null;
 	}
 	
 }

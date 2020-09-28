@@ -1,5 +1,6 @@
 package com.anthunt.aws.network.service.user;
 
+import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -24,7 +25,10 @@ public class UserService implements UserDetailsService {
 	private UserRepository userRepository;
 	
 	public void joinUser(JoinUser joinUser) {
-		User user = new User();
+		User user = this.getUserByUseremail(joinUser.getUseremail());
+		if( user == null) {
+			user = new User();
+		}
 		user.setUseremail(joinUser.getUseremail());
 		user.setUsername(joinUser.getUsername());
 		user.setPassword(new BCryptPasswordEncoder().encode(joinUser.getPassword()));
