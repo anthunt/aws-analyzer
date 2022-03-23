@@ -62,14 +62,18 @@ public class ServiceCollectorService {
 			num = serviceRepository.elbSync(num, total, sessionProfile, loadBalancerService);
 		}
 		
-		if(!serviceName.isPresent() || ServiceType.RDS.getName().equals(serviceName.get())) {
-			num = serviceRepository.rdsSync(num, total, sessionProfile, rdsService);
-		}
+		try {
+			if(!serviceName.isPresent() || ServiceType.RDS.getName().equals(serviceName.get())) {
+				num = serviceRepository.rdsSync(num, total, sessionProfile, rdsService);
+			}
+		}catch(Exception skip) {}
 		
-		if(!serviceName.isPresent() || ServiceType.DX.getName().equals(serviceName.get())) {
-			num = serviceRepository.dxSync(num, total, sessionProfile, directConnectService);
-		}
-		
+		try {
+			if(!serviceName.isPresent() || ServiceType.DX.getName().equals(serviceName.get())) {
+				num = serviceRepository.dxSync(num, total, sessionProfile, directConnectService);
+			}
+		}catch(Exception skip) {}
+	
 		serviceRepository.collect(sessionProfile);
 		
 		SessionHandler.setServiceRepository(session, serviceRepository);
